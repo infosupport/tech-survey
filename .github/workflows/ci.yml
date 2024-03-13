@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+env:
+  POSTGRES_HOST: your_postgres_host
+  POSTGRES_USER: your_postgres_user
+  POSTGRES_PASSWORD: your_postgres_password
+  POSTGRES_DB: your_postgres_db
+  DISCORD_CLIENT_ID: your_discord_client_id
+  DISCORD_CLIENT_SECRET: your_discord_client_secret
+  AZURE_AD_CLIENT_ID: your_azure_ad_client_id
+  AZURE_AD_CLIENT_SECRET: your_azure_ad_client_secret
+  AZURE_AD_TENANT_ID: your_azure_ad_tenant_id
+  NODE_ENV: development
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+
+      - name: Install dependencies
+        run: |
+          npm install -g pnpm
+          pnpm install
+
+      - name: TypeScript type checking
+        run: pnpm typecheck
+
+      - name: Linting
+        run: pnpm lint
