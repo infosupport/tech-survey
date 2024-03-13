@@ -21,6 +21,7 @@ jobs:
         run: |
           pnpm i
           cp .env.example .env
+          pnpm run db:generate
           pnpm build
           pnpm prune --prod --no-optional
           rm .env

@@ -25,7 +25,9 @@ jobs:
           pnpm install
 
       - name: Prepare
-        run: cp .env.example .env
+        run: |
+          cp .env.example .env
+          pnpm run db:generate
         
       - name: TypeScript type checking
         run: pnpm typecheck
