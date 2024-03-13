@@ -23,10 +23,11 @@ jobs:
           cp .env.example .env
           pnpm run db:generate
           pnpm build
-          pnpm prune --prod --no-optional
+          rm -rf node_modules/
+          pnpm i --prod
           rm .env
       - name: Zip artifact for deployment
-        run: zip release.zip ./* -r
+        run: zip -y release.zip ./* .next -r 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
