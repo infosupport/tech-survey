@@ -13,10 +13,14 @@ import Link from "next/link";
 import { CheckIcon } from "@radix-ui/react-icons";
 
 const MobileProgressionBar = ({ roles }: { roles: Section[] }) => {
+  const currentRole = roles.find((role) => role.current)?.label;
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline">Select questions for role</Button>
+        <Button variant="outline">
+          {currentRole ? `${currentRole}` : "Select questions for role"}
+        </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56">
         <DropdownMenuLabel>Roles:</DropdownMenuLabel>
