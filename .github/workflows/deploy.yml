@@ -20,13 +20,22 @@ jobs:
       - name: npm install, build, and test
         run: |
           pnpm i
-          cp .env.example .env
+          cp .env.example .env # an env file is needed for `build`
           pnpm run db:generate
           pnpm build
-          rm -rf node_modules/
+
+          # we want to delete the node_modules, as they will also contain `devDependencies`
+          # Note: `pnpm prune --prod` is not enough, as that will keep all dev dependencies installed inside `node_modules/.pnpm`
+          rm -rf node_modules/ 
+
+          # This will install all "dependencies" (excluding "devDependencies")
           pnpm i --prod
           rm .env
       - name: Zip artifact for deployment
+        # `-y`: means preserve symlinks. 
+        # `./*`: the current directory
+        # `.next`: explicitly also zip this hidden directory. 
+        # `-r`: recursive
         run: zip -y release.zip ./* .next -r 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
