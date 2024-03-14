@@ -260,7 +260,7 @@ export function MobileSurveyQuestionnaire({
                               value={field.value}
                               className="flex flex-col space-y-1"
                             >
-                              <label className="flex cursor-pointer items-center space-x-2 rounded-lg p-2 hover:bg-gray-100">
+                              <label className="flex cursor-pointer items-center space-x-2 rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-slate-900">
                                 <FormControl>
                                   <RadioGroupItem
                                     value={option.id}
@@ -270,7 +270,7 @@ export function MobileSurveyQuestionnaire({
                                     }
                                   />
                                 </FormControl>
-                                <span className=":dark:text-white-100 text-gray-900">
+                                <span className=" dark:text-white-900 text-gray-100">
                                   {idToTextMap[option.option]}
                                 </span>
                               </label>

@@ -11,10 +11,11 @@ import { useState } from "react";
 import { type Session } from "next-auth";
 import { slugToId, slugify } from "~/utils/slugify";
 
-import Navigation from "./progression-bar";
+import ProgressionBar from "./progression-bar";
 import useScreenSize from "./useScreenSize";
 import { MobileSurveyQuestionnaire } from "./mobile/survey-questions";
 import { SurveyQuestions } from "./survey-questions";
+import { MobileProgressionBar } from "./mobile/progression-bar";
 
 export function SurveyQuestionnaire({
   session,
@@ -94,11 +95,11 @@ export function SurveyQuestionnaire({
 
   return (
     <div>
-      <div>
-        <Navigation roles={selectedRolesForProgressBar} />
-      </div>
       {screenSize.width < 768 && (
         <div>
+          <div className="mb-4">
+            <MobileProgressionBar roles={selectedRolesForProgressBar} />
+          </div>
           <MobileSurveyQuestionnaire
             session={session}
             questions={questions}
@@ -112,6 +113,7 @@ export function SurveyQuestionnaire({
       )}
       {screenSize.width >= 768 && (
         <div>
+          <ProgressionBar roles={selectedRolesForProgressBar} />
           <SurveyQuestions
             session={session}
             questions={questions}
