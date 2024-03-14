@@ -70,6 +70,9 @@ export const surveyRouter = createTRPCRouter({
         where: {
           id: input.userId,
         },
+        include: {
+          roles: true, // Include the roles associated with the user
+        },
       });
 
       if (!user) {
@@ -86,16 +89,26 @@ export const surveyRouter = createTRPCRouter({
         throw new Error("Default role not found");
       }
 
-      await ctx.db.user.update({
-        where: {
-          id: input.userId,
-        },
-        data: {
-          roles: {
-            set: [defaultRole],
+      // Check if the default role is already assigned to the user
+      const hasDefaultRole = user.roles.some(
+        (role) => role.id === defaultRole.id,
+      );
+
+      if (!hasDefaultRole) {
+        // If the user doesn't have the default role, add it to their roles
+        const updatedRoles = [...user.roles, defaultRole];
+
+        await ctx.db.user.update({
+          where: {
+            id: input.userId,
           },
-        },
-      });
+          data: {
+            roles: {
+              set: updatedRoles,
+            },
+          },
+        });
+      }
     }),
 
   setRole: protectedProcedure
