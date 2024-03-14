@@ -1,11 +1,14 @@
 "use client";
-
 import { useState, useEffect } from "react";
 import { api } from "~/trpc/react";
 import { type Session } from "next-auth";
 import { type Role } from "~/models/types";
 import Link from "next/link";
 import { Button } from "~/components/ui/button";
+
+function useSetDefaultRole() {
+  return api.survey.setDefaultRole.useMutation();
+}
 
 export default function SelectRoles({
   session,
@@ -18,43 +21,42 @@ export default function SelectRoles({
 }) {
   const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
   const setRolesMutation = api.survey.setRole.useMutation();
+  const setDefaultRoleMutation = useSetDefaultRole();
 
   useEffect(() => {
     setSelectedRoles(userSelectedRoles.map((role) => role.id));
+  }, [userSelectedRoles]);
 
-    // if the user has no roles selected, set the default roles
-    if (userSelectedRoles.length === 0) {
+  const handleRoleToggle = (roleId: string, isDefault: boolean) => {
+    if (!isDefault) {
+      const index = selectedRoles.indexOf(roleId);
+      let updatedRoles;
+      if (index === -1) {
+        updatedRoles = [...selectedRoles, roleId];
+      } else {
+        updatedRoles = [...selectedRoles];
+        updatedRoles.splice(index, 1);
+      }
+      setSelectedRoles(updatedRoles);
       setRolesMutation.mutate({
         userId: session.user.id,
-        roleIds: roles.filter((role) => role.default).map((role) => role.id),
+        roleIds: updatedRoles,
       });
     }
-  }, [userSelectedRoles, roles, session.user.id, setRolesMutation]);
+  };
 
-  const handleRoleToggle = (roleId: string) => {
-    const index = selectedRoles.indexOf(roleId);
-    let updatedRoles;
-    if (index === -1) {
-      updatedRoles = [...selectedRoles, roleId];
-    } else {
-      updatedRoles = [...selectedRoles];
-      updatedRoles.splice(index, 1);
-    }
-    setSelectedRoles(updatedRoles);
-
-    // Trigger mutation whenever a role is toggled
-    setRolesMutation.mutate({
+  const handleSetGeneralRole = () => {
+    setDefaultRoleMutation.mutate({
       userId: session.user.id,
-      roleIds: updatedRoles,
-    });
-    // note: always make sure the default roles are not included in the mutation
-    setRolesMutation.mutate({
-      userId: session.user.id,
-      roleIds: updatedRoles.filter(
-        (roleId) => !roles.find((role) => role.id === roleId)?.default,
-      ),
     });
   };
+
+  // Redirect to /survey/general after the default role mutation succeeds
+  useEffect(() => {
+    if (setDefaultRoleMutation.isSuccess) {
+      window.location.href = "/survey/general";
+    }
+  }, [setDefaultRoleMutation.isSuccess]);
 
   return (
     <div className="container mx-auto py-8">
@@ -66,15 +68,13 @@ export default function SelectRoles({
             className={`rounded-lg border p-4 hover:bg-gray-100 hover:bg-opacity-25 ${
               role.default ? "" : "cursor-pointer"
             }`}
-            onClick={
-              () => !role.default && handleRoleToggle(role.id) // Add a check to prevent toggling for default roles
-            }
+            onClick={() => handleRoleToggle(role.id, role.default)}
           >
             <input
               type="checkbox"
               className="mr-2 cursor-pointer accent-custom-primary"
               checked={role.default || selectedRoles.includes(role.id)}
-              onChange={() => handleRoleToggle(role.id)}
+              onChange={() => handleRoleToggle(role.id, role.default)}
               disabled={role.default}
             />
             <label
@@ -88,7 +88,10 @@ export default function SelectRoles({
       </ul>
       <div className="mt-8 flex">
         <Link href="/survey/general" passHref>
-          <Button className="bg-custom-buttonPrimary text-custom-secondary hover:bg-custom-buttonHover dark:bg-custom-buttonPrimary">
+          <Button
+            onClick={handleSetGeneralRole}
+            className="bg-custom-buttonPrimary text-custom-secondary hover:bg-custom-buttonHover dark:bg-custom-buttonPrimary"
+          >
             Go to survey
             <svg
               className="arrow-right ml-2"
@@ -100,36 +103,36 @@ export default function SelectRoles({
             >
               <path
                 id="Vector"
-                fill-rule="evenodd"
-                clip-rule="evenodd"
+                fillRule="evenodd"
+                clipRule="evenodd"
                 d="M2.39352 3.60724H3.60801V2.39278H2.39352V3.60724Z"
                 fill="#003865"
               ></path>
               <path
                 id="Vector_2"
-                fill-rule="evenodd"
-                clip-rule="evenodd"
+                fillRule="evenodd"
+                clipRule="evenodd"
                 d="M1.19662 4.80365H2.41102V3.58923H1.19662V4.80365Z"
                 fill="#003865"
               ></path>
               <path
                 id="Vector_3"
-                fill-rule="evenodd"
-                clip-rule="evenodd"
+                fillRule="evenodd"
+                clipRule="evenodd"
                 d="M1.19662 2.41089H2.41102V1.19641H1.19662V2.41089Z"
                 fill="#003865"
               ></path>
               <path
                 id="Vector_4"
-                fill-rule="evenodd"
-                clip-rule="evenodd"
+                fillRule="evenodd"
+                clipRule="evenodd"
                 d="M0 6H1.21442V4.78559L0 4.78558L0 6Z"
                 fill="#003865"
               ></path>
               <path
                 id="Vector_5"
-                fill-rule="evenodd"
-                clip-rule="evenodd"
+                fillRule="evenodd"
+                clipRule="evenodd"
                 d="M0 1.21448H1.21442V9.50098e-05L0 -5.24521e-06L0 1.21448Z"
                 fill="#003865"
               ></path>
