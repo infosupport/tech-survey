@@ -12,6 +12,7 @@
     "dev": "next dev",
     "lint": "next lint",
     "start": "node ./node_modules/next/dist/bin/next start",
+    "start_comment": "echo ''",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
