@@ -21,10 +21,8 @@ jobs:
           npm ci
           cp .env.example .env # an env file is needed for `build`
           npm run db:generate
-          npm build
-
-          # This will install all "dependencies" (excluding "devDependencies")
-          npm i --prod
+          npm run build
+          npm ci --prod
           rm .env
       - name: Zip artifact for deployment
         # `./*`: the current directory
