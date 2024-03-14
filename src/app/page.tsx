@@ -14,7 +14,11 @@ const Home: React.FC = async () => {
   return (
     <main className="flex min-h-screen items-center justify-center">
       <div className="absolute right-4 top-4 z-50 flex items-center space-x-4">
-        {session && <Login session={session} />}
+        {session && (
+          <Suspense fallback={<div>Loading...</div>}>
+            <LoginWrapper session={session} />
+          </Suspense>
+        )}
         <ModeToggle />
       </div>
       <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
@@ -86,6 +90,10 @@ const SelectRoleWrapper: React.FC<{ session: Session }> = async ({
       userSelectedRoles={userSelectedRoles}
     />
   );
+};
+
+const LoginWrapper: React.FC<{ session: Session }> = async ({ session }) => {
+  return <Login session={session} />;
 };
 
 export default Home;

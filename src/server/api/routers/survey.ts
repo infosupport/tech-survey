@@ -63,6 +63,54 @@ export const surveyRouter = createTRPCRouter({
       return userAnswers;
     }),
 
+  setDefaultRole: protectedProcedure
+    .input(z.object({ userId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const user = await ctx.db.user.findUnique({
+        where: {
+          id: input.userId,
+        },
+        include: {
+          roles: true, // Include the roles associated with the user
+        },
+      });
+
+      if (!user) {
+        throw new Error("User not found");
+      }
+
+      const defaultRole = await ctx.db.role.findFirst({
+        where: {
+          default: true,
+        },
+      });
+
+      if (!defaultRole) {
+        throw new Error("Default role not found");
+      }
+
+      // Check if the default role is already assigned to the user
+      const hasDefaultRole = user.roles.some(
+        (role) => role.id === defaultRole.id,
+      );
+
+      if (!hasDefaultRole) {
+        // If the user doesn't have the default role, add it to their roles
+        const updatedRoles = [...user.roles, defaultRole];
+
+        await ctx.db.user.update({
+          where: {
+            id: input.userId,
+          },
+          data: {
+            roles: {
+              set: updatedRoles,
+            },
+          },
+        });
+      }
+    }),
+
   setRole: protectedProcedure
     .input(z.object({ userId: z.string(), roleIds: z.array(z.string()) }))
     .mutation(async ({ ctx, input }) => {
