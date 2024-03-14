@@ -3,7 +3,7 @@ name: Deploy
 on:
   push:
     branches:
-      - chore/deploy
+      - main
   workflow_dispatch:
 
 jobs:
@@ -16,7 +16,9 @@ jobs:
         with:
           node-version: '20.x'
           cache: 'npm'
-      - name: npm install, build, and test
+      - name: '📩 npm install'
+        run: npm ci
+      - name: '🏗 npm build'
         run: |
           npm ci
           cp .env.example .env # an env file is needed for `build`
@@ -24,13 +26,13 @@ jobs:
           npm run build
           npm ci --prod
           rm .env
-      - name: Zip artifact for deployment
+      - name: '📦 Package artifact'
         # `./*`: the current directory
         # `.next`: explicitly also zip this hidden directory. 
         # `-r`: recursive
         # `-y`: preserve symlinks
         run: zip -y release.zip ./* .next -r 
-      - name: Upload artifact for deployment job
+      - name: '📤 Upload artifact'
         uses: actions/upload-artifact@v4
         with:
           name: node-app
@@ -45,13 +47,13 @@ jobs:
     permissions:
       id-token: write #This is required for requesting the JWT
     steps:
-      - name: Download artifact from build job
+      - name: '📩 Download artifact'
         uses: actions/download-artifact@v4
         with:
           name: node-app
-      - name: Unzip artifact for deployment
+      - name: '💤 Unzip artifact'
         run: unzip release.zip
-      - name: 'Deploy to Azure Web App'
+      - name: '🚀 Deploy'
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v2
         with:
