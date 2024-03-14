@@ -11,7 +11,7 @@
     "db:generate": "prisma generate",
     "dev": "next dev",
     "lint": "next lint",
-    "start": "node fake-api.mjs",
+    "start": "node ./node_modules/next/dist/bin/next start",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
