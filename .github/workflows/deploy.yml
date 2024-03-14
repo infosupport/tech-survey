@@ -11,32 +11,26 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: npm i -g pnpm
       - name: Set up Node.js version
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
-          cache: 'pnpm'
+          cache: 'npm'
       - name: npm install, build, and test
         run: |
-          pnpm i
+          npm ci
           cp .env.example .env # an env file is needed for `build`
-          pnpm run db:generate
-          pnpm build
-
-          # we want to delete the node_modules, as they will also contain `devDependencies`
-          # Note: `pnpm prune --prod` is not enough, as that will keep all dev dependencies installed inside `node_modules/.pnpm`
-          rm -rf node_modules/ 
+          npm run db:generate
+          npm build
 
           # This will install all "dependencies" (excluding "devDependencies")
-          pnpm i --prod
+          npm i --prod
           rm .env
       - name: Zip artifact for deployment
-        # `-y`: means preserve symlinks. 
         # `./*`: the current directory
         # `.next`: explicitly also zip this hidden directory. 
         # `-r`: recursive
-        run: zip -y release.zip ./* .next -r 
+        run: zip release.zip ./* .next -r 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:

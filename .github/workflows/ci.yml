@@ -20,9 +20,7 @@ jobs:
         uses: actions/setup-node@v4
 
       - name: Install dependencies
-        run: |
-          npm install -g pnpm
-          pnpm install
+        run: npm install
 
       - name: Prepare
         run: |
