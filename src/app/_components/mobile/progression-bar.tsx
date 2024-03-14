@@ -14,12 +14,16 @@ import { CheckIcon } from "@radix-ui/react-icons";
 
 const MobileProgressionBar = ({ roles }: { roles: Section[] }) => {
   const currentRole = roles.find((role) => role.current)?.label;
+  const totalroles = roles.length;
+  const completedroles = roles.filter((section) => section.completed).length;
+  const progressPercentage = (completedroles / totalroles) * 100;
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="outline">
-          {currentRole ? `${currentRole}` : "Select questions for role"}
+          {currentRole ? `${currentRole} - ` : ""} {completedroles}/{totalroles}{" "}
+          {progressPercentage.toFixed(2)}% Completed
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56">
