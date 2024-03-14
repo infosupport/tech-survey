@@ -25,13 +25,13 @@ jobs:
       - name: Prepare
         run: |
           cp .env.example .env
-          pnpm run db:generate
-        
+          npm run db:generate
+
       - name: TypeScript type checking
-        run: pnpm typecheck
+        run: npm run typecheck
 
       - name: Linting
-        run: pnpm lint
+        run: npm run lint
 
       - name: Build
-        run: pnpm build
+        run: npm run build
