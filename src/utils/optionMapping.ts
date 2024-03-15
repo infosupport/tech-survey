@@ -6,10 +6,10 @@ export const idToTextMap: Record<number, string> = {
   4: "❓ Never heard of it/Not sure what it is",
 } as const;
 
-export const idToTextMapMobile: Record<number, string> = {
-  0: "👍 Used it",
-  1: "👎 Used it",
-  2: "✅ Heard of it",
-  3: "🚫 Heard of it",
-  4: "❓ Never heard of it",
+export const idToAnswerMap: Record<string, string> = {
+  cltfmxq3200002hsdmlswqpzx: "👍 Used it > Would use again",
+  cltfmxq3300012hsdp6y7fs7e: "👎 Used it > Would not use again",
+  cltfmxq3300022hsdl237nczb: "✅ Heard of it > Would like to learn",
+  cltfmxq3300032hsd3hvun83v: "🚫 Heard of it > Not interested",
+  cltfmxq3300042hsdi471akdg: "❓ Never heard of it/Not sure what it is",
 } as const;

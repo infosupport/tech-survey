@@ -1,14 +1,9 @@
 import { useState, useEffect } from "react";
 
 const useScreenSize = () => {
-  const [screenSize, setScreenSize] = useState(() => {
-    // Initialize with the stored screen size or defaults
-    const storedWidth = localStorage.getItem("screenWidth");
-    const storedHeight = localStorage.getItem("screenHeight");
-    return {
-      width: storedWidth ? parseInt(storedWidth) : 1024,
-      height: storedHeight ? parseInt(storedHeight) : 768,
-    };
+  const [screenSize, setScreenSize] = useState({
+    width: 1024,
+    height: 768,
   });
 
   useEffect(() => {
@@ -23,6 +18,12 @@ const useScreenSize = () => {
 
     // Check if window is defined before adding event listener
     if (typeof window !== "undefined") {
+      const storedWidth = localStorage.getItem("screenWidth");
+      const storedHeight = localStorage.getItem("screenHeight");
+      setScreenSize({
+        width: storedWidth ? parseInt(storedWidth) : window.innerWidth,
+        height: storedHeight ? parseInt(storedHeight) : window.innerHeight,
+      });
       window.addEventListener("resize", handleResize);
 
       // Clean up the event listener when the component unmounts

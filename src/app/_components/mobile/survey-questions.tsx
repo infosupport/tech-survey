@@ -168,7 +168,7 @@ export function MobileSurveyQuestionnaire({
         });
         // wait for 2 seconds before redirecting to the thank you page
         setTimeout(() => {
-          window.location.assign("/survey/thank-you");
+          window.location.assign("/thank-you");
         }, 2000);
       }
     } catch (error) {
@@ -270,7 +270,7 @@ export function MobileSurveyQuestionnaire({
                                     }
                                   />
                                 </FormControl>
-                                <span className=" dark:text-white-900 text-gray-100">
+                                <span className=" dark:text-white-900 text-gray-900">
                                   {idToTextMap[option.option]}
                                 </span>
                               </label>

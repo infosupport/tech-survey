@@ -22,12 +22,23 @@ export interface AnswerOption {
   option: number;
 }
 
+export interface Answers {
+  questionId: string;
+  answerId: string;
+}
+[];
+
 export interface QuestionResult {
   id: string;
   userId: string;
   questionId: string;
   answerId: string;
   question: Question;
+}
+
+export interface TransformedData {
+  question: Question;
+  answers: { questionId: string; answerId: string }[];
 }
 
 export interface User {
