@@ -7,6 +7,7 @@ import { type TransformedData } from "~/models/types";
 
 import dynamic from "next/dynamic";
 import { Button } from "~/components/ui/button";
+import Link from "next/link";
 
 const PDFDownloadLink = dynamic(
   () => import("@react-pdf/renderer").then((mod) => mod.PDFDownloadLink),
@@ -124,10 +125,27 @@ const MyComponent = ({
 }) => {
   return (
     <div>
-      <div className="mt-5 flex flex-col items-center gap-6">
+      <div className="mt-5 flex items-center justify-around gap-6">
+        <Button className="bg-custom-buttonPrimary text-custom-secondary hover:bg-custom-buttonHover dark:bg-custom-buttonPrimary">
+          <Link href="/survey/general" passHref>
+            Go back to Survey
+          </Link>
+        </Button>
         {/* Add a download link/button */}
         {userAnswersForRole && (
           <Button className="bg-custom-buttonPrimary text-custom-secondary hover:bg-custom-buttonHover dark:bg-custom-buttonPrimary">
+            {/* Hidden PDFDownloadLink */}
+            <PDFDownloadLink
+              className="download-link"
+              document={
+                <MyPDFDocument userAnswersForRole={userAnswersForRole} />
+              }
+              fileName="question_results.pdf"
+            >
+              {({ loading }) =>
+                loading ? "Loading document..." : "Download PDF"
+              }
+            </PDFDownloadLink>
             <svg
               className="arrow-right ml-2"
               width="10"
@@ -172,18 +190,6 @@ const MyComponent = ({
                 fill="#003865"
               ></path>
             </svg>
-            {/* Hidden PDFDownloadLink */}
-            <PDFDownloadLink
-              className="download-link"
-              document={
-                <MyPDFDocument userAnswersForRole={userAnswersForRole} />
-              }
-              fileName="question_results.pdf"
-            >
-              {({ loading }) =>
-                loading ? "Loading document..." : "Download PDF"
-              }
-            </PDFDownloadLink>
           </Button>
         )}
       </div>
