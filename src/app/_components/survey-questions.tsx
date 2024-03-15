@@ -175,7 +175,7 @@ export function SurveyQuestions({
         });
         // wait for 2 seconds before redirecting to the thank you page
         setTimeout(() => {
-          window.location.assign("/survey/thank-you");
+          window.location.assign("/thank-you");
         }, 2000);
       }
     } catch (error) {
