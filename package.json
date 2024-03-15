@@ -11,7 +11,7 @@
     "db:generate": "prisma generate",
     "dev": "next dev",
     "lint": "next lint",
-    "start": "next start",
+    "start": "node ./node_modules/next/dist/bin/next start",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -51,7 +51,7 @@
   },
   "devDependencies": {
     "@types/eslint": "^8.56.2",
-    "@types/node": "^20.11.20",
+    "@types/node": "^20.11.27",
     "@types/react": "^18.2.57",
     "@types/react-dom": "^18.2.19",
     "@typescript-eslint/eslint-plugin": "^7.0.2",
