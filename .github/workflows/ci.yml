@@ -19,19 +19,19 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
 
-      - name: Install dependencies
+      - name: '📩 npm install'
         run: npm install
 
-      - name: Prepare
+      - name: '💅 Prepare'
         run: |
           cp .env.example .env
           npm run db:generate
-
-      - name: TypeScript type checking
+        
+      - name: '🔍 TypeScript type checking'
         run: npm run typecheck
 
-      - name: Linting
+      - name: '🧹 Linting'
         run: npm run lint
 
-      - name: Build
+      - name: '🏗 Build'
         run: npm run build
