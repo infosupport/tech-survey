@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 "use client";
 
 import React from "react";
@@ -10,6 +12,7 @@ import { Button } from "~/components/ui/button";
 import Link from "next/link";
 
 const PDFDownloadLink = dynamic(
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   () => import("@react-pdf/renderer").then((mod) => mod.PDFDownloadLink),
   {
     ssr: false,
@@ -86,6 +89,7 @@ const MyPDFDocument = ({
 );
 
 // Styles for PDF
+// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
 const styles = StyleSheet.create({
   page: {
     flexDirection: "column",
