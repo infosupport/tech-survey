@@ -1,9 +1,9 @@
 import { getServerAuthSession } from "~/server/auth";
 import { type AnswerOption, type Question } from "~/models/types";
-import { Login } from "~/app/_components/login";
-import { ModeToggle } from "~/app/_components/mode-toggle";
+import { Login } from "~/components/login";
+import { ModeToggle } from "~/components/mode-toggle";
 import { Suspense } from "react";
-import { SurveyQuestionnaire } from "~/app/_components/survey-questionnaire";
+import { SurveyQuestionnaire } from "~/components/survey-questionnaire";
 import Loading from "~/app/loading";
 import { db } from "~/server/db";
 

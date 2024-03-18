@@ -4,13 +4,13 @@ import { getServerAuthSession } from "~/server/auth";
 import React, { Suspense } from "react";
 import { type Session } from "next-auth";
 import { db } from "~/server/db";
-import { ModeToggle } from "../../_components/mode-toggle";
-import { Login } from "../../_components/login";
+import { ModeToggle } from "../../../components/mode-toggle";
+import { Login } from "../../../components/login";
 import { type Role, type QuestionResult } from "~/models/types";
 import { idToAnswerMap } from "~/utils/optionMapping";
-import { SelectRoleResults } from "../../_components/select-role-results";
+import { SelectRoleResults } from "../../../components/select-role-results";
 import { slugify } from "~/utils/slugify";
-import ResultsWrapper from "~/app/_components/results";
+import ResultsWrapper from "~/components/results";
 
 const Results: React.FC = async () => {
   const session = await getServerAuthSession();

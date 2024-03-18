@@ -1,11 +1,11 @@
 import { db } from "~/server/db";
-import MyComponent from "../_components/download-pdf";
+import MyComponent from "../../components/download-pdf";
 import React, { Suspense } from "react";
 import { getServerAuthSession } from "~/server/auth";
 import { type QuestionResult, type Question } from "~/models/types";
-import { Login } from "../_components/login";
+import { Login } from "../../components/login";
 import { type Session } from "next-auth";
-import { ModeToggle } from "../_components/mode-toggle";
+import { ModeToggle } from "../../components/mode-toggle";
 
 const ThankYou = async () => {
   const session = await getServerAuthSession();

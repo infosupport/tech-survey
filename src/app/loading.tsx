@@ -8,7 +8,7 @@ import {
   TableRow,
 } from "~/components/ui/table";
 import { idToTextMap } from "~/utils/optionMapping";
-import { ModeToggle } from "./_components/mode-toggle";
+import { ModeToggle } from "../components/mode-toggle";
 
 export default function SkeletonDemo() {
   const answerOptions = [

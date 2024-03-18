@@ -1,7 +1,7 @@
 import { getServerAuthSession } from "~/server/auth";
-import { Login } from "./_components/login";
-import SelectRole from "./_components/select-role";
-import { ModeToggle } from "./_components/mode-toggle";
+import { Login } from "../components/login";
+import SelectRole from "../components/select-role";
+import { ModeToggle } from "../components/mode-toggle";
 
 import React, { Suspense } from "react";
 import { type Session } from "next-auth";
