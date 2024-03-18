@@ -131,10 +131,10 @@ const MyComponent = ({
   return (
     <div>
       <div className="mt-5 flex items-center justify-around gap-6">
-        <Button className="bg-custom-buttonPrimary text-custom-secondary hover:bg-custom-buttonHover dark:bg-custom-buttonPrimary">
-          <Link href="/survey/general" passHref>
+        <Link href="/survey/general" passHref>
+          <Button className="bg-custom-buttonPrimary text-custom-secondary hover:bg-custom-buttonHover dark:bg-custom-buttonPrimary dark:hover:bg-custom-buttonHover">
             <svg
-              className="arrow-left ml-2"
+              className="arrow-left mr-2"
               width="10"
               height="10"
               viewBox="0 0 4 6"
@@ -178,11 +178,11 @@ const MyComponent = ({
               ></path>
             </svg>
             Go back to Survey
-          </Link>
-        </Button>
+          </Button>
+        </Link>
         {/* Add a download link/button */}
         {userAnswersForRole && (
-          <Button className="bg-custom-buttonPrimary text-custom-secondary hover:bg-custom-buttonHover dark:bg-custom-buttonPrimary">
+          <Button className="bg-custom-buttonPrimary text-custom-secondary hover:bg-custom-buttonHover dark:bg-custom-buttonPrimary dark:hover:bg-custom-buttonHover">
             {/* Hidden PDFDownloadLink */}
             <PDFDownloadLink
               className="download-link"

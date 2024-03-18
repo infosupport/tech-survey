@@ -27,7 +27,7 @@ const SelectRoleResults = ({ roles }: { roles: Section[] }) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button className=" bg-custom-buttonPrimary text-custom-secondary hover:bg-custom-buttonHover dark:bg-custom-buttonPrimary">
+        <Button className=" bg-custom-buttonPrimary text-custom-secondary hover:bg-custom-buttonHover dark:bg-custom-buttonPrimary dark:hover:bg-custom-buttonHover">
           Viewing results for: {currentRole}
         </Button>
       </DropdownMenuTrigger>
