@@ -4,6 +4,12 @@ import React, { Suspense } from "react";
 import { getServerAuthSession } from "~/server/auth";
 import { type QuestionResult, type Question } from "~/models/types";
 
+import { type Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Thank You",
+};
+
 const ThankYou = async () => {
   const session = await getServerAuthSession();
   const userAnswersForRole: QuestionResult[] = await db.questionResult.findMany(

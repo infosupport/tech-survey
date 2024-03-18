@@ -12,19 +12,18 @@ import { type Section } from "~/models/types";
 import Link from "next/link";
 import { CheckIcon, DotFilledIcon } from "@radix-ui/react-icons";
 import { ScrollArea } from "~/components/ui/scroll-area";
+import { progressionInfo } from "~/utils/survey-utils";
 
 const MobileProgressionBar = ({ roles }: { roles: Section[] }) => {
-  const currentRole = roles.find((role) => role.current)?.label;
-  const totalroles = roles.length;
-  const completedroles = roles.filter((section) => section.completed).length;
-  const progressPercentage = (completedroles / totalroles) * 100;
+  const { completedRoles, totalRoles, currentRole, progressPercentage } =
+    progressionInfo(roles);
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="outline">
-          {currentRole ? `${currentRole} - ` : ""} {completedroles}/{totalroles}{" "}
-          {progressPercentage.toFixed(2)}% Completed
+          {currentRole ? `${currentRole.label} - ` : ""} {completedRoles}/
+          {totalRoles} {progressPercentage.toFixed(2)}% Completed
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56">

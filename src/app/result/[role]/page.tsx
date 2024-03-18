@@ -4,11 +4,21 @@ import { getServerAuthSession } from "~/server/auth";
 import React, { Suspense } from "react";
 import { db } from "~/server/db";
 import { Login } from "../../../components/login";
-import { type Role, type QuestionResult } from "~/models/types";
+import {
+  type Role,
+  type QuestionResult,
+  type TransformedData,
+} from "~/models/types";
 import { idToAnswerMap } from "~/utils/optionMapping";
 import { SelectRoleResults } from "../../../components/select-role-results";
 import { slugify } from "~/utils/slugify";
 import ResultsWrapper from "~/components/results";
+
+import { type Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Results",
+};
 
 const Results: React.FC = async () => {
   const session = await getServerAuthSession();
@@ -44,6 +54,8 @@ const ShowRolesWrapper = async () => {
   const roles: Role[] = await db.role.findMany();
 
   const availableRoles = roles
+
+    // sort roles by general first
     .sort((a, b) => {
       const roleA = a.role.toLowerCase();
       const roleB = b.role.toLowerCase();
@@ -78,8 +90,6 @@ const ShowResultsWrapper = async () => {
       },
     },
   );
-
-  type TransformedData = Record<string, Record<string, Record<string, number>>>;
 
   let transformedData: TransformedData = {};
 

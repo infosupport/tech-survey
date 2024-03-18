@@ -131,3 +131,5 @@ export function SurveyQuestionnaire({
     </div>
   );
 }
+
+export default SurveyQuestionnaire;

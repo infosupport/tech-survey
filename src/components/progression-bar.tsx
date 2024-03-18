@@ -1,11 +1,10 @@
 import Link from "next/link";
 import { Fragment } from "react";
 import { type Section } from "~/models/types";
+import { progressionInfo } from "~/utils/survey-utils";
 
 const ProgressionBar = ({ roles }: { roles: Section[] }) => {
-  const totalroles = roles.length;
-  const completedroles = roles.filter((section) => section.completed).length;
-  const progressPercentage = (completedroles / totalroles) * 100;
+  const { progressPercentage } = progressionInfo(roles);
 
   return (
     <nav className="relative mt-8 p-4" style={{ padding: "100px 40px 40px" }}>

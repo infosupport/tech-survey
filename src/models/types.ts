@@ -1,3 +1,6 @@
+import { type Session } from "next-auth";
+import { type z } from "zod";
+
 export interface Survey {
   id: string;
   surveyName: string;
@@ -36,7 +39,7 @@ export interface QuestionResult {
   question: Question;
 }
 
-export interface TransformedData {
+export interface PdfTransformedData {
   question: Question;
   answers: { questionId: string; answerId: string }[];
 }
@@ -53,3 +56,39 @@ export interface Section {
   completed: boolean;
   started: boolean;
 }
+
+export type TransformedData = Record<
+  string,
+  Record<string, Record<string, number>>
+>;
+
+export type QuestionSchema = Record<string, z.ZodEnum<[string, ...string[]]>>;
+
+export interface HandleResponseSelectionParams {
+  questionId: string;
+  answerId: string;
+  responses: Record<string, string>;
+  setResponses: React.Dispatch<React.SetStateAction<Record<string, string>>>;
+  session: Session;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  submitResponse: any;
+}
+
+export interface UserAnswer {
+  question: {
+    id: string;
+    roles?: Role[];
+  };
+  answerId: string;
+}
+
+export interface ProgressBar {
+  current: boolean;
+  href: string;
+}
+
+export type SurveyResponse = {
+  userId: string | undefined;
+  questionId: string;
+  answerId: string;
+};

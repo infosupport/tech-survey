@@ -5,7 +5,12 @@ import { SurveyQuestionnaire } from "~/components/survey-questionnaire";
 import Loading from "~/app/loading";
 import { db } from "~/server/db";
 
-// Wrap the asynchronous data fetching with Suspense
+import { type Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Survey",
+};
+
 const SuspenseSurveyData = () => (
   <Suspense fallback={<Loading />}>
     <SurveyPage />
@@ -21,14 +26,11 @@ const SurveyPage: React.FC = async () => {
 
   const [questions, answerOptions, userRoles, userAnswersForRole] =
     await Promise.all([
-      // Delayed call to simulate slow API
-      // new Promise((resolve) => setTimeout(resolve, 3000)).then(() =>
       db.question.findMany({
         include: {
           roles: true,
         },
       }),
-      // ),
       db.answerOption.findMany(),
       db.user
         .findUnique({

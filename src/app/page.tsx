@@ -59,9 +59,7 @@ const SelectRoleWrapper: React.FC<{ session: Session }> = async ({
   session,
 }) => {
   const [roles, userRoles] = await Promise.all([
-    // new Promise((resolve) => setTimeout(resolve, 3000)).then(() =>
     db.role.findMany(),
-    // ),
     db.user.findUnique({
       where: {
         id: session.user.id,

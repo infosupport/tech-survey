@@ -10,9 +10,9 @@ import {
   CartesianGrid,
   Tooltip,
 } from "recharts";
+import { type TransformedData } from "~/models/types";
 import { slugToId, slugify } from "~/utils/slugify";
-
-type TransformedData = Record<string, Record<string, Record<string, number>>>;
+import { ResultCommons } from "./results";
 
 const ShowResults = ({ data }: { data: TransformedData }) => {
   const pathname = usePathname() || "";
@@ -22,58 +22,9 @@ const ShowResults = ({ data }: { data: TransformedData }) => {
     notFound();
   }
 
-  // Define a color palette, which is friendly to colorblind people.
-  const colorPalette = ["#003f5c", "#58508d", "#bc5090", "#ff6361", "#ffa600"];
-
-  // Get unique data keys for legend
-  const dataKeys = Object.values(data).flatMap((questions) =>
-    Object.values(questions).flatMap((answers) => Object.keys(answers)),
-  );
-  const uniqueDataKeys = Array.from(new Set(dataKeys));
-
-  const dataKeyColors = uniqueDataKeys.reduce<Record<string, string>>(
-    (acc, dataKey, index) => {
-      acc[dataKey] = colorPalette[index % colorPalette.length]!;
-      return acc;
-    },
-    {},
-  );
-  const customTooltipStyle = {
-    backgroundColor: "rgba(255, 255, 255, 0.9)",
-    border: "1px solid #ccc",
-    borderRadius: "4px",
-    padding: "8px",
-    fontSize: "14px",
-  };
-
-  const CustomTooltip = ({
-    active,
-    payload,
-  }: {
-    active: boolean;
-    payload: { name: string; value: number }[];
-  }) => {
-    if (active && payload?.length) {
-      return (
-        <div>
-          <div
-            className="custom-tooltip dark:bg-slate-700"
-            style={customTooltipStyle}
-          >
-            <p className="label dark:text-black">
-              {payload.map((entry, index) => (
-                <span key={`item-${index}`}>
-                  {`${entry.name} : ${entry.value}`}
-                </span>
-              ))}
-            </p>
-          </div>
-        </div>
-      );
-    }
-
-    return null;
-  };
+  const { uniqueDataKeys, dataKeyColors, CustomTooltip } = ResultCommons({
+    data,
+  });
 
   return (
     <div className="grid gap-4">
@@ -90,7 +41,6 @@ const ShowResults = ({ data }: { data: TransformedData }) => {
         ))}
       </div>
       {Object.entries(data).map(([role, questions]) => {
-        // Only show the results for the current role
         if (slugify(role) === currentRole) {
           return (
             <div key={role} className="grid gap-4 md:grid-cols-2">
@@ -132,7 +82,7 @@ const ShowResults = ({ data }: { data: TransformedData }) => {
             </div>
           );
         }
-        return null; // Returning null for roles that don't match currentRole
+        return null;
       })}
     </div>
   );

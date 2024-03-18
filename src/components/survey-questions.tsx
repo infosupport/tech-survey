@@ -15,20 +15,15 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { api } from "~/trpc/react";
 import { type Session } from "next-auth";
 import { idToTextMap } from "~/utils/optionMapping";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-
 import { Button } from "~/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
-import { toast } from "~/components/ui/use-toast";
-import { slugToId, slugify } from "~/utils/slugify";
+import { slugify } from "~/utils/slugify";
 
 import {
   Table,
@@ -38,6 +33,14 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
+import {
+  getInitialResponses,
+  getNextHref,
+  handleResponseSelection,
+  hasAnsweredAllQuestionsForRole,
+  onSubmit,
+  useGenerateFormAndSchema,
+} from "~/utils/survey-utils";
 
 export function SurveyQuestions({
   session,
@@ -56,132 +59,9 @@ export function SurveyQuestions({
   userAnswersForRole: QuestionResult[];
   currentRole: string;
 }) {
-  const [responses, setResponses] = useState<Record<string, string>>({});
-  type InitialResponses = Record<string, string>;
-
-  useEffect(() => {
-    // Populate responses with previous answers for the current role when component mounts
-    const initialResponses: InitialResponses = {};
-    userAnswersForRole.forEach((answer) => {
-      if (
-        answer.question.roles?.some((role) => role.id === slugToId[currentRole])
-      ) {
-        initialResponses[answer.question.id] = answer.answerId;
-      }
-    });
-    setResponses(initialResponses);
-  }, [userAnswersForRole, currentRole]);
-
-  // function that check if a user already has more than 1 response for a question
-  function hasAnsweredAllQuestionsForRole(
-    userAnswersForRole: QuestionResult[],
-    roleId: string,
-    questions: Question[],
-  ) {
-    const questionsForRole = userAnswersForRole.filter((answer) =>
-      answer.question.roles?.some((role) => role.id === roleId),
-    );
-
-    const totalQuestionsForRole = questions.filter((question) =>
-      question.roleIds?.some((role) => role === roleId),
-    ).length;
-
-    const answeredQuestionsForRole = questionsForRole.filter(
-      (answer) => answer.answerId !== undefined,
-    );
-
-    return answeredQuestionsForRole.length >= totalQuestionsForRole;
-  }
-
-  const unansweredQuestions = filteredQuestions.filter(
-    (question) => !responses[question.id],
+  const [responses, setResponses] = useState(
+    getInitialResponses(userAnswersForRole, currentRole),
   );
-
-  const handleResponseSelection = async (
-    questionId: string,
-    answerId: string,
-  ) => {
-    setResponses((prevResponses) => ({
-      ...prevResponses,
-      [questionId]: answerId,
-    }));
-
-    console.log("responses", responses);
-    await saveResponsesToDatabase();
-  };
-
-  type QuestionSchema = Record<string, z.ZodEnum<[string, ...string[]]>>;
-
-  // look at the responses to create validation schema
-  const FormSchema = z.object(
-    unansweredQuestions.reduce<QuestionSchema>((schema, question) => {
-      // Add a validation rule for each question ID
-      return {
-        ...schema,
-        [question.id]: z.enum(
-          [question.id, ...answerOptions.map((option) => option.id)],
-          {
-            required_error: `You need to select an answer`,
-          },
-        ),
-      };
-    }, {}),
-  );
-
-  const form = useForm<z.infer<typeof FormSchema>>({
-    resolver: zodResolver(FormSchema),
-  });
-
-  async function saveResponsesToDatabase() {
-    console.log("responses", responses);
-
-    const mappedResponses = Object.entries(responses).map(
-      ([questionId, answerId]) => ({
-        userId: session?.user.id,
-        questionId,
-        answerId,
-      }),
-    );
-
-    console.log("mappedResponses", mappedResponses);
-
-    try {
-      // Submitting responses for each question
-      await Promise.all(
-        mappedResponses.map((response) => submitResponse.mutateAsync(response)),
-      );
-      console.log("Responses saved successfully");
-    } catch (error) {
-      console.error("Error saving responses:", error);
-      // You might want to handle the error here, e.g., display a toast
-      toast({
-        title: "Error!",
-        description: "Failed to save responses.",
-        variant: "destructive",
-      });
-    }
-  }
-
-  async function onSubmit() {
-    try {
-      await saveResponsesToDatabase();
-      const nextHref = getNextHref();
-      if (nextHref) {
-        window.location.assign(nextHref);
-      } else {
-        toast({
-          title: "Success!",
-          description: "Your survey has been submitted.",
-        });
-        // wait for 2 seconds before redirecting to the thank you page
-        setTimeout(() => {
-          window.location.assign("/thank-you");
-        }, 2000);
-      }
-    } catch (error) {
-      console.error("Error in onSubmit:", error);
-    }
-  }
 
   const submitResponse = api.survey.setQuestionResult.useMutation({
     onSuccess: () => {
@@ -193,6 +73,26 @@ export function SurveyQuestions({
       return false;
     },
   });
+
+  const unansweredQuestions = filteredQuestions.filter(
+    (question) => !responses[question.id],
+  );
+
+  const { form } = useGenerateFormAndSchema(unansweredQuestions, answerOptions);
+
+  const handleSelection = async (
+    questionId: string,
+    answerId: string,
+  ): Promise<void> => {
+    await handleResponseSelection({
+      questionId,
+      answerId,
+      responses,
+      setResponses,
+      session,
+      submitResponse,
+    });
+  };
 
   const selectedRolesForProgressBar = userSelectedRoles
     .sort((a, b) => {
@@ -216,18 +116,19 @@ export function SurveyQuestions({
       ),
     }));
 
-  function getNextHref() {
-    // lookup the current index of the current role
-    const index = selectedRolesForProgressBar.findIndex(
-      (role) => role.current === true,
-    );
-    return selectedRolesForProgressBar[index + 1]?.href;
-  }
-
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(onSubmit)}
+        onSubmit={form.handleSubmit((data) => {
+          onSubmit(
+            data,
+            session,
+            selectedRolesForProgressBar,
+            submitResponse,
+          ).catch((error) => {
+            console.error("Error in form submission:", error);
+          });
+        })}
         className="grid gap-4 md:grid-cols-1 lg:grid-cols-1"
       >
         <Table divClassname="">
@@ -272,10 +173,7 @@ export function SurveyQuestions({
                               onValueChange={async (value) => {
                                 field.onChange(value);
                                 try {
-                                  await handleResponseSelection(
-                                    question.id,
-                                    value,
-                                  );
+                                  await handleSelection(question.id, value);
                                 } catch (error) {
                                   console.error(
                                     "Error in handleResponseSelection:",
@@ -283,7 +181,7 @@ export function SurveyQuestions({
                                   );
                                 }
                               }}
-                              value={field.value}
+                              value={field.value as string}
                               className="flex flex-col space-y-1"
                             >
                               <label className="flex cursor-pointer items-center justify-center">
@@ -308,7 +206,9 @@ export function SurveyQuestions({
             ))}
           </TableBody>
         </Table>
-        <Button type="submit">{getNextHref() ? "Next" : "Submit"}</Button>
+        <Button type="submit">
+          {getNextHref(selectedRolesForProgressBar) ? "Next" : "Submit"}
+        </Button>
       </form>
     </Form>
   );
