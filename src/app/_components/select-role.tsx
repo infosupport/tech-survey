@@ -90,7 +90,7 @@ export default function SelectRoles({
         <Link href="/survey/general" passHref>
           <Button
             onClick={handleSetGeneralRole}
-            className="bg-custom-buttonPrimary text-custom-secondary hover:bg-custom-buttonHover dark:bg-custom-buttonPrimary"
+            className="bg-custom-buttonPrimary text-custom-secondary hover:bg-custom-buttonHover dark:bg-custom-buttonPrimary dark:hover:bg-custom-buttonHover"
           >
             Go to survey
             <svg

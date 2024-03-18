@@ -270,7 +270,7 @@ export function MobileSurveyQuestionnaire({
                                     }
                                   />
                                 </FormControl>
-                                <span className=" dark:text-white-900 text-gray-900">
+                                <span className="text-gray-900 dark:text-white">
                                   {idToTextMap[option.option]}
                                 </span>
                               </label>
