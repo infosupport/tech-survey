@@ -6,8 +6,6 @@ import { ModeToggle } from "./_components/mode-toggle";
 import React, { Suspense } from "react";
 import { type Session } from "next-auth";
 import { db } from "~/server/db";
-import InfoSupportLogo from "./_components/info-support-logo";
-import Link from "next/link";
 
 const Home: React.FC = async () => {
   const session = await getServerAuthSession();
@@ -15,11 +13,6 @@ const Home: React.FC = async () => {
   // Use Suspense to suspend rendering while the data is being fetched
   return (
     <main className="flex min-h-screen items-center justify-center">
-      <div className="absolute left-4 top-4 z-50">
-        <Link href="/" passHref>
-          <InfoSupportLogo />
-        </Link>
-      </div>
       <div className="absolute right-4 top-4 z-50 flex items-center space-x-4">
         {session && (
           <Suspense fallback={<div>Loading...</div>}>

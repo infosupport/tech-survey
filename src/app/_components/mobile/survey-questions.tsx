@@ -260,7 +260,9 @@ export function MobileSurveyQuestionnaire({
                               value={field.value}
                               className="flex flex-col space-y-1"
                             >
-                              <label className="flex cursor-pointer items-center space-x-2 rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-slate-900">
+                              <label
+                                className={`flex cursor-pointer items-center space-x-2 rounded-lg p-2 ${field.value === option.id || responses[question.id] === option.id ? "bg-custom-selectedLight dark:bg-custom-selected" : "hover:bg-gray-100 dark:hover:bg-slate-900"}`}
+                              >
                                 <FormControl>
                                   <RadioGroupItem
                                     value={option.id}

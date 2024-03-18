@@ -262,7 +262,10 @@ export function SurveyQuestions({
                       <FormMessage />
                     </TableCell>
                     {answerOptions.map((option) => (
-                      <TableCell key={option.id}>
+                      <TableCell
+                        key={option.id}
+                        className={`${field.value === option.id || responses[question.id] === option.id ? "bg-custom-selectedLight dark:bg-custom-selected rounded-lg" : ""}`}
+                      >
                         <FormItem>
                           <FormControl>
                             <RadioGroup
