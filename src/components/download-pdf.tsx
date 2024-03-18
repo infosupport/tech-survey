@@ -116,7 +116,6 @@ const styles = StyleSheet.create({
   },
 });
 
-// Define the react component with the TransformedData type
 const PdfDownloadButton = ({
   userAnswersForRole,
 }: {
