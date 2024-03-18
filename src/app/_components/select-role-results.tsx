@@ -1,0 +1,51 @@
+"use client";
+
+import * as React from "react";
+import { Button } from "~/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
+import { ScrollArea } from "~/components/ui/scroll-area";
+import { type Section } from "~/models/types";
+import Link from "next/link";
+import { notFound, usePathname } from "next/navigation";
+import { slugToId } from "~/utils/slugify";
+
+const SelectRoleResults = ({ roles }: { roles: Section[] }) => {
+  const pathname = usePathname() || "";
+
+  const currentRole = pathname.split("/").pop() ?? "";
+  if (!slugToId[currentRole]) {
+    notFound();
+  }
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button className=" bg-custom-buttonPrimary text-custom-secondary hover:bg-custom-buttonHover dark:bg-custom-buttonPrimary">
+          Viewing results for: {currentRole}
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="w-56">
+        <DropdownMenuLabel>Roles:</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <ScrollArea className="w-50 h-72 rounded-md border">
+          {roles.map((section) => (
+            <Link href={section.href} key={section.id}>
+              <DropdownMenuCheckboxItem checked={section.current}>
+                {section.label}
+              </DropdownMenuCheckboxItem>
+            </Link>
+          ))}
+        </ScrollArea>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
+
+export { SelectRoleResults };
