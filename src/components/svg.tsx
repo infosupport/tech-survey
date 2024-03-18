@@ -1,4 +1,4 @@
-export default function InfoSupportLogo() {
+export function InfoSupportLogo() {
   return (
     <svg
       className="logo text-black hover:text-custom-primary dark:text-white dark:hover:text-custom-primary"
@@ -161,6 +161,104 @@ export default function InfoSupportLogo() {
         id="Vector_27"
         d="M160.608 39.9068L160.403 40.9393C160.608 40.5266 160.816 40.2174 161.228 40.0104C161.641 39.8047 161.952 39.7012 162.468 39.7012H162.984L162.675 41.2499C162.571 41.2499 162.468 41.2499 162.364 41.1463H162.055C161.744 41.1463 161.435 41.2499 161.228 41.352C161.023 41.4555 160.816 41.5604 160.712 41.7661C160.608 41.9731 160.403 42.1788 160.403 42.3844C160.299 42.5915 160.196 42.9021 160.196 43.1077L159.68 45.6903H158.027L159.267 39.8047H160.608V39.9068Z"
         className="fill-current"
+      ></path>
+    </svg>
+  );
+}
+
+export function ArrowRight() {
+  return (
+    <svg
+      className="arrow-right ml-2"
+      width="10"
+      height="10"
+      viewBox="0 0 4 6"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        id="Vector"
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M2.39352 3.60724H3.60801V2.39278H2.39352V3.60724Z"
+        fill="#003865"
+      ></path>
+      <path
+        id="Vector_2"
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M1.19662 4.80365H2.41102V3.58923H1.19662V4.80365Z"
+        fill="#003865"
+      ></path>
+      <path
+        id="Vector_3"
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M1.19662 2.41089H2.41102V1.19641H1.19662V2.41089Z"
+        fill="#003865"
+      ></path>
+      <path
+        id="Vector_4"
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M0 6H1.21442V4.78559L0 4.78558L0 6Z"
+        fill="#003865"
+      ></path>
+      <path
+        id="Vector_5"
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M0 1.21448H1.21442V9.50098e-05L0 -5.24521e-06L0 1.21448Z"
+        fill="#003865"
+      ></path>
+    </svg>
+  );
+}
+
+export function ArrowLeft() {
+  return (
+    <svg
+      className="arrow-left mr-2"
+      width="10"
+      height="10"
+      viewBox="0 0 4 6"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        id="Vector"
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M1.60648 3.60724H0.391989V2.39278H1.60648V3.60724Z"
+        fill="#003865"
+      ></path>
+      <path
+        id="Vector_2"
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M2.80338 4.80365H1.58898V3.58923H2.80338V4.80365Z"
+        fill="#003865"
+      ></path>
+      <path
+        id="Vector_3"
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M2.80338 2.41089H1.58898V1.19641H2.80338V2.41089Z"
+        fill="#003865"
+      ></path>
+      <path
+        id="Vector_4"
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M4 6H2.78558V4.78559L4 4.78558L4 6Z"
+        fill="#003865"
+      ></path>
+      <path
+        id="Vector_5"
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M4 1.21448H2.78558V9.50098e-05L4 -5.24521e-06L4 1.21448Z"
+        fill="#003865"
       ></path>
     </svg>
   );

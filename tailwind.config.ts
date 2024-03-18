@@ -24,6 +24,8 @@ const config: Config = {
           secondary: "#003865",
           buttonPrimary: "#bed62f",
           buttonHover: "#d0e26a",
+          selected: "#1e843b",
+          selectedLight: "#a8edbc",
         },
         // Your existing color definitions...
         border: "hsl(var(--border))",

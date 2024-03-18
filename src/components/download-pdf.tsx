@@ -5,11 +5,12 @@
 import React from "react";
 import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
 import { idToAnswerMap } from "~/utils/optionMapping";
-import { type TransformedData } from "~/models/types";
+import { type PdfTransformedData } from "~/models/types";
 
 import dynamic from "next/dynamic";
 import { Button } from "~/components/ui/button";
 import Link from "next/link";
+import { ArrowLeft, ArrowRight } from "./svg";
 
 const PDFDownloadLink = dynamic(
   // eslint-disable-next-line @typescript-eslint/no-unsafe-return
@@ -20,15 +21,18 @@ const PDFDownloadLink = dynamic(
   },
 );
 
+// TODO: There is currently a bug that causes questions that have multiple roles not to be put into all the roles they belong to.
+// Currently they are only put into the first role they belong to.
+
 const MyPDFDocument = ({
   userAnswersForRole,
 }: {
-  userAnswersForRole: TransformedData[];
+  userAnswersForRole: PdfTransformedData[];
 }) => (
   <Document>
     {/* Group userAnswersForRole by role */}
     {userAnswersForRole
-      .reduce<{ id: string; data: TransformedData[] }[]>(
+      .reduce<{ id: string; data: PdfTransformedData[] }[]>(
         (acc, { question, answers }) => {
           const roleId =
             question.roles && question.roles.length > 0
@@ -126,57 +130,14 @@ const styles = StyleSheet.create({
 const MyComponent = ({
   userAnswersForRole,
 }: {
-  userAnswersForRole: TransformedData[];
+  userAnswersForRole: PdfTransformedData[];
 }) => {
   return (
     <div>
       <div className="mt-5 flex items-center justify-around gap-6">
         <Link href="/survey/general" passHref>
           <Button className="bg-custom-buttonPrimary text-custom-secondary hover:bg-custom-buttonHover dark:bg-custom-buttonPrimary dark:hover:bg-custom-buttonHover">
-            <svg
-              className="arrow-left mr-2"
-              width="10"
-              height="10"
-              viewBox="0 0 4 6"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                id="Vector"
-                fillRule="evenodd"
-                clipRule="evenodd"
-                d="M1.60648 3.60724H0.391989V2.39278H1.60648V3.60724Z"
-                fill="#003865"
-              ></path>
-              <path
-                id="Vector_2"
-                fillRule="evenodd"
-                clipRule="evenodd"
-                d="M2.80338 4.80365H1.58898V3.58923H2.80338V4.80365Z"
-                fill="#003865"
-              ></path>
-              <path
-                id="Vector_3"
-                fillRule="evenodd"
-                clipRule="evenodd"
-                d="M2.80338 2.41089H1.58898V1.19641H2.80338V2.41089Z"
-                fill="#003865"
-              ></path>
-              <path
-                id="Vector_4"
-                fillRule="evenodd"
-                clipRule="evenodd"
-                d="M4 6H2.78558V4.78559L4 4.78558L4 6Z"
-                fill="#003865"
-              ></path>
-              <path
-                id="Vector_5"
-                fillRule="evenodd"
-                clipRule="evenodd"
-                d="M4 1.21448H2.78558V9.50098e-05L4 -5.24521e-06L4 1.21448Z"
-                fill="#003865"
-              ></path>
-            </svg>
+            <ArrowLeft />
             Go back to Survey
           </Button>
         </Link>
@@ -195,50 +156,7 @@ const MyComponent = ({
                 loading ? "Loading document..." : "Download results as PDF"
               }
             </PDFDownloadLink>
-            <svg
-              className="arrow-right ml-2"
-              width="10"
-              height="10"
-              viewBox="0 0 4 6"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                id="Vector"
-                fillRule="evenodd"
-                clipRule="evenodd"
-                d="M2.39352 3.60724H3.60801V2.39278H2.39352V3.60724Z"
-                fill="#003865"
-              ></path>
-              <path
-                id="Vector_2"
-                fillRule="evenodd"
-                clipRule="evenodd"
-                d="M1.19662 4.80365H2.41102V3.58923H1.19662V4.80365Z"
-                fill="#003865"
-              ></path>
-              <path
-                id="Vector_3"
-                fillRule="evenodd"
-                clipRule="evenodd"
-                d="M1.19662 2.41089H2.41102V1.19641H1.19662V2.41089Z"
-                fill="#003865"
-              ></path>
-              <path
-                id="Vector_4"
-                fillRule="evenodd"
-                clipRule="evenodd"
-                d="M0 6H1.21442V4.78559L0 4.78558L0 6Z"
-                fill="#003865"
-              ></path>
-              <path
-                id="Vector_5"
-                fillRule="evenodd"
-                clipRule="evenodd"
-                d="M0 1.21448H1.21442V9.50098e-05L0 -5.24521e-06L0 1.21448Z"
-                fill="#003865"
-              ></path>
-            </svg>
+            <ArrowRight />
           </Button>
         )}
       </div>

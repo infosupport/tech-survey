@@ -10,11 +10,11 @@ import {
   CartesianGrid,
   Tooltip,
 } from "recharts";
+import { type TransformedData } from "~/models/types";
 import { slugToId, slugify } from "~/utils/slugify";
+import { ResultCommons } from "./results";
 
-type TransformedData = Record<string, Record<string, Record<string, number>>>;
-
-const MobileShowResults = ({ data }: { data: TransformedData }) => {
+const ShowResults = ({ data }: { data: TransformedData }) => {
   const pathname = usePathname() || "";
 
   const currentRole = pathname.split("/").pop() ?? "";
@@ -22,74 +22,25 @@ const MobileShowResults = ({ data }: { data: TransformedData }) => {
     notFound();
   }
 
-  // Define a color palette, which is friendly to colorblind people.
-  const colorPalette = ["#003f5c", "#58508d", "#bc5090", "#ff6361", "#ffa600"];
-
-  // Get unique data keys for legend
-  const dataKeys = Object.values(data).flatMap((questions) =>
-    Object.values(questions).flatMap((answers) => Object.keys(answers)),
-  );
-  const uniqueDataKeys = Array.from(new Set(dataKeys));
-
-  const dataKeyColors = uniqueDataKeys.reduce<Record<string, string>>(
-    (acc, dataKey, index) => {
-      acc[dataKey] = colorPalette[index % colorPalette.length]!;
-      return acc;
-    },
-    {},
-  );
-
-  const customTooltipStyle = {
-    backgroundColor: "rgba(255, 255, 255, 0.9)",
-    border: "1px solid #ccc",
-    borderRadius: "4px",
-    padding: "8px",
-    fontSize: "14px",
-  };
-
-  const CustomTooltip = ({
-    active,
-    payload,
-  }: {
-    active: boolean;
-    payload: { name: string; value: number }[];
-  }) => {
-    if (active && payload?.length) {
-      return (
-        <div>
-          <div className="custom-tooltip" style={customTooltipStyle}>
-            <p className="label dark:text-black">
-              {payload.map((entry, index) => (
-                <span key={`item-${index}`}>
-                  {`${entry.name} : ${entry.value}`}
-                </span>
-              ))}
-            </p>
-          </div>
-        </div>
-      );
-    }
-
-    return null;
-  };
+  const { uniqueDataKeys, dataKeyColors, CustomTooltip } = ResultCommons({
+    data,
+  });
 
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+    <div className="grid gap-4">
       <h2 className="mb-4 text-lg font-semibold">Legend</h2>
       <div className="flex flex-wrap gap-2">
         {uniqueDataKeys.map((dataKey, index) => (
           <div key={index} className="flex items-center">
             <div
               className="mr-2 h-4 w-4 rounded-full"
-              style={{ backgroundColor: dataKeyColors[dataKey]! }}
+              style={{ backgroundColor: dataKeyColors[dataKey] }}
             ></div>
             <span>{dataKey}</span>
           </div>
         ))}
       </div>
-
       {Object.entries(data).map(([role, questions]) => {
-        // Only show the results for the current role
         if (slugify(role) === currentRole) {
           return (
             <div key={role} className="grid gap-4 md:grid-cols-2">
@@ -131,10 +82,10 @@ const MobileShowResults = ({ data }: { data: TransformedData }) => {
             </div>
           );
         }
-        return null; // Returning null for roles that don't match currentRole
+        return null;
       })}
     </div>
   );
 };
 
-export default MobileShowResults;
+export default ShowResults;
