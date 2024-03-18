@@ -10,7 +10,7 @@ import {
 } from "~/components/ui/dropdown-menu";
 import { type Section } from "~/models/types";
 import Link from "next/link";
-import { CheckIcon } from "@radix-ui/react-icons";
+import { CheckIcon, DotFilledIcon } from "@radix-ui/react-icons";
 
 const MobileProgressionBar = ({ roles }: { roles: Section[] }) => {
   const currentRole = roles.find((role) => role.current)?.label;
@@ -34,9 +34,14 @@ const MobileProgressionBar = ({ roles }: { roles: Section[] }) => {
             <DropdownMenuCheckboxItem checked={section.current}>
               {section.completed && (
                 <div className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
-                  <CheckIcon className="h-4 w-4 text-green-500" />
+                  <CheckIcon className="h-4 w-4 text-green-500" />{" "}
                 </div>
               )}
+              {section.started && !section.completed ? (
+                <div className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
+                  <DotFilledIcon className="h-4 w-4 text-orange-500" />{" "}
+                </div>
+              ) : null}
               {section.label}
             </DropdownMenuCheckboxItem>
           </Link>

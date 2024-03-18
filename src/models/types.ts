@@ -51,4 +51,5 @@ export interface Section {
   label: string;
   current: boolean;
   completed: boolean;
+  started: boolean;
 }

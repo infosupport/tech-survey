@@ -89,6 +89,9 @@ export function SurveyQuestionnaire({
         role.id,
         questions,
       ),
+      started: userAnswersForRole.some((answer) =>
+        answer.question.roles?.some((role) => role.id === role.id),
+      ),
     }));
 
   const screenSize = useScreenSize();

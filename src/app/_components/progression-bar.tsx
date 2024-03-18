@@ -26,10 +26,12 @@ const ProgressionBar = ({ roles }: { roles: Section[] }) => {
                 <div
                   className={`mb-1 h-6 w-6 rounded-full border-2 ${
                     section.current
-                      ? "border-custom-secondary bg-custom-primary"
+                      ? "border-custom-secondary bg-custom-primary dark:border-custom-primary dark:bg-custom-secondary"
                       : section.completed
                         ? "border-green-500 bg-green-500"
-                        : "border-gray-300"
+                        : section.started
+                          ? "border-orange-500 bg-orange-500"
+                          : "border-gray-300"
                   }`}
                 ></div>
                 <div

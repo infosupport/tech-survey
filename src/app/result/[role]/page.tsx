@@ -71,6 +71,7 @@ const ShowRolesWrapper = async () => {
       label: role.role,
       current: false,
       completed: false,
+      started: false,
     }));
 
   return <SelectRoleResults roles={availableRoles} />;
