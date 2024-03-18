@@ -2,9 +2,7 @@
 import { getServerAuthSession } from "~/server/auth";
 
 import React, { Suspense } from "react";
-import { type Session } from "next-auth";
 import { db } from "~/server/db";
-import { ModeToggle } from "../../../components/mode-toggle";
 import { Login } from "../../../components/login";
 import { type Role, type QuestionResult } from "~/models/types";
 import { idToAnswerMap } from "~/utils/optionMapping";
@@ -16,39 +14,29 @@ const Results: React.FC = async () => {
   const session = await getServerAuthSession();
 
   return (
-    <main className="flex min-h-screen items-center justify-center">
-      <div className="absolute right-4 top-4 z-50 flex items-center space-x-4">
-        {session && (
-          <Suspense fallback={<div>Loading...</div>}>
-            <LoginWrapper session={session} />
-          </Suspense>
-        )}
-        <ModeToggle />
-      </div>
-      <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
-        <h1 className="text-center text-5xl font-extrabold tracking-tight">
-          <span className="block text-custom-primary sm:inline">
-            Info Support
-          </span>
-          <span className="block sm:inline"> Tech Survey - Results</span>
-        </h1>
-        <Suspense fallback={<div>Loading...</div>}>
-          <ShowRolesWrapper />
-        </Suspense>
+    <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
+      <h1 className="text-center text-5xl font-extrabold tracking-tight">
+        <span className="block text-custom-primary sm:inline">
+          Info Support
+        </span>
+        <span className="block sm:inline"> Tech Survey - Results</span>
+      </h1>
+      <Suspense fallback={<div>Loading...</div>}>
+        <ShowRolesWrapper />
+      </Suspense>
 
-        <Suspense fallback={<div>Loading...</div>}>
-          <ShowResultsWrapper />
-        </Suspense>
-        {!session && (
-          <div>
-            <div className="max-w-2xl text-center">
-              <p>Please log in to view the results of the 2024 Tech Survey.</p>
-            </div>
-            <Login session={session} />
+      <Suspense fallback={<div>Loading...</div>}>
+        <ShowResultsWrapper />
+      </Suspense>
+      {!session && (
+        <div>
+          <div className="max-w-2xl text-center">
+            <p>Please log in to view the results of the 2024 Tech Survey.</p>
           </div>
-        )}
-      </div>
-    </main>
+          <Login session={session} />
+        </div>
+      )}
+    </div>
   );
 };
 
@@ -121,10 +109,6 @@ const ShowResultsWrapper = async () => {
   });
 
   return <ResultsWrapper data={transformedData} />;
-};
-
-const LoginWrapper: React.FC<{ session: Session }> = async ({ session }) => {
-  return <Login session={session} />;
 };
 
 export default Results;

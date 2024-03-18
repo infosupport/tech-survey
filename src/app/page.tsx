@@ -1,7 +1,6 @@
 import { getServerAuthSession } from "~/server/auth";
 import { Login } from "../components/login";
 import SelectRole from "../components/select-role";
-import { ModeToggle } from "../components/mode-toggle";
 
 import React, { Suspense } from "react";
 import { type Session } from "next-auth";
@@ -12,15 +11,7 @@ const Home: React.FC = async () => {
 
   // Use Suspense to suspend rendering while the data is being fetched
   return (
-    <main className="flex min-h-screen items-center justify-center">
-      <div className="absolute right-4 top-4 z-50 flex items-center space-x-4">
-        {session && (
-          <Suspense fallback={<div>Loading...</div>}>
-            <LoginWrapper session={session} />
-          </Suspense>
-        )}
-        <ModeToggle />
-      </div>
+    <div>
       <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
         <h1 className="text-center text-5xl font-extrabold tracking-tight">
           <span className="block text-custom-primary sm:inline">
@@ -59,7 +50,7 @@ const Home: React.FC = async () => {
           </div>
         )}
       </div>
-    </main>
+    </div>
   );
 };
 
@@ -90,10 +81,6 @@ const SelectRoleWrapper: React.FC<{ session: Session }> = async ({
       userSelectedRoles={userSelectedRoles}
     />
   );
-};
-
-const LoginWrapper: React.FC<{ session: Session }> = async ({ session }) => {
-  return <Login session={session} />;
 };
 
 export default Home;

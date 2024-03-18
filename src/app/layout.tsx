@@ -6,6 +6,11 @@ import { Inter } from "next/font/google";
 
 import { TRPCReactProvider } from "~/trpc/react";
 import { cn } from "~/lib/utils";
+import { Suspense } from "react";
+import { ModeToggle } from "~/components/mode-toggle";
+import { Login } from "~/components/login";
+import { type Session } from "next-auth";
+import { getServerAuthSession } from "~/server/auth";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -18,11 +23,12 @@ export const metadata = {
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const session = await getServerAuthSession();
   return (
     <html lang="en">
       <body
@@ -37,10 +43,26 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <TRPCReactProvider>{children}</TRPCReactProvider>
+          <TRPCReactProvider>
+            <main className="flex min-h-screen items-center justify-center">
+              <div className="absolute right-4 top-4 z-50 flex items-center space-x-4">
+                {session && (
+                  <Suspense fallback={<div>Loading...</div>}>
+                    <LoginWrapper session={session} />
+                  </Suspense>
+                )}
+                <ModeToggle />
+              </div>
+              {children}
+            </main>
+          </TRPCReactProvider>
           <Toaster />
         </ThemeProvider>
       </body>
     </html>
   );
 }
+
+const LoginWrapper: React.FC<{ session: Session }> = async ({ session }) => {
+  return <Login session={session} />;
+};
