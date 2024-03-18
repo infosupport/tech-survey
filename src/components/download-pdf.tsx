@@ -21,76 +21,66 @@ const PDFDownloadLink = dynamic(
   },
 );
 
-// TODO: There is currently a bug that causes questions that have multiple roles not to be put into all the roles they belong to.
-// Currently they are only put into the first role they belong to.
-
-const MyPDFDocument = ({
+const PDFDocument = ({
   userAnswersForRole,
 }: {
   userAnswersForRole: PdfTransformedData[];
-}) => (
-  <Document>
-    {/* Group userAnswersForRole by role */}
-    {userAnswersForRole
-      .reduce<{ id: string; data: PdfTransformedData[] }[]>(
-        (acc, { question, answers }) => {
-          const roleId =
-            question.roles && question.roles.length > 0
-              ? question.roles[0]?.id ?? ""
-              : "";
+}) => {
+  const rolesIncluded: Record<string, boolean> = {};
 
-          const existingRole = acc.find((role) => role.id === roleId);
-
-          if (existingRole) {
-            // If the role already exists, add the question and its answers to its data
-            existingRole.data.push({ question, answers });
-          } else {
-            // If the role doesn't exist, create a new role object with the question and its answers
-            acc.push({
-              id: roleId,
-              data: [{ question, answers }],
-            });
+  return (
+    <Document>
+      {/* Group userAnswersForRole by role */}
+      {userAnswersForRole.map(({ question }) => {
+        const roles = question.roles ?? [];
+        return roles.map((role) => {
+          const roleId = role.id;
+          if (rolesIncluded[roleId]) {
+            // If the role has already been included, return null to skip it
+            return null;
           }
+          // Mark the role as included
+          rolesIncluded[roleId] = true;
 
-          return acc;
-        },
-        [],
-      )
-
-      .map(({ id, data }) => (
-        <Page key={id} style={styles.page}>
-          <View style={styles.section}>
-            {/* Role Name */}
-            <Text style={styles.roleTitle}>
-              Role: {data[0]?.question?.roles?.[0]?.role}
-            </Text>
-            {/* Table Header */}
-            <View style={styles.tableRow}>
-              <Text style={styles.columnHeader}>Question</Text>
-              <Text style={styles.columnHeader}>Answer</Text>
-            </View>
-            {/* Iterate over questions and answers */}
-            {data.map(({ question, answers }) => (
-              <View key={question?.id}>
-                {/* Render the question */}
+          return (
+            <Page key={roleId} style={styles.page}>
+              <View style={styles.section}>
+                {/* Role Name */}
+                <Text style={styles.roleTitle}>Role: {role.role}</Text>
+                {/* Table Header */}
                 <View style={styles.tableRow}>
-                  <Text style={styles.cell}>
-                    {question?.questionText || "Question not found"}
-                  </Text>
-                  {/* Render the answer */}
-                  <Text style={styles.cell}>
-                    {answers
-                      .map(({ answerId }) => idToAnswerMap[answerId])
-                      .join(", ")}
-                  </Text>
+                  <Text style={styles.columnHeader}>Question</Text>
+                  <Text style={styles.columnHeader}>Answer</Text>
                 </View>
+                {/* Iterate over questions and answers */}
+                {userAnswersForRole
+                  .filter(({ question }) =>
+                    question.roles?.find((r) => r.id === roleId),
+                  )
+                  .map(({ question, answers }) => (
+                    <View key={question?.id}>
+                      {/* Render the question */}
+                      <View style={styles.tableRow}>
+                        <Text style={styles.cell}>
+                          {question?.questionText || "Question not found"}
+                        </Text>
+                        {/* Render the answer */}
+                        <Text style={styles.cell}>
+                          {answers
+                            .map(({ answerId }) => idToAnswerMap[answerId])
+                            .join(", ")}
+                        </Text>
+                      </View>
+                    </View>
+                  ))}
               </View>
-            ))}
-          </View>
-        </Page>
-      ))}
-  </Document>
-);
+            </Page>
+          );
+        });
+      })}
+    </Document>
+  );
+};
 
 // Styles for PDF
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
@@ -126,8 +116,7 @@ const styles = StyleSheet.create({
   },
 });
 
-// Define the react component with the TransformedData type
-const MyComponent = ({
+const PdfDownloadButton = ({
   userAnswersForRole,
 }: {
   userAnswersForRole: PdfTransformedData[];
@@ -147,9 +136,7 @@ const MyComponent = ({
             {/* Hidden PDFDownloadLink */}
             <PDFDownloadLink
               className="download-link"
-              document={
-                <MyPDFDocument userAnswersForRole={userAnswersForRole} />
-              }
+              document={<PDFDocument userAnswersForRole={userAnswersForRole} />}
               fileName="question_results.pdf"
             >
               {({ loading }) =>
@@ -164,4 +151,4 @@ const MyComponent = ({
   );
 };
 
-export default MyComponent;
+export default PdfDownloadButton;
