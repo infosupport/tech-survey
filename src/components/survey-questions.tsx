@@ -21,7 +21,6 @@ import { api } from "~/trpc/react";
 import { type Session } from "next-auth";
 import { idToTextMap } from "~/utils/optionMapping";
 
-import { Button } from "~/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 import { slugify } from "~/utils/slugify";
 
@@ -39,8 +38,9 @@ import {
   handleResponseSelection,
   hasAnsweredAllQuestionsForRole,
   onSubmit,
-  useGenerateFormAndSchema,
+  GenerateFormAndSchema,
 } from "~/utils/survey-utils";
+import { SpinnerButton } from "./button-spinner";
 
 export function SurveyQuestions({
   session,
@@ -63,6 +63,8 @@ export function SurveyQuestions({
     getInitialResponses(userAnswersForRole, currentRole),
   );
 
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+
   const submitResponse = api.survey.setQuestionResult.useMutation({
     onSuccess: () => {
       console.log("Response submitted successfully");
@@ -75,10 +77,15 @@ export function SurveyQuestions({
   });
 
   const unansweredQuestions = filteredQuestions.filter(
-    (question) => !responses[question.id],
+    (question) =>
+      !userAnswersForRole.some((answer) => answer.question.id === question.id),
   );
 
-  const { form } = useGenerateFormAndSchema(unansweredQuestions, answerOptions);
+  const { form } = GenerateFormAndSchema(
+    unansweredQuestions,
+    answerOptions,
+    responses,
+  );
 
   const handleSelection = async (
     questionId: string,
@@ -119,9 +126,10 @@ export function SurveyQuestions({
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit((data) => {
+        onSubmit={form.handleSubmit(async () => {
+          setIsSubmitting(true);
           onSubmit(
-            data,
+            form.getValues(),
             session,
             selectedRolesForProgressBar,
             submitResponse,
@@ -165,7 +173,7 @@ export function SurveyQuestions({
                     {answerOptions.map((option) => (
                       <TableCell
                         key={option.id}
-                        className={`${field.value === option.id || responses[question.id] === option.id ? "bg-custom-selectedLight dark:bg-custom-selected rounded-lg" : ""}`}
+                        className={`${field.value === option.id || responses[question.id] === option.id ? "rounded-lg bg-custom-selectedLight dark:bg-custom-selected" : ""}`}
                       >
                         <FormItem>
                           <FormControl>
@@ -206,9 +214,11 @@ export function SurveyQuestions({
             ))}
           </TableBody>
         </Table>
-        <Button type="submit">
-          {getNextHref(selectedRolesForProgressBar) ? "Next" : "Submit"}
-        </Button>
+        <SpinnerButton
+          type="submit"
+          state={isSubmitting}
+          name={getNextHref(selectedRolesForProgressBar) ? "Next" : "Submit"}
+        />
       </form>
     </Form>
   );

@@ -18,7 +18,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "~/components/ui/use-toast";
 import { type Session } from "next-auth";
 
-const MAX_RETRY_ATTEMPTS = 5;
+const MAX_RETRY_ATTEMPTS = 5; // Maximum number of retry attempts
+const MAX_RETRY_INTERVAL = 5000; // Maximum retry interval in milliseconds
+const MAX_TOTAL_RETRY_TIME = 30000; // Maximum total time for all retry attempts in milliseconds
 
 export function getInitialResponses(
   userAnswersForRole: UserAnswer[],
@@ -94,13 +96,18 @@ export async function handleResponseSelection({
     [questionId]: answerId,
   }));
 
-  console.log("responses", responses);
-  await saveResponsesToDatabase(responses, session, submitResponse);
+  console.log("HandleResponseSelection responses", responses);
+  await saveResponsesToDatabase(
+    { ...responses, [questionId]: answerId },
+    session,
+    submitResponse,
+  );
 }
 
-export function useGenerateFormAndSchema(
+export function GenerateFormAndSchema(
   unansweredQuestions: Question[],
   answerOptions: AnswerOption[],
+  formValues: Record<string, any>,
 ): {
   form: ReturnType<typeof useForm>;
   FormSchema: z.ZodObject<QuestionSchema>;
@@ -121,6 +128,7 @@ export function useGenerateFormAndSchema(
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
+    defaultValues: formValues,
   });
 
   return { form, FormSchema };
@@ -130,8 +138,8 @@ export async function saveResponsesToDatabase(
   responses: Record<string, string>,
   session: Session | null,
   submitResponse: any,
-): Promise<void> {
-  console.log("responses", responses);
+): Promise<boolean> {
+  console.log("SaveResponsesToDatabase responses", responses);
 
   const mappedResponses: SurveyResponse[] = Object.entries(responses).map(
     ([questionId, answerId]) => ({
@@ -141,44 +149,81 @@ export async function saveResponsesToDatabase(
     }),
   );
 
-  console.log("mappedResponses", mappedResponses);
+  const submitWithExponentialBackoff = async () => {
+    let retryAttempts = 0;
+    let retryInterval = 1000; // Initial retry interval in milliseconds
+    let totalRetryTime = 0;
 
-  let retryAttempts = 0;
+    while (
+      retryAttempts < MAX_RETRY_ATTEMPTS &&
+      totalRetryTime < MAX_TOTAL_RETRY_TIME
+    ) {
+      try {
+        // Check for network connectivity before attempting to submit data
+        if (!navigator.onLine) {
+          toast({
+            title: "Offline. Waiting for network connection...",
+            description:
+              "Attempting to submit data... - Your responses will be saved locally and submitted when you are back online.",
+            variant: "informative",
+          });
 
-  while (retryAttempts < MAX_RETRY_ATTEMPTS) {
-    try {
-      await Promise.all(
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-        mappedResponses.map((response) => submitResponse.mutateAsync(response)),
-      );
-      console.log("Responses saved successfully");
-      return;
-    } catch (error) {
-      console.error("Error saving responses:", error);
-      retryAttempts++;
+          const startTimestamp = performance.now();
+          await new Promise<void>((resolve, reject) => {
+            const checkConnectivity = () => {
+              if (navigator.onLine) {
+                resolve();
+              } else if (
+                performance.now() - startTimestamp >=
+                MAX_TOTAL_RETRY_TIME
+              ) {
+                reject(new Error("Exceeded maximum total retry time"));
+              } else {
+                setTimeout(checkConnectivity, 1000);
+              }
+            };
+            checkConnectivity();
+          }).catch((error) => {
+            throw error;
+          });
+          totalRetryTime += performance.now() - startTimestamp;
+        }
 
-      // Calculate the wait time using exponential backoff
-      const waitTime = Math.pow(2, retryAttempts) * 1000;
+        await submitData(mappedResponses, submitResponse);
+        return true;
+      } catch (error) {
+        retryAttempts++;
 
-      // Inform the user that the responses are being retried.
-      toast({
-        title: "Failed to save responses. Retrying...",
-        description: `Please do not interact with the page - Attempt ${retryAttempts} of ${MAX_RETRY_ATTEMPTS}`,
-        variant: "informative",
-      });
+        toast({
+          title: "Failed to save responses. Retrying...",
+          description: `Please do not interact with the page - Attempt ${retryAttempts} of ${MAX_RETRY_ATTEMPTS}`,
+          variant: "informative",
+        });
 
-      // Wait for the calculated duration before retrying
-      await new Promise((resolve) => setTimeout(resolve, waitTime));
+        retryInterval = Math.min(retryInterval * 2, MAX_RETRY_INTERVAL);
+        await new Promise((resolve) => setTimeout(resolve, retryInterval));
+      }
     }
-  }
 
-  // If all retry attempts fail, display an error toast
-  toast({
-    title: "Failed to save responses after multiple attempts.",
-    description:
-      "Please try again later. Your responses have been saved locally.",
-    variant: "destructive",
-  });
+    toast({
+      title: "Failed to save responses after multiple attempts.",
+      description:
+        "Please try again later. Your responses have been saved locally.",
+      variant: "destructive",
+    });
+    return false;
+  };
+
+  return submitWithExponentialBackoff();
+}
+
+async function submitData(
+  mappedResponses: SurveyResponse[],
+  submitResponse: any,
+) {
+  // Batch all responses and wait for all mutations to complete
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+  await Promise.all([submitResponse.mutateAsync(mappedResponses)]);
 }
 
 export async function onSubmit(
@@ -187,8 +232,20 @@ export async function onSubmit(
   selectedRolesForProgressBar: ProgressBar[],
   submitResponse: any,
 ): Promise<void> {
+  let responsesSaved = false;
+
   try {
-    await saveResponsesToDatabase(responses, session, submitResponse);
+    responsesSaved = await saveResponsesToDatabase(
+      responses,
+      session,
+      submitResponse,
+    );
+  } catch (error) {
+    console.error("Error in onSubmit:", error);
+  }
+
+  if (responsesSaved) {
+    console.log("got responsesSaved", responsesSaved);
     const nextHref = getNextHref(selectedRolesForProgressBar);
     if (nextHref) {
       window.location.assign(nextHref);
@@ -202,7 +259,13 @@ export async function onSubmit(
         window.location.assign("/thank-you");
       }, 2000);
     }
-  } catch (error) {
-    console.error("Error in onSubmit:", error);
+  } else {
+    // Handle case where responses couldn't be saved after multiple attempts
+    toast({
+      title: "Failed to save responses after multiple attempts.",
+      description:
+        "Please try again later. Your responses have been saved locally.",
+      variant: "destructive",
+    });
   }
 }

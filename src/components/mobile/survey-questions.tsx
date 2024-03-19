@@ -28,13 +28,14 @@ import { slugify } from "~/utils/slugify";
 
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import {
-  useGenerateFormAndSchema,
+  GenerateFormAndSchema,
   getInitialResponses,
   getNextHref,
   handleResponseSelection,
   hasAnsweredAllQuestionsForRole,
   onSubmit,
 } from "~/utils/survey-utils";
+import { SpinnerButton } from "../button-spinner";
 
 export function MobileSurveyQuestionnaire({
   session,
@@ -57,11 +58,7 @@ export function MobileSurveyQuestionnaire({
     getInitialResponses(userAnswersForRole, currentRole),
   );
 
-  const unansweredQuestions = filteredQuestions.filter(
-    (question) => !responses[question.id],
-  );
-
-  const { form } = useGenerateFormAndSchema(unansweredQuestions, answerOptions);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   const submitResponse = api.survey.setQuestionResult.useMutation({
     onSuccess: () => {
@@ -74,6 +71,16 @@ export function MobileSurveyQuestionnaire({
     },
   });
 
+  const unansweredQuestions = filteredQuestions.filter(
+    (question) =>
+      !userAnswersForRole.some((answer) => answer.question.id === question.id),
+  );
+
+  const { form } = GenerateFormAndSchema(
+    unansweredQuestions,
+    answerOptions,
+    responses,
+  );
   const handleSelection = async (
     questionId: string,
     answerId: string,
@@ -114,9 +121,10 @@ export function MobileSurveyQuestionnaire({
     <div>
       <Form {...form}>
         <form
-          onSubmit={form.handleSubmit((data) => {
+          onSubmit={form.handleSubmit(async () => {
+            setIsSubmitting(true);
             onSubmit(
-              data,
+              form.getValues(),
               session,
               selectedRolesForProgressBar,
               submitResponse,
@@ -187,9 +195,11 @@ export function MobileSurveyQuestionnaire({
               />
             </div>
           ))}
-          <Button type="submit">
-            {getNextHref(selectedRolesForProgressBar) ? "Next" : "Submit"}
-          </Button>
+          <SpinnerButton
+            type="submit"
+            state={isSubmitting}
+            name={getNextHref(selectedRolesForProgressBar) ? "Next" : "Submit"}
+          />
         </form>
       </Form>
     </div>
