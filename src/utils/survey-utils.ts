@@ -18,6 +18,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "~/components/ui/use-toast";
 import { type Session } from "next-auth";
 
+const MAX_RETRY_ATTEMPTS = 5;
+
 export function getInitialResponses(
   userAnswersForRole: UserAnswer[],
   currentRole: string,
@@ -141,22 +143,42 @@ export async function saveResponsesToDatabase(
 
   console.log("mappedResponses", mappedResponses);
 
-  try {
-    // Submitting responses for each question
-    await Promise.all(
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-      mappedResponses.map((response) => submitResponse.mutateAsync(response)),
-    );
-    console.log("Responses saved successfully");
-  } catch (error) {
-    console.error("Error saving responses:", error);
-    // You might want to handle the error here, e.g., display a toast
-    toast({
-      title: "Error!",
-      description: "Failed to save responses.",
-      variant: "destructive",
-    });
+  let retryAttempts = 0;
+
+  while (retryAttempts < MAX_RETRY_ATTEMPTS) {
+    try {
+      await Promise.all(
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+        mappedResponses.map((response) => submitResponse.mutateAsync(response)),
+      );
+      console.log("Responses saved successfully");
+      return;
+    } catch (error) {
+      console.error("Error saving responses:", error);
+      retryAttempts++;
+
+      // Calculate the wait time using exponential backoff
+      const waitTime = Math.pow(2, retryAttempts) * 1000;
+
+      // Inform the user that the responses are being retried.
+      toast({
+        title: "Failed to save responses. Retrying...",
+        description: `Please do not interact with the page - Attempt ${retryAttempts} of ${MAX_RETRY_ATTEMPTS}`,
+        variant: "informative",
+      });
+
+      // Wait for the calculated duration before retrying
+      await new Promise((resolve) => setTimeout(resolve, waitTime));
+    }
   }
+
+  // If all retry attempts fail, display an error toast
+  toast({
+    title: "Failed to save responses after multiple attempts.",
+    description:
+      "Please try again later. Your responses have been saved locally.",
+    variant: "destructive",
+  });
 }
 
 export async function onSubmit(
