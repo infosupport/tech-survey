@@ -4,7 +4,7 @@
 
 import React from "react";
 import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
-import { idToAnswerMap } from "~/utils/optionMapping";
+import { answerIdOrder, idToAnswerMap } from "~/utils/optionMapping";
 import { type PdfTransformedData } from "~/models/types";
 
 import dynamic from "next/dynamic";
@@ -28,6 +28,41 @@ const PDFDocument = ({
 }) => {
   const rolesIncluded: Record<string, boolean> = {};
 
+  // First, sort UserAnswersForRole based on alphabetical order of question text.
+  userAnswersForRole.sort((a, b) => {
+    const textA = a.question.questionText.toUpperCase();
+    const textB = b.question.questionText.toUpperCase();
+    return textA < textB ? -1 : textA > textB ? 1 : 0;
+  });
+
+  // Flatten the answers array from all questions
+  const allAnswers = userAnswersForRole.reduce(
+    (acc: { questionId: string; answerId: string }[], { answers }) => {
+      return acc.concat(answers);
+    },
+    [],
+  );
+
+  // Sort all answers based on the custom order
+  allAnswers.sort((a, b) => {
+    const positionA = answerIdOrder[a.answerId] ?? 0;
+    const positionB = answerIdOrder[b.answerId] ?? 0;
+    return positionA - positionB;
+  });
+
+  // Create a map to store the position of each question ID in allAnswers
+  const questionIdPositionMap: Record<string, number> = {};
+  allAnswers.forEach((answer, index) => {
+    questionIdPositionMap[answer.questionId] = index;
+  });
+
+  // Rearrange the order of UserAnswersForRole based on the position of the question IDs in allAnswers
+  userAnswersForRole.sort((a, b) => {
+    const positionA = questionIdPositionMap[a.question.id] ?? 0;
+    const positionB = questionIdPositionMap[b.question.id] ?? 0;
+    return positionA - positionB;
+  });
+
   return (
     <Document>
       {/* Group userAnswersForRole by role */}
@@ -50,7 +85,7 @@ const PDFDocument = ({
                 {/* Table Header */}
                 <View style={styles.tableRow}>
                   <Text style={styles.columnHeader}>Question</Text>
-                  <Text style={styles.columnHeader}>Answer</Text>
+                  <Text style={styles.columnHeaderAnswer}>Answer</Text>
                 </View>
                 {/* Iterate over questions and answers */}
                 {userAnswersForRole
@@ -65,7 +100,7 @@ const PDFDocument = ({
                           {question?.questionText || "Question not found"}
                         </Text>
                         {/* Render the answer */}
-                        <Text style={styles.cell}>
+                        <Text style={styles.answerCell}>
                           {answers
                             .map(({ answerId }) => idToAnswerMap[answerId])
                             .join(", ")}
@@ -109,10 +144,17 @@ const styles = StyleSheet.create({
   },
   columnHeader: {
     fontWeight: "bold",
-    flexBasis: "50%",
+    flexBasis: "70%",
+  },
+  columnHeaderAnswer: {
+    fontWeight: "bold",
+    flexBasis: "30%",
   },
   cell: {
-    flexBasis: "50%",
+    flexBasis: "70%",
+  },
+  answerCell: {
+    flexBasis: "30%",
   },
 });
 
@@ -137,7 +179,7 @@ const PdfDownloadButton = ({
             <PDFDownloadLink
               className="download-link"
               document={<PDFDocument userAnswersForRole={userAnswersForRole} />}
-              fileName="question_results.pdf"
+              fileName="info_support_tech_survey_results.pdf"
             >
               {({ loading }) =>
                 loading ? "Loading document..." : "Download results as PDF"
