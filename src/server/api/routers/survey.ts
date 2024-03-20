@@ -4,13 +4,11 @@ import { type Role } from "~/models/types";
 
 export const surveyRouter = createTRPCRouter({
   getQuestions: publicProcedure.query(async ({ ctx }) => {
-    // get all questions and also the roles associated with each question
     const questions = await ctx.db.question.findMany({
       include: {
         roles: true,
       },
     });
-    // await new Promise((resolve) => setTimeout(resolve, 10000));
     return questions;
   }),
 
@@ -20,10 +18,62 @@ export const surveyRouter = createTRPCRouter({
   }),
 
   getRoles: publicProcedure.query(async ({ ctx }) => {
-    // await new Promise((resolve) => setTimeout(resolve, 3000));
     const roles = await ctx.db.role.findMany();
     return roles;
   }),
+
+  checkUserHasAnsweredAllQuestionsForAllRoles: protectedProcedure
+    .input(z.object({ userId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const user = await ctx.db.user.findUnique({
+        where: {
+          id: input.userId,
+        },
+        include: {
+          roles: true,
+        },
+      });
+
+      if (!user) {
+        throw new Error("User not found");
+      }
+
+      const questions = await ctx.db.question.findMany({
+        include: {
+          roles: true,
+        },
+      });
+
+      const userAnswers = await ctx.db.questionResult.findMany({
+        where: {
+          userId: input.userId,
+        },
+        include: {
+          question: {
+            include: {
+              roles: true,
+            },
+          },
+        },
+      });
+
+      const userHasAnsweredAllQuestionsForAllRoles = user.roles.every(
+        (role) => {
+          const roleQuestions = questions.filter((question) =>
+            question.roles.some((questionRole) => questionRole.id === role.id),
+          );
+          const userAnswersForRole = userAnswers.filter((answer) =>
+            answer.question.roles.some(
+              (questionRole) => questionRole.id === role.id,
+            ),
+          );
+
+          return roleQuestions.length === userAnswersForRole.length;
+        },
+      );
+
+      return userHasAnsweredAllQuestionsForAllRoles;
+    }),
 
   getUserSelectedRoles: protectedProcedure
     .input(z.object({ userId: z.string() }))
@@ -71,7 +121,7 @@ export const surveyRouter = createTRPCRouter({
           id: input.userId,
         },
         include: {
-          roles: true, // Include the roles associated with the user
+          roles: true,
         },
       });
 

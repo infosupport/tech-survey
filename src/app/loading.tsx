@@ -15,7 +15,6 @@ export default function SkeletonDemo() {
     { id: 1, option: "Disagree" },
     { id: 2, option: "Neutral" },
     { id: 3, option: "Agree" },
-    { id: 4, option: "Strongly Agree" },
   ];
 
   // create 20 dummy questions

@@ -18,9 +18,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "~/components/ui/use-toast";
 import { type Session } from "next-auth";
 
-const MAX_RETRY_ATTEMPTS = 5; // Maximum number of retry attempts
-const MAX_RETRY_INTERVAL = 5000; // Maximum retry interval in milliseconds
-const MAX_TOTAL_RETRY_TIME = 30000; // Maximum total time for all retry attempts in milliseconds
+const MAX_RETRY_ATTEMPTS = 5;
+const MAX_RETRY_INTERVAL = 5000;
+const MAX_TOTAL_RETRY_TIME = 30000;
 
 export function getInitialResponses(
   userAnswersForRole: UserAnswer[],

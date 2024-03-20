@@ -5,6 +5,7 @@ import {
   type AnswerOption,
   type Question,
   type QuestionResult,
+  type localStorageResponse,
 } from "~/models/types";
 
 import {
@@ -15,7 +16,7 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { api } from "~/trpc/react";
 import { type Session } from "next-auth";
@@ -42,7 +43,28 @@ import {
 } from "~/utils/survey-utils";
 import { SpinnerButton } from "./button-spinner";
 
-export function SurveyQuestions({
+// Function to retrieve data from local storage
+const loadResponsesFromLocalStorage = (key: string) => {
+  if (typeof window !== "undefined") {
+    const savedResponses = localStorage.getItem(key);
+    return savedResponses
+      ? (JSON.parse(savedResponses) as localStorageResponse)
+      : {};
+  }
+  return {};
+};
+
+// Function to save data to local storage
+const saveResponsesToLocalStorage = (
+  key: string,
+  responses: Record<string, string>,
+) => {
+  if (typeof window !== "undefined") {
+    localStorage.setItem(key, JSON.stringify(responses));
+  }
+};
+
+export const SurveyQuestions = ({
   session,
   questions,
   filteredQuestions,
@@ -58,12 +80,35 @@ export function SurveyQuestions({
   userSelectedRoles: Role[];
   userAnswersForRole: QuestionResult[];
   currentRole: string;
-}) {
-  const [responses, setResponses] = useState(
-    getInitialResponses(userAnswersForRole, currentRole),
-  );
+}) => {
+  const storageKey = "surveyResponses";
+
+  // Initialize state from local storage or default values
+  const [responses, setResponses] = useState(() => {
+    const fromLocalStorage = loadResponsesFromLocalStorage(storageKey);
+    const fromInitial = getInitialResponses(userAnswersForRole, currentRole);
+
+    // Check if both responses exist
+    if (fromLocalStorage && fromInitial) {
+      // Select the one with greater length
+      return (fromLocalStorage?.length ?? 0) > (fromInitial?.length ?? 0)
+        ? fromLocalStorage
+        : fromInitial;
+    } else {
+      // If one of them is null or undefined, return the one that exists
+      return fromLocalStorage ?? fromInitial;
+    }
+  });
 
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+
+  // Save responses to local storage whenever it updates
+  useEffect(() => {
+    saveResponsesToLocalStorage(
+      storageKey,
+      responses as Record<string, string>,
+    );
+  }, [responses]);
 
   const submitResponse = api.survey.setQuestionResult.useMutation({
     onSuccess: () => {
@@ -123,28 +168,30 @@ export function SurveyQuestions({
       ),
     }));
 
+  const handleSubmit = form.handleSubmit(async () => {
+    setIsSubmitting(true);
+    onSubmit(
+      form.getValues(),
+      session,
+      selectedRolesForProgressBar,
+      submitResponse,
+    ).catch((error) => {
+      console.error("Error in form submission:", error);
+    });
+  });
+
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(async () => {
-          setIsSubmitting(true);
-          onSubmit(
-            form.getValues(),
-            session,
-            selectedRolesForProgressBar,
-            submitResponse,
-          ).catch((error) => {
-            console.error("Error in form submission:", error);
-          });
-        })}
+        onSubmit={handleSubmit}
         className="grid gap-4 md:grid-cols-1 lg:grid-cols-1"
       >
         <Table divClassname="">
           <TableHeader className="sticky top-0 z-10 h-10 w-full bg-slate-100 dark:bg-slate-900">
             <TableRow>
-              <TableHead className="w-[200px]">Question</TableHead>
+              <TableHead className="w-[400px]">Question</TableHead>
               {answerOptions.map((option) => (
-                <TableHead key={option.id}>
+                <TableHead className="text-center" key={option.id}>
                   {idToTextMap[option.option]}
                 </TableHead>
               ))}
@@ -173,7 +220,7 @@ export function SurveyQuestions({
                     {answerOptions.map((option) => (
                       <TableCell
                         key={option.id}
-                        className={`${field.value === option.id || responses[question.id] === option.id ? "rounded-lg bg-custom-selectedLight dark:bg-custom-selected" : ""}`}
+                        className={`${field.value === option.id || responses[question.id] === option.id ? "rounded-lg bg-custom-selectedLight dark:bg-custom-selected" : ""} w-[300px]`}
                       >
                         <FormItem>
                           <FormControl>
@@ -222,4 +269,4 @@ export function SurveyQuestions({
       </form>
     </Form>
   );
-}
+};
