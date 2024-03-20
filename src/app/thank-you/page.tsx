@@ -1,5 +1,5 @@
 import { db } from "~/server/db";
-import MyComponent from "../../components/download-pdf";
+import PdfDownloadButton from "../../components/download-pdf";
 import React, { Suspense } from "react";
 import { getServerAuthSession } from "~/server/auth";
 import { type QuestionResult, type Question } from "~/models/types";
@@ -65,7 +65,10 @@ const ThankYou = async () => {
       </p>
       <div className="w-full max-w-3xl">
         <Suspense fallback={<div>Loading...</div>}>
-          <MyComponent userAnswersForRole={transformedData} />
+          <PdfDownloadButton
+            userAnswersForRole={transformedData}
+            session={session!}
+          />
         </Suspense>
       </div>
     </div>

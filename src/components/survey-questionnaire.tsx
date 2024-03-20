@@ -13,7 +13,7 @@ import { slugToId, slugify } from "~/utils/slugify";
 
 import ProgressionBar from "./progression-bar";
 import useScreenSize from "./useScreenSize";
-import { MobileSurveyQuestionnaire } from "./mobile/survey-questions";
+import { MobileSurveyQuestions } from "./mobile/survey-questions";
 import { SurveyQuestions } from "./survey-questions";
 import { MobileProgressionBar } from "./mobile/progression-bar";
 
@@ -103,7 +103,7 @@ export function SurveyQuestionnaire({
           <div className="mb-4">
             <MobileProgressionBar roles={selectedRolesForProgressBar} />
           </div>
-          <MobileSurveyQuestionnaire
+          <MobileSurveyQuestions
             session={session}
             questions={questions}
             filteredQuestions={filteredQuestions}
