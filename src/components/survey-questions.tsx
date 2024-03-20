@@ -1,5 +1,14 @@
 "use client";
 
+import { Button } from "~/components/ui/button";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "~/components/ui/hover-card";
+
+import { InfoCircledIcon } from "@radix-ui/react-icons";
+
 import {
   type Role,
   type AnswerOption,
@@ -19,7 +28,7 @@ import { useEffect, useState } from "react";
 
 import { api } from "~/trpc/react";
 import { type Session } from "next-auth";
-import { idToTextMap } from "~/utils/optionMapping";
+import { idToMoreInfo, idToTextMap } from "~/utils/optionMapping";
 
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 import { slugify } from "~/utils/slugify";
@@ -188,7 +197,23 @@ export const SurveyQuestions = ({
               <TableHead className="w-[400px]">Question</TableHead>
               {answerOptions.map((option) => (
                 <TableHead className="text-center" key={option.id}>
-                  {idToTextMap[option.option]}
+                  <HoverCard>
+                    <HoverCardTrigger asChild>
+                      <Button variant="link" className="no-underline">
+                        {idToTextMap[option.option]}
+                        <InfoCircledIcon className="ml-2 h-4 w-4" />
+                      </Button>
+                    </HoverCardTrigger>
+                    <HoverCardContent className="w-80">
+                      <div className="flex justify-between space-x-4">
+                        <div className="space-y-1">
+                          <p className="text-sm font-normal">
+                            {idToMoreInfo[option.option]}
+                          </p>
+                        </div>
+                      </div>
+                    </HoverCardContent>
+                  </HoverCard>
                 </TableHead>
               ))}
             </TableRow>
