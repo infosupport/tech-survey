@@ -5,7 +5,6 @@ import {
   type AnswerOption,
   type Question,
   type QuestionResult,
-  type localStorageResponse,
 } from "~/models/types";
 
 import {
@@ -48,7 +47,7 @@ const loadResponsesFromLocalStorage = (key: string) => {
   if (typeof window !== "undefined") {
     const savedResponses = localStorage.getItem(key);
     return savedResponses
-      ? (JSON.parse(savedResponses) as localStorageResponse)
+      ? (JSON.parse(savedResponses) as Record<string, string>)
       : {};
   }
   return {};
@@ -96,7 +95,7 @@ export const SurveyQuestions = ({
         : fromInitial;
     } else {
       // If one of them is null or undefined, return the one that exists
-      return fromLocalStorage ?? fromInitial;
+      return fromInitial || fromLocalStorage;
     }
   });
 
@@ -104,10 +103,7 @@ export const SurveyQuestions = ({
 
   // Save responses to local storage whenever it updates
   useEffect(() => {
-    saveResponsesToLocalStorage(
-      storageKey,
-      responses as Record<string, string>,
-    );
+    saveResponsesToLocalStorage(storageKey, responses);
   }, [responses]);
 
   const submitResponse = api.survey.setQuestionResult.useMutation({

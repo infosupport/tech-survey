@@ -92,8 +92,3 @@ export type SurveyResponse = {
   questionId: string;
   answerId: string;
 };
-
-export type localStorageResponse = Record<
-  string,
-  string | number | boolean | null
->;
