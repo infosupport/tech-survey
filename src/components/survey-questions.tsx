@@ -199,10 +199,12 @@ export const SurveyQuestions = ({
                 <TableHead className="text-center" key={option.id}>
                   <HoverCard>
                     <HoverCardTrigger asChild>
-                      <Button variant="link" className="no-underline">
-                        {idToTextMap[option.option]}
+                      <div className="flex items-center">
+                        <span style={{ flex: 1, textAlign: "center" }}>
+                          {idToTextMap[option.option]}
+                        </span>
                         <InfoCircledIcon className="ml-2 h-4 w-4" />
-                      </Button>
+                      </div>
                     </HoverCardTrigger>
                     <HoverCardContent className="w-80">
                       <div className="flex justify-between space-x-4">
@@ -218,6 +220,7 @@ export const SurveyQuestions = ({
               ))}
             </TableRow>
           </TableHeader>
+
           <TableBody>
             {filteredQuestions?.map((question) => (
               <FormField
