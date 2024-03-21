@@ -12,8 +12,7 @@
     "dev": "next dev",
     "lint": "next lint",
     "start": "node ./node_modules/next/dist/bin/next start",
-    "typecheck": "tsc --noEmit",
-    "deploy:prepare": "az storage file download --share-name import --path survey.csv --account-name $AZURE_STORAGE_ACCOUNT --account-key $AZURE_STORAGE_KEY --dest import/survey.csv"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^1.4.0",
