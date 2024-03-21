@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - chore/seed
   workflow_dispatch:
 
 jobs:
@@ -26,6 +27,11 @@ jobs:
           npm run build
           npm ci --prod
           rm .env
+      - name: '🙌 Prepare'
+        run: npm run deploy:prepare
+        env:
+          AZURE_STORAGE_ACCOUNT: ${{ secrets.AZURE_STORAGE_ACCOUNT }}
+          AZURE_STORAGE_KEY: ${{ secrets.AZURE_STORAGE_KEY }}
       - name: '📦 Package artifact'
         # `./*`: the current directory
         # `.next`: explicitly also zip this hidden directory. 
