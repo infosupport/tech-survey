@@ -21,13 +21,12 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { api } from "~/trpc/react";
 import { type Session } from "next-auth";
 import { idToMoreInfo, idToTextMap } from "~/utils/optionMapping";
 
-import { Button } from "~/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 import { slugify } from "~/utils/slugify";
 
@@ -45,9 +44,12 @@ import {
   handleResponseSelection,
   hasAnsweredAllQuestionsForRole,
   onSubmit,
-  useGenerateFormAndSchema,
+  GenerateFormAndSchema,
+  SaveResponsesToDatabase,
 } from "~/utils/survey-utils";
 import { InfoCircledIcon } from "@radix-ui/react-icons";
+import { SpinnerButton } from "./ui/button-spinner";
+import { toast } from "./ui/use-toast";
 
 export function SurveyQuestions({
   session,
@@ -70,6 +72,8 @@ export function SurveyQuestions({
     getInitialResponses(userAnswersForRole, currentRole),
   );
 
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+
   const submitResponse = api.survey.setQuestionResult.useMutation({
     onSuccess: () => {
       console.log("Response submitted successfully");
@@ -81,11 +85,93 @@ export function SurveyQuestions({
     },
   });
 
+  useEffect(() => {
+    let PreviouslyOffline = false;
+    const handleOnline = async () => {
+      if (PreviouslyOffline) {
+        try {
+          await SaveResponsesToDatabase(responses, session, submitResponse);
+          toast({
+            title: "Back online!",
+            description:
+              "Your (intermediate) responses have been submitted successfully.",
+          });
+        } catch (error) {
+          toast({
+            title: "Failed to resend responses",
+            description:
+              "An error occurred while attempting to resend responses.",
+            variant: "destructive",
+          });
+        }
+        PreviouslyOffline = false;
+      }
+    };
+
+    const handleOffline = () => {
+      PreviouslyOffline = true;
+      console.log("Offline - Failed to save responses. Retrying...");
+      // Display error toast if offline
+      toast({
+        title: "Failed to save responses. Retrying...",
+        description:
+          "Data submission in progress... Your responses will be automatically submitted once you're back online. Feel free to continue filling out the survey.",
+        variant: "informative",
+      });
+    };
+    if (!navigator.onLine) {
+      // Handle offline when component mounts
+      handleOffline();
+    } else {
+      handleOnline().catch(() => {
+        toast({
+          title: "Failed to resend responses",
+          description:
+            "An error occurred while attempting to resend responses.",
+          variant: "destructive",
+        });
+      });
+    }
+
+    // Add event listeners for online and offline events
+    window.addEventListener("online", () => {
+      handleOnline().catch(() => {
+        toast({
+          title: "Failed to resend responses",
+          description:
+            "An error occurred while attempting to resend responses.",
+          variant: "destructive",
+        });
+      });
+    });
+    window.addEventListener("offline", handleOffline);
+
+    return () => {
+      // Remove event listeners when component unmounts
+      window.addEventListener("online", () => {
+        handleOnline().catch(() => {
+          toast({
+            title: "Failed to resend responses",
+            description:
+              "An error occurred while attempting to resend responses.",
+            variant: "destructive",
+          });
+        });
+      });
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, [responses, session, submitResponse]);
+
   const unansweredQuestions = filteredQuestions.filter(
-    (question) => !responses[question.id],
+    (question) =>
+      !userAnswersForRole.some((answer) => answer.question.id === question.id),
   );
 
-  const { form } = useGenerateFormAndSchema(unansweredQuestions, answerOptions);
+  const { form } = GenerateFormAndSchema(
+    unansweredQuestions,
+    answerOptions,
+    responses,
+  );
 
   const handleSelection = async (
     questionId: string,
@@ -126,9 +212,10 @@ export function SurveyQuestions({
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit((data) => {
+        onSubmit={form.handleSubmit(async () => {
+          setIsSubmitting(true);
           onSubmit(
-            data,
+            form.getValues(),
             session,
             selectedRolesForProgressBar,
             submitResponse,
@@ -231,9 +318,11 @@ export function SurveyQuestions({
             ))}
           </TableBody>
         </Table>
-        <Button type="submit">
-          {getNextHref(selectedRolesForProgressBar) ? "Next" : "Submit"}
-        </Button>
+        <SpinnerButton
+          type="submit"
+          state={isSubmitting}
+          name={getNextHref(selectedRolesForProgressBar) ? "Next" : "Submit"}
+        />
       </form>
     </Form>
   );

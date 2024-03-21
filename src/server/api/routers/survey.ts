@@ -155,78 +155,93 @@ export const surveyRouter = createTRPCRouter({
 
   setQuestionResult: protectedProcedure
     .input(
-      z.object({
-        userId: z.string(),
-        questionId: z.string(),
-        answerId: z.string(),
-      }),
+      z.array(
+        z.object({
+          userId: z.string(),
+          questionId: z.string(),
+          answerId: z.string(),
+        }),
+      ),
     )
-    // create new or update an existing answer
     .mutation(async ({ ctx, input }) => {
-      const { userId, questionId, answerId } = input;
+      try {
+        await Promise.all(
+          input.map(async (response) => {
+            const { userId, questionId, answerId } = response;
 
-      // find the question
-      const question = await ctx.db.question.findUnique({
-        where: {
-          id: questionId,
-        },
-      });
+            // find the question
+            const question = await ctx.db.question.findUnique({
+              where: {
+                id: questionId,
+              },
+            });
 
-      if (!question) {
-        throw new Error("Question not found");
+            if (!question) {
+              throw new Error(`Question with ID ${questionId} not found`);
+            }
+
+            // find the answer
+            const answerOption = await ctx.db.answerOption.findUnique({
+              where: {
+                id: answerId,
+              },
+            });
+
+            if (!answerOption) {
+              throw new Error(`Answer with ID ${answerId} not found`);
+            }
+
+            // find the user
+            const user = await ctx.db.user.findUnique({
+              where: {
+                id: userId,
+              },
+            });
+
+            if (!user) {
+              throw new Error(`User with ID ${userId} not found`);
+            }
+
+            // find the existing answer
+            const existingAnswer = await ctx.db.questionResult.findFirst({
+              where: {
+                userId,
+                questionId,
+              },
+            });
+
+            if (existingAnswer) {
+              // update the existing answer
+              await ctx.db.questionResult.update({
+                where: {
+                  id: existingAnswer.id,
+                },
+                data: {
+                  answerId,
+                },
+              });
+              console.log(
+                `Updated answer for user ${userId} and question ${questionId}`,
+              );
+            } else {
+              // create a new answer
+              await ctx.db.questionResult.create({
+                data: {
+                  userId,
+                  questionId,
+                  answerId,
+                },
+              });
+              console.log(
+                `Created answer for user ${userId} and question ${questionId}`,
+              );
+            }
+          }),
+        );
+        console.log("All answers processed successfully");
+      } catch (error) {
+        console.error("Error processing answers:", error);
+        throw new Error("Failed to process all answers");
       }
-
-      // find the answer
-      const answerOption = await ctx.db.answerOption.findUnique({
-        where: {
-          id: answerId,
-        },
-      });
-
-      if (!answerOption) {
-        throw new Error("Answer not found");
-      }
-
-      // find the user
-      const user = await ctx.db.user.findUnique({
-        where: {
-          id: userId,
-        },
-      });
-
-      if (!user) {
-        throw new Error("User not found");
-      }
-
-      // find the existing answer
-      const existingAnswer = await ctx.db.questionResult.findFirst({
-        where: {
-          userId,
-          questionId,
-        },
-      });
-
-      if (existingAnswer) {
-        // update the existing answer
-        await ctx.db.questionResult.update({
-          where: {
-            id: existingAnswer.id,
-          },
-          data: {
-            answerId,
-          },
-        });
-        console.log("Updated answer");
-      } else {
-        // create a new answer
-        await ctx.db.questionResult.create({
-          data: {
-            userId,
-            questionId,
-            answerId,
-          },
-        });
-      }
-      console.log("Created answer");
     }),
 });
