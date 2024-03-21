@@ -11,6 +11,7 @@ import dynamic from "next/dynamic";
 import { Button } from "~/components/ui/button";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight } from "./svg";
+import { type Session } from "next-auth";
 
 const PDFDownloadLink = dynamic(
   // eslint-disable-next-line @typescript-eslint/no-unsafe-return
@@ -23,8 +24,10 @@ const PDFDownloadLink = dynamic(
 
 const PDFDocument = ({
   userAnswersForRole,
+  session,
 }: {
   userAnswersForRole: PdfTransformedData[];
+  session: Session;
 }) => {
   const rolesIncluded: Record<string, boolean> = {};
 
@@ -65,6 +68,21 @@ const PDFDocument = ({
 
   return (
     <Document>
+      {/* Display participant name on the first page only */}
+      <Page key="firstPage" style={styles.page}>
+        <View style={styles.sectionFirstPage}>
+          <View style={styles.centered}>
+            <Text style={styles.title}>
+              <Text style={styles.infoSupport}>Info Support</Text> Tech Survey
+              2024
+            </Text>
+            <Text style={styles.subtitle}>
+              Results for: {session.user?.name ?? "Name not found"}
+            </Text>
+          </View>
+        </View>
+      </Page>
+
       {/* Group userAnswersForRole by role */}
       {userAnswersForRole.map(({ question }) => {
         const roles = question.roles ?? [];
@@ -156,12 +174,42 @@ const styles = StyleSheet.create({
   answerCell: {
     flexBasis: "30%",
   },
+  sectionFirstPage: {
+    // Styles for the section/container
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  centered: {
+    // Styles for centering content vertically
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  title: {
+    // Styles for the title
+    fontSize: 32, // Adjust size as needed
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: 10, // Adjust spacing between title and subtitle
+  },
+  subtitle: {
+    // Styles for the subtitle
+    fontSize: 20, // Adjust size as needed
+    textAlign: "center",
+  },
+  infoSupport: {
+    // Styles for the "Info Support" text
+    color: "rgb(0, 163, 224)",
+  },
 });
 
 const PdfDownloadButton = ({
   userAnswersForRole,
+  session,
 }: {
   userAnswersForRole: PdfTransformedData[];
+  session: Session;
 }) => {
   return (
     <div>
@@ -178,7 +226,12 @@ const PdfDownloadButton = ({
             {/* Hidden PDFDownloadLink */}
             <PDFDownloadLink
               className="download-link"
-              document={<PDFDocument userAnswersForRole={userAnswersForRole} />}
+              document={
+                <PDFDocument
+                  userAnswersForRole={userAnswersForRole}
+                  session={session}
+                />
+              }
               fileName="info_support_tech_survey_results.pdf"
             >
               {({ loading }) =>
