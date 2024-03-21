@@ -1,5 +1,5 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
   binaryTargets = ["native", "debian-openssl-3.0.x"]
 }
 
@@ -17,9 +17,9 @@ model Survey {
 model Role {
   id        String     @id @default(cuid())
   role      String
+  default   Boolean    @default(false)
   questions Question[] @relation("QuestionToRole")
   users     User[]     @relation("UserRole")
-  default   Boolean    @default(false)
 }
 
 model Question {
@@ -53,10 +53,10 @@ model User {
   email           String?          @unique
   emailVerified   DateTime?
   image           String?
-  roles           Role[]           @relation("UserRole")
   accounts        Account[]
   questionResults QuestionResult[]
   sessions        Session[]
+  roles           Role[]           @relation("UserRole")
 }
 
 model Account {
