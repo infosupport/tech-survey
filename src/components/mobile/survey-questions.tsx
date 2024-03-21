@@ -1,5 +1,14 @@
 "use client";
 
+import { Button } from "~/components/ui/button";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "~/components/ui/hover-card";
+
+import { InfoCircledIcon } from "@radix-ui/react-icons";
+
 import {
   type Role,
   type AnswerOption,
@@ -19,9 +28,8 @@ import { useState } from "react";
 
 import { api } from "~/trpc/react";
 import { type Session } from "next-auth";
-import { idToTextMap } from "~/utils/optionMapping";
+import { idToMoreInfo, idToTextMap } from "~/utils/optionMapping";
 
-import { Button } from "~/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 
 import { slugify } from "~/utils/slugify";
@@ -173,9 +181,28 @@ export function MobileSurveyQuestionnaire({
                                     }
                                   />
                                 </FormControl>
-                                <span className="text-gray-900 dark:text-white">
-                                  {idToTextMap[option.option]}
-                                </span>
+                                <div className="flex items-center">
+                                  <span className="text-gray-900 dark:text-white">
+                                    {idToTextMap[option.option]}
+                                  </span>
+
+                                  <HoverCard>
+                                    <HoverCardTrigger asChild>
+                                      <div className="ml-2">
+                                        <InfoCircledIcon />
+                                      </div>
+                                    </HoverCardTrigger>
+                                    <HoverCardContent className="w-80">
+                                      <div className="flex justify-between space-x-4">
+                                        <div className="space-y-1">
+                                          <p className="text-sm font-normal">
+                                            {idToMoreInfo[option.option]}
+                                          </p>
+                                        </div>
+                                      </div>
+                                    </HoverCardContent>
+                                  </HoverCard>
+                                </div>
                               </label>
                             </RadioGroup>
                           </FormControl>
