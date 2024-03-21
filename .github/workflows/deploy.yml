@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - chore/seed
   workflow_dispatch:
 
 jobs:
@@ -55,7 +54,7 @@ jobs:
       - name: '💤 Unzip artifact'
         run: unzip release.zip
       - name: '🙌 Prepare'
-        run: az storage file download --share-name import --path survey.csv --account-name $AZURE_STORAGE_ACCOUNT --account-key $AZURE_STORAGE_KEY --dest .next/import/survey.csv
+        run: az storage file download --share-name import --path survey.csv --account-name $AZURE_STORAGE_ACCOUNT --account-key $AZURE_STORAGE_KEY --dest import/survey.csv
         env:
           AZURE_STORAGE_ACCOUNT: ${{ secrets.AZURE_STORAGE_ACCOUNT }}
           AZURE_STORAGE_KEY: ${{ secrets.AZURE_STORAGE_KEY }}
