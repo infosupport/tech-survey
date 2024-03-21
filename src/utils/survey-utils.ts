@@ -134,6 +134,7 @@ export function GenerateFormAndSchema(
   return { form, FormSchema };
 }
 
+// send responses to database when back online
 export async function saveResponsesToDatabase(
   responses: Record<string, string>,
   session: Session | null,
