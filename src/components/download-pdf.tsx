@@ -4,13 +4,14 @@
 
 import React from "react";
 import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
-import { idToAnswerMap } from "~/utils/optionMapping";
+import { answerIdOrder, idToAnswerMap } from "~/utils/optionMapping";
 import { type PdfTransformedData } from "~/models/types";
 
 import dynamic from "next/dynamic";
 import { Button } from "~/components/ui/button";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight } from "./svg";
+import { type Session } from "next-auth";
 
 const PDFDownloadLink = dynamic(
   // eslint-disable-next-line @typescript-eslint/no-unsafe-return
@@ -23,13 +24,65 @@ const PDFDownloadLink = dynamic(
 
 const PDFDocument = ({
   userAnswersForRole,
+  session,
 }: {
   userAnswersForRole: PdfTransformedData[];
+  session: Session;
 }) => {
   const rolesIncluded: Record<string, boolean> = {};
 
+  // First, sort UserAnswersForRole based on alphabetical order of question text.
+  userAnswersForRole.sort((a, b) => {
+    const textA = a.question.questionText.toUpperCase();
+    const textB = b.question.questionText.toUpperCase();
+    return textA < textB ? -1 : textA > textB ? 1 : 0;
+  });
+
+  // Flatten the answers array from all questions
+  const allAnswers = userAnswersForRole.reduce(
+    (acc: { questionId: string; answerId: string }[], { answers }) => {
+      return acc.concat(answers);
+    },
+    [],
+  );
+
+  // Sort all answers based on the custom order
+  allAnswers.sort((a, b) => {
+    const positionA = answerIdOrder[a.answerId] ?? 0;
+    const positionB = answerIdOrder[b.answerId] ?? 0;
+    return positionA - positionB;
+  });
+
+  // Create a map to store the position of each question ID in allAnswers
+  const questionIdPositionMap: Record<string, number> = {};
+  allAnswers.forEach((answer, index) => {
+    questionIdPositionMap[answer.questionId] = index;
+  });
+
+  // Rearrange the order of UserAnswersForRole based on the position of the question IDs in allAnswers
+  userAnswersForRole.sort((a, b) => {
+    const positionA = questionIdPositionMap[a.question.id] ?? 0;
+    const positionB = questionIdPositionMap[b.question.id] ?? 0;
+    return positionA - positionB;
+  });
+
   return (
     <Document>
+      {/* Display participant name on the first page only */}
+      <Page key="firstPage" style={styles.page}>
+        <View style={styles.sectionFirstPage}>
+          <View style={styles.centered}>
+            <Text style={styles.title}>
+              <Text style={styles.infoSupport}>Info Support</Text> Tech Survey
+              2024
+            </Text>
+            <Text style={styles.subtitle}>
+              Results for: {session.user?.name ?? "Name not found"}
+            </Text>
+          </View>
+        </View>
+      </Page>
+
       {/* Group userAnswersForRole by role */}
       {userAnswersForRole.map(({ question }) => {
         const roles = question.roles ?? [];
@@ -50,7 +103,7 @@ const PDFDocument = ({
                 {/* Table Header */}
                 <View style={styles.tableRow}>
                   <Text style={styles.columnHeader}>Question</Text>
-                  <Text style={styles.columnHeader}>Answer</Text>
+                  <Text style={styles.columnHeaderAnswer}>Answer</Text>
                 </View>
                 {/* Iterate over questions and answers */}
                 {userAnswersForRole
@@ -65,7 +118,7 @@ const PDFDocument = ({
                           {question?.questionText || "Question not found"}
                         </Text>
                         {/* Render the answer */}
-                        <Text style={styles.cell}>
+                        <Text style={styles.answerCell}>
                           {answers
                             .map(({ answerId }) => idToAnswerMap[answerId])
                             .join(", ")}
@@ -109,17 +162,54 @@ const styles = StyleSheet.create({
   },
   columnHeader: {
     fontWeight: "bold",
-    flexBasis: "50%",
+    flexBasis: "70%",
+  },
+  columnHeaderAnswer: {
+    fontWeight: "bold",
+    flexBasis: "30%",
   },
   cell: {
-    flexBasis: "50%",
+    flexBasis: "70%",
+  },
+  answerCell: {
+    flexBasis: "30%",
+  },
+  sectionFirstPage: {
+    // Styles for the section/container
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  centered: {
+    // Styles for centering content vertically
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  title: {
+    // Styles for the title
+    fontSize: 32, // Adjust size as needed
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: 10, // Adjust spacing between title and subtitle
+  },
+  subtitle: {
+    // Styles for the subtitle
+    fontSize: 20, // Adjust size as needed
+    textAlign: "center",
+  },
+  infoSupport: {
+    // Styles for the "Info Support" text
+    color: "rgb(0, 163, 224)",
   },
 });
 
 const PdfDownloadButton = ({
   userAnswersForRole,
+  session,
 }: {
   userAnswersForRole: PdfTransformedData[];
+  session: Session;
 }) => {
   return (
     <div>
@@ -136,8 +226,13 @@ const PdfDownloadButton = ({
             {/* Hidden PDFDownloadLink */}
             <PDFDownloadLink
               className="download-link"
-              document={<PDFDocument userAnswersForRole={userAnswersForRole} />}
-              fileName="question_results.pdf"
+              document={
+                <PDFDocument
+                  userAnswersForRole={userAnswersForRole}
+                  session={session}
+                />
+              }
+              fileName="info_support_tech_survey_results.pdf"
             >
               {({ loading }) =>
                 loading ? "Loading document..." : "Download results as PDF"
