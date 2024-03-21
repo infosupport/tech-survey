@@ -88,8 +88,9 @@ async function main() {
   });
 
   try {
-    const { roles, questions, roleQuestionsMapping } =
-      await parseCSV("survey.csv");
+    const { roles, questions, roleQuestionsMapping } = await parseCSV(
+      "./import/survey.csv",
+    );
     console.log("Roles:", roles);
     console.log("Questions:", questions);
     console.log("Role-Question Mapping:");
@@ -103,7 +104,7 @@ async function main() {
       const newRole = await prisma.role.create({
         data: {
           role: role,
-          default: false,
+          default: role === "Default" ? true : false,
         },
       });
       roleObjects.push(newRole);
