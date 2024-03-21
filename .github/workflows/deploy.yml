@@ -10,8 +10,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    environment:
-      name: 'production'
     steps:
       - uses: actions/checkout@v4
       - name: Set up Node.js version
@@ -29,11 +27,6 @@ jobs:
           npm run build
           npm ci --prod
           rm .env
-      - name: '🙌 Prepare'
-        run: az storage file download --share-name import --path survey.csv --account-name $AZURE_STORAGE_ACCOUNT --account-key $AZURE_STORAGE_KEY --dest .next/import/survey.csv
-        env:
-          AZURE_STORAGE_ACCOUNT: ${{ secrets.AZURE_STORAGE_ACCOUNT }}
-          AZURE_STORAGE_KEY: ${{ secrets.AZURE_STORAGE_KEY }}
       - name: '📦 Package artifact'
         # `./*`: the current directory
         # `.next`: explicitly also zip this hidden directory. 
@@ -61,6 +54,11 @@ jobs:
           name: node-app
       - name: '💤 Unzip artifact'
         run: unzip release.zip
+      - name: '🙌 Prepare'
+        run: az storage file download --share-name import --path survey.csv --account-name $AZURE_STORAGE_ACCOUNT --account-key $AZURE_STORAGE_KEY --dest .next/import/survey.csv
+        env:
+          AZURE_STORAGE_ACCOUNT: ${{ secrets.AZURE_STORAGE_ACCOUNT }}
+          AZURE_STORAGE_KEY: ${{ secrets.AZURE_STORAGE_KEY }}
       - name: '🚀 Deploy'
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v2
