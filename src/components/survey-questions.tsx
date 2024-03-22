@@ -193,7 +193,7 @@ export function SurveyQuestions({
                           className={`${
                             field.value === option.id ||
                             responses[question.id] === option.id
-                              ? "rounded-lg border border-custom-selectedLight dark:border-custom-selected "
+                              ? "rounded-lg border-2 border-custom-selected "
                               : ""
                           }flex h-[40px] cursor-pointer items-center justify-center`}
                         >
