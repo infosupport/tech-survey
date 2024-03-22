@@ -2,6 +2,7 @@
 
 import { type TransformedData } from "~/models/types";
 import ShowResults from "./show-results";
+import { idToTextMap } from "~/utils/optionMapping";
 
 export default function ResultsWrapper({ data }: { data: TransformedData }) {
   return (
@@ -51,11 +52,13 @@ export function ResultCommons({ data }: { data: TransformedData }) {
             style={customTooltipStyle}
           >
             <p className="label dark:text-black">
-              {payload.map((entry, index) => (
-                <span key={`item-${index}`}>
-                  {`${entry.name} : ${entry.value}`}
-                </span>
-              ))}
+              {payload.map(
+                (entry: { name: string; value: number }, index: number) => (
+                  <span key={`item-${index}`}>
+                    {`${idToTextMap[+entry.name]} : ${entry.value}`}
+                  </span>
+                ),
+              )}
             </p>
           </div>
         </div>
