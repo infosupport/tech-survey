@@ -33,6 +33,24 @@ const ThankYou = async () => {
 
   const answerOptions: AnswerOption[] = await db.answerOption.findMany();
 
+  const userSelectedRoles = await db.user.findUnique({
+    where: {
+      id: session?.user.id,
+    },
+    include: {
+      roles: true,
+    },
+  });
+
+  // Update the userAnswersForRole object such that a question only includes the roles of the selected roles of the user.
+  for (const userAnswer of userAnswersForRole) {
+    userAnswer.question.roles = userAnswer.question.roles?.filter((role) =>
+      userSelectedRoles?.roles.some(
+        (selectedRole) => selectedRole.id === role.id,
+      ),
+    );
+  }
+
   const transformedData = userAnswersForRole.reduce(
     (acc, curr) => {
       const existingQuestion = acc.find(
