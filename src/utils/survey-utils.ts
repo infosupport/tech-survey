@@ -11,18 +11,26 @@ import {
   type AnswerOption,
   type SurveyResponse,
   type QuestionSchema,
+  type Role,
 } from "~/models/types";
-import { slugToId } from "~/utils/slugify";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "~/components/ui/use-toast";
 import { type Session } from "next-auth";
+import { slugify } from "./slugify";
 
 export function getInitialResponses(
   userAnswersForRole: UserAnswer[],
   currentRole: string,
+  userSelectedRoles: Role[],
 ): Record<string, string> {
   const initialResponses: Record<string, string> = {};
+  // Dynamically generate the slugToId mapping
+  const slugToId: Record<string, string> = {};
+  userSelectedRoles.forEach((role) => {
+    slugToId[slugify(role.role)] = role.id;
+  });
+
   userAnswersForRole.forEach((answer) => {
     if (
       answer.question.roles?.some((role) => role.id === slugToId[currentRole])

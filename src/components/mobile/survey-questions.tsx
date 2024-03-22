@@ -64,7 +64,7 @@ export function MobileSurveyQuestionnaire({
   currentRole: string;
 }) {
   const [responses, setResponses] = useState(
-    getInitialResponses(userAnswersForRole, currentRole),
+    getInitialResponses(userAnswersForRole, currentRole, userSelectedRoles),
   );
 
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
