@@ -11,15 +11,19 @@ import {
   Tooltip,
 } from "recharts";
 import { type TransformedData } from "~/models/types";
-import { slugToId, slugify } from "~/utils/slugify";
+import { slugify } from "~/utils/slugify";
 import { ResultCommons } from "./results";
 
 const ShowResults = ({ data }: { data: TransformedData }) => {
   const pathname = usePathname() || "";
 
   const currentRole = pathname.split("/").pop() ?? "";
-  if (!slugToId[currentRole]) {
-    notFound();
+
+  const roleExists = Object.keys(data).some(
+    (role) => slugify(role) === currentRole,
+  );
+  if (!roleExists) {
+    return notFound();
   }
 
   const { uniqueDataKeys, dataKeyColors, CustomTooltip } = ResultCommons({

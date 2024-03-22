@@ -2,7 +2,11 @@ import { db } from "~/server/db";
 import PdfDownloadButton from "../../components/download-pdf";
 import React, { Suspense } from "react";
 import { getServerAuthSession } from "~/server/auth";
-import { type QuestionResult, type Question } from "~/models/types";
+import {
+  type QuestionResult,
+  type Question,
+  type AnswerOption,
+} from "~/models/types";
 
 import { type Metadata } from "next";
 
@@ -26,6 +30,8 @@ const ThankYou = async () => {
       },
     },
   );
+
+  const answerOptions: AnswerOption[] = await db.answerOption.findMany();
 
   const transformedData = userAnswersForRole.reduce(
     (acc, curr) => {
@@ -67,6 +73,7 @@ const ThankYou = async () => {
         <Suspense fallback={<div>Loading...</div>}>
           <PdfDownloadButton
             userAnswersForRole={transformedData}
+            answerOptions={answerOptions}
             session={session!}
           />
         </Suspense>
