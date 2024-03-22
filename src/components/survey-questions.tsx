@@ -192,24 +192,24 @@ export function SurveyQuestions({
                         key={option.id}
                         className={`${field.value === option.id || responses[question.id] === option.id ? "rounded-lg bg-custom-selectedLight dark:bg-custom-selected" : ""} w-[300px]`}
                       >
-                        <FormItem>
-                          <FormControl>
-                            <RadioGroup
-                              onValueChange={async (value) => {
-                                field.onChange(value);
-                                try {
-                                  await handleSelection(question.id, value);
-                                } catch (error) {
-                                  console.error(
-                                    "Error in handleResponseSelection:",
-                                    error,
-                                  );
-                                }
-                              }}
-                              value={field.value as string}
-                              className="flex flex-col space-y-1"
-                            >
-                              <label className="flex cursor-pointer items-center justify-center">
+                        <label className="flex h-[40px] cursor-pointer items-center justify-center ">
+                          <FormItem>
+                            <FormControl>
+                              <RadioGroup
+                                onValueChange={async (value) => {
+                                  field.onChange(value);
+                                  try {
+                                    await handleSelection(question.id, value);
+                                  } catch (error) {
+                                    console.error(
+                                      "Error in handleResponseSelection:",
+                                      error,
+                                    );
+                                  }
+                                }}
+                                value={field.value as string}
+                                className="flex flex-col space-y-1"
+                              >
                                 <FormControl>
                                   <RadioGroupItem
                                     value={option.id}
@@ -219,10 +219,10 @@ export function SurveyQuestions({
                                     }
                                   />
                                 </FormControl>
-                              </label>
-                            </RadioGroup>
-                          </FormControl>
-                        </FormItem>
+                              </RadioGroup>
+                            </FormControl>
+                          </FormItem>
+                        </label>
                       </TableCell>
                     ))}
                   </TableRow>
