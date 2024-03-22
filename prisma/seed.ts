@@ -104,7 +104,7 @@ async function main() {
       const newRole = await prisma.role.create({
         data: {
           role: role,
-          default: false,
+          default: role === "General" ? true : false,
         },
       });
       roleObjects.push(newRole);

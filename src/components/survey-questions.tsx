@@ -67,7 +67,7 @@ export function SurveyQuestions({
   currentRole: string;
 }) {
   const [responses, setResponses] = useState(
-    getInitialResponses(userAnswersForRole, currentRole),
+    getInitialResponses(userAnswersForRole, currentRole, userSelectedRoles),
   );
 
   const submitResponse = api.survey.setQuestionResult.useMutation({
@@ -188,11 +188,15 @@ export function SurveyQuestions({
                       <FormMessage />
                     </TableCell>
                     {answerOptions.map((option) => (
-                      <TableCell
-                        key={option.id}
-                        className={`${field.value === option.id || responses[question.id] === option.id ? "rounded-lg bg-custom-selectedLight dark:bg-custom-selected" : ""} w-[300px]`}
-                      >
-                        <label className="flex h-[40px] cursor-pointer items-center justify-center ">
+                      <TableCell key={option.id} className="w-[300px]">
+                        <label
+                          className={`${
+                            field.value === option.id ||
+                            responses[question.id] === option.id
+                              ? "rounded-lg border-2 border-custom-selected "
+                              : ""
+                          }flex h-[40px] cursor-pointer items-center justify-center`}
+                        >
                           <FormItem>
                             <FormControl>
                               <RadioGroup
@@ -231,7 +235,7 @@ export function SurveyQuestions({
             ))}
           </TableBody>
         </Table>
-        <Button type="submit">
+        <Button variant={"outline"} type="submit">
           {getNextHref(selectedRolesForProgressBar) ? "Next" : "Submit"}
         </Button>
       </form>

@@ -11,6 +11,7 @@ import { ModeToggle } from "~/components/mode-toggle";
 import { Login } from "~/components/login";
 import { type Session } from "next-auth";
 import { getServerAuthSession } from "~/server/auth";
+import ButtonSkeleton from "~/components/loading/button-loader";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -50,7 +51,7 @@ export default async function RootLayout({
             <main className="flex min-h-screen items-center justify-center">
               <div className="absolute right-4 top-4 z-50 flex items-center space-x-4">
                 {session && (
-                  <Suspense fallback={<div>Loading...</div>}>
+                  <Suspense fallback={<ButtonSkeleton />}>
                     <LoginWrapper session={session} />
                   </Suspense>
                 )}

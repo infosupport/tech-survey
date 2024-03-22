@@ -5,11 +5,11 @@ import SelectRole from "../components/select-role";
 import React, { Suspense } from "react";
 import { type Session } from "next-auth";
 import { db } from "~/server/db";
+import RoleSelectionSkeleton from "~/components/loading/role-selection-loader";
 
 const Home: React.FC = async () => {
   const session = await getServerAuthSession();
 
-  // Use Suspense to suspend rendering while the data is being fetched
   return (
     <div>
       <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
@@ -44,7 +44,7 @@ const Home: React.FC = async () => {
         {/* If the user is logged in, show the SelectRole component */}
         {session && (
           <div>
-            <Suspense fallback={<div>Loading...</div>}>
+            <Suspense fallback={<RoleSelectionSkeleton />}>
               <SelectRoleWrapper session={session} />
             </Suspense>
           </div>

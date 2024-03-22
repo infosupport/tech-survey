@@ -14,21 +14,29 @@ import { ScrollArea } from "~/components/ui/scroll-area";
 import { type Section } from "~/models/types";
 import Link from "next/link";
 import { notFound, usePathname } from "next/navigation";
-import { slugToId } from "~/utils/slugify";
+import { slugify } from "~/utils/slugify";
 
 const SelectRoleResults = ({ roles }: { roles: Section[] }) => {
   const pathname = usePathname() || "";
 
   const currentRole = pathname.split("/").pop() ?? "";
-  if (!slugToId[currentRole]) {
-    notFound();
+  const currentRoleBeautified = roles.find(
+    (section) => slugify(section.label) === currentRole,
+  )?.label;
+
+  // Check if the current role is in the list of roles
+  const roleExists = roles.some(
+    (section) => slugify(section.label) === currentRole,
+  );
+  if (!roleExists) {
+    return notFound();
   }
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button className=" bg-custom-buttonPrimary text-custom-secondary hover:bg-custom-buttonHover dark:bg-custom-buttonPrimary dark:hover:bg-custom-buttonHover">
-          Viewing results for: {currentRole}
+          Viewing results for: {currentRoleBeautified}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56">

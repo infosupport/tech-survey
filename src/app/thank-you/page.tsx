@@ -2,9 +2,14 @@ import { db } from "~/server/db";
 import PdfDownloadButton from "../../components/download-pdf";
 import React, { Suspense } from "react";
 import { getServerAuthSession } from "~/server/auth";
-import { type QuestionResult, type Question } from "~/models/types";
+import {
+  type QuestionResult,
+  type Question,
+  type AnswerOption,
+} from "~/models/types";
 
 import { type Metadata } from "next";
+import ButtonSkeleton from "~/components/loading/button-loader";
 
 export const metadata: Metadata = {
   title: "Thank You",
@@ -26,6 +31,26 @@ const ThankYou = async () => {
       },
     },
   );
+
+  const answerOptions: AnswerOption[] = await db.answerOption.findMany();
+
+  const userSelectedRoles = await db.user.findUnique({
+    where: {
+      id: session?.user.id,
+    },
+    include: {
+      roles: true,
+    },
+  });
+
+  // Update the userAnswersForRole object such that a question only includes the roles of the selected roles of the user.
+  for (const userAnswer of userAnswersForRole) {
+    userAnswer.question.roles = userAnswer.question.roles?.filter((role) =>
+      userSelectedRoles?.roles.some(
+        (selectedRole) => selectedRole.id === role.id,
+      ),
+    );
+  }
 
   const transformedData = userAnswersForRole.reduce(
     (acc, curr) => {
@@ -64,9 +89,10 @@ const ThankYou = async () => {
         We appreciate your time and effort in completing the survey.
       </p>
       <div className="w-full max-w-3xl">
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense fallback={<ButtonSkeleton />}>
           <PdfDownloadButton
             userAnswersForRole={transformedData}
+            answerOptions={answerOptions}
             session={session!}
           />
         </Suspense>

@@ -9,7 +9,7 @@ import {
 import { usePathname, notFound } from "next/navigation";
 import { useState } from "react";
 import { type Session } from "next-auth";
-import { slugToId, slugify } from "~/utils/slugify";
+import { slugify } from "~/utils/slugify";
 
 import ProgressionBar from "./progression-bar";
 import useScreenSize from "./useScreenSize";
@@ -37,9 +37,20 @@ export function SurveyQuestionnaire({
 
   // get the current role from the url, which is /survey/[role]
   const currentRole = pathname.split("/").pop() ?? "";
-  if (!slugToId[currentRole]) {
+
+  const roleExists = userSelectedRoles.some(
+    (role) => slugify(role.role) === currentRole,
+  );
+
+  if (!roleExists) {
     notFound();
   }
+
+  // Dynamically generate the slugToId mapping
+  const slugToId: Record<string, string> = {};
+  userSelectedRoles.forEach((role) => {
+    slugToId[slugify(role.role)] = role.id;
+  });
 
   const filteredQuestions = questions.filter(
     (question) =>
