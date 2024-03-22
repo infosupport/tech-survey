@@ -9,6 +9,7 @@ import {
 } from "~/models/types";
 
 import { type Metadata } from "next";
+import ButtonSkeleton from "~/components/loading/button-loader";
 
 export const metadata: Metadata = {
   title: "Thank You",
@@ -88,7 +89,7 @@ const ThankYou = async () => {
         We appreciate your time and effort in completing the survey.
       </p>
       <div className="w-full max-w-3xl">
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense fallback={<ButtonSkeleton />}>
           <PdfDownloadButton
             userAnswersForRole={transformedData}
             answerOptions={answerOptions}

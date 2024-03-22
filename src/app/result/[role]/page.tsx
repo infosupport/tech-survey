@@ -14,6 +14,8 @@ import { slugify } from "~/utils/slugify";
 import ResultsWrapper from "~/components/results";
 
 import { type Metadata } from "next";
+import ButtonSkeleton from "~/components/loading/button-loader";
+import LegendSkeleton from "~/components/loading/results-loader";
 
 export const metadata: Metadata = {
   title: "Results",
@@ -30,11 +32,11 @@ const Results: React.FC = async () => {
         </span>
         <span className="block sm:inline"> Tech Survey - Results</span>
       </h1>
-      <Suspense fallback={<div>Loading...</div>}>
+      <Suspense fallback={<ButtonSkeleton />}>
         <ShowRolesWrapper />
       </Suspense>
 
-      <Suspense fallback={<div>Loading...</div>}>
+      <Suspense fallback={<LegendSkeleton />}>
         <ShowResultsWrapper />
       </Suspense>
       {!session && (

@@ -2,7 +2,7 @@ import { getServerAuthSession } from "~/server/auth";
 import { type AnswerOption, type Question } from "~/models/types";
 import { Suspense } from "react";
 import { SurveyQuestionnaire } from "~/components/survey-questionnaire";
-import Loading from "~/app/loading";
+import SurveyQuestionLoader from "~/components/loading/survey-question-loader";
 import { db } from "~/server/db";
 
 import { type Metadata } from "next";
@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 };
 
 const SuspenseSurveyData = () => (
-  <Suspense fallback={<Loading />}>
+  <Suspense fallback={<SurveyQuestionLoader />}>
     <SurveyPage />
   </Suspense>
 );
