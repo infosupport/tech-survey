@@ -67,7 +67,7 @@ export function SurveyQuestions({
   currentRole: string;
 }) {
   const [responses, setResponses] = useState(
-    getInitialResponses(userAnswersForRole, currentRole),
+    getInitialResponses(userAnswersForRole, currentRole, userSelectedRoles),
   );
 
   const submitResponse = api.survey.setQuestionResult.useMutation({
