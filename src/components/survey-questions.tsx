@@ -231,7 +231,7 @@ export function SurveyQuestions({
             ))}
           </TableBody>
         </Table>
-        <Button type="submit">
+        <Button variant={"outline"} type="submit">
           {getNextHref(selectedRolesForProgressBar) ? "Next" : "Submit"}
         </Button>
       </form>
