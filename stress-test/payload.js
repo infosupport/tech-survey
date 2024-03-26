@@ -1,5 +1,9 @@
 import http from "k6/http";
 
+/**
+ * Array of possible answer options.
+ * @type {string[]}
+ */
 const answerOptions = [
   "clu2mvriq007ky5dmjuelhsbj",
   "clu2mvris007ly5dmufv524uo",
@@ -7,6 +11,10 @@ const answerOptions = [
   "clu2mvriw007ny5dml4kztguo",
 ];
 
+/**
+ * Array of question IDs.
+ * @type {string[]}
+ */
 const questionIds = [
   "clu2mvqfz000hy5dmey2nwyee",
   "clu2mvqgo000ly5dmbsjzn75c",
@@ -20,14 +28,39 @@ const questionIds = [
   "clu2mvqve002wy5dmqkmwyyqd",
 ];
 
-export default function () {
-  // Make a GET request to /survey/general to fetch the page content
+/**
+ * Function to simulate user behavior by making a GET request to fetch page content and a POST request to set question results.
+ */
+export function simulateUserBehavior() {
   const surveyGeneralUrl = "http://localhost:3000/survey/general";
+
   const surveyGeneralResponse = http.get(surveyGeneralUrl);
 
+  if (surveyGeneralResponse.status !== 200) {
+    console.error(
+      `GET /survey/general failed. Response status code: ${surveyGeneralResponse.status}`,
+    );
+    return;
+  }
+
+  if (!surveyGeneralResponse.body) {
+    console.error("GET /survey/general failed. Response body is empty");
+    return;
+  }
+
+  if (
+    typeof surveyGeneralResponse.body !== "string" ||
+    !surveyGeneralResponse.body.includes("UserId:")
+  ) {
+    console.error(
+      "GET /survey/general failed. Page content does not contain 'UserId:'",
+    );
+    return;
+  }
+
   // Extract the UserId from the HTML content
-  const userIdStartIndex = surveyGeneralResponse.body.indexOf("UserId:") + 8; // Length of 'UserId:' is 7
-  const userIdEndIndex = surveyGeneralResponse.body.indexOf(
+  const userIdStartIndex = surveyGeneralResponse.body?.indexOf("UserId:") + 8; // Length of 'UserId:' is 7
+  const userIdEndIndex = surveyGeneralResponse.body?.indexOf(
     "</div>",
     userIdStartIndex,
   );
@@ -39,7 +72,7 @@ export default function () {
   let userId = userIdString.split('"')[2];
 
   // remove the \ from the userId
-  userId = userId.replace(/\\/g, "");
+  userId = userId?.replace(/\\/g, "");
 
   // Make a POST request to /api/trpc/survey.setQuestionResult with extracted userId
   const setQuestionResultUrl =
