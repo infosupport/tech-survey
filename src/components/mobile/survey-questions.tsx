@@ -77,6 +77,7 @@ export function MobileSurveyQuestionnaire({
                                 responses,
                                 setResponses,
                                 session,
+                                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                                 submitResponse,
                               });
                             } catch (error) {
