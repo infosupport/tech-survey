@@ -8,12 +8,7 @@ import {
 
 import { InfoCircledIcon } from "@radix-ui/react-icons";
 
-import {
-  type Role,
-  type AnswerOption,
-  type Question,
-  type QuestionResult,
-} from "~/models/types";
+import { type AnswerOption, type Question, type Section } from "~/models/types";
 
 import {
   Form,
@@ -23,7 +18,7 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 
-import { useEffect, useState } from "react";
+import { type Dispatch, type SetStateAction, useState } from "react";
 
 import { api } from "~/trpc/react";
 import { type Session } from "next-auth";
@@ -31,54 +26,33 @@ import { idToMoreInfo, idToTextMap } from "~/utils/optionMapping";
 
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 
-import { slugify } from "~/utils/slugify";
-
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import {
-  GenerateFormAndSchema,
-  getInitialResponses,
   getNextHref,
   handleResponseSelection,
-  hasAnsweredAllQuestionsForRole,
   onSubmit,
-  SaveResponsesToDatabase,
 } from "~/utils/survey-utils";
 import { SpinnerButton } from "../ui/button-spinner";
-import { toast } from "../ui/use-toast";
+import { type useForm } from "react-hook-form";
 
 export function MobileSurveyQuestionnaire({
   session,
-  questions,
   filteredQuestions,
   answerOptions,
-  userSelectedRoles,
-  userAnswersForRole,
-  currentRole,
+  form,
+  selectedRolesForProgressBar,
+  responses,
+  setResponses,
 }: {
   session: Session;
-  questions: Question[];
   filteredQuestions: Question[];
   answerOptions: AnswerOption[];
-  userSelectedRoles: Role[];
-  userAnswersForRole: QuestionResult[];
-  currentRole: string;
+  form: ReturnType<typeof useForm>;
+  selectedRolesForProgressBar: Section[];
+  responses: Record<string, string>;
+  setResponses: Dispatch<SetStateAction<Record<string, string>>>;
 }) {
-  const [responses, setResponses] = useState(
-    getInitialResponses(userAnswersForRole, currentRole, userSelectedRoles),
-  );
-
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-
-  const unansweredQuestions = filteredQuestions.filter(
-    (question) =>
-      !userAnswersForRole.some((answer) => answer.question.id === question.id),
-  );
-
-  const { form } = GenerateFormAndSchema(
-    unansweredQuestions,
-    answerOptions,
-    responses,
-  );
 
   const submitResponse = api.survey.setQuestionResult.useMutation({
     onSuccess: () => {
@@ -90,83 +64,6 @@ export function MobileSurveyQuestionnaire({
       return false;
     },
   });
-
-  useEffect(() => {
-    let PreviouslyOffline = false;
-    const handleOnline = async () => {
-      if (PreviouslyOffline) {
-        try {
-          await SaveResponsesToDatabase(responses, session, submitResponse);
-          toast({
-            title: "Back online!",
-            description:
-              "Your (intermediate) responses have been submitted successfully.",
-          });
-        } catch (error) {
-          toast({
-            title: "Failed to resend responses",
-            description:
-              "An error occurred while attempting to resend responses.",
-            variant: "destructive",
-          });
-        }
-        PreviouslyOffline = false;
-      }
-    };
-
-    const handleOffline = () => {
-      PreviouslyOffline = true;
-      console.log("Offline - Failed to save responses. Retrying...");
-      // Display error toast if offline
-      toast({
-        title: "Failed to save responses. Retrying...",
-        description:
-          "Data submission in progress... Your responses will be automatically submitted once you're back online. Feel free to continue filling out the survey.",
-        variant: "informative",
-      });
-    };
-    if (!navigator.onLine) {
-      // Handle offline when component mounts
-      handleOffline();
-    } else {
-      handleOnline().catch(() => {
-        toast({
-          title: "Failed to resend responses",
-          description:
-            "An error occurred while attempting to resend responses.",
-          variant: "destructive",
-        });
-      });
-    }
-
-    // Add event listeners for online and offline events
-    window.addEventListener("online", () => {
-      handleOnline().catch(() => {
-        toast({
-          title: "Failed to resend responses",
-          description:
-            "An error occurred while attempting to resend responses.",
-          variant: "destructive",
-        });
-      });
-    });
-    window.addEventListener("offline", handleOffline);
-
-    return () => {
-      // Remove event listeners when component unmounts
-      window.addEventListener("online", () => {
-        handleOnline().catch(() => {
-          toast({
-            title: "Failed to resend responses",
-            description:
-              "An error occurred while attempting to resend responses.",
-            variant: "destructive",
-          });
-        });
-      });
-      window.removeEventListener("offline", handleOffline);
-    };
-  }, [responses, session, submitResponse]);
 
   const handleSelection = async (
     questionId: string,
@@ -181,28 +78,6 @@ export function MobileSurveyQuestionnaire({
       submitResponse,
     });
   };
-
-  const selectedRolesForProgressBar = userSelectedRoles
-    .sort((a, b) => {
-      const roleA = a.role.toLowerCase();
-      const roleB = b.role.toLowerCase();
-
-      if (roleA === "general") return -1;
-      if (roleB === "general") return 1;
-
-      return 0;
-    })
-    .map((role) => ({
-      id: role.id,
-      href: `/survey/${slugify(role.role)}`,
-      label: role.role,
-      current: slugify(role.role) === currentRole,
-      completed: hasAnsweredAllQuestionsForRole(
-        userAnswersForRole,
-        role.id,
-        questions,
-      ),
-    }));
 
   return (
     <div>
@@ -304,6 +179,7 @@ export function MobileSurveyQuestionnaire({
           <SpinnerButton
             type="submit"
             state={isSubmitting}
+            disabled={submitResponse.isLoading}
             name={getNextHref(selectedRolesForProgressBar) ? "Next" : "Submit"}
           />
         </form>

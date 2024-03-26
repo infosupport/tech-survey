@@ -7,7 +7,7 @@ import {
   type QuestionResult,
 } from "~/models/types";
 import { usePathname, notFound } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { type Session } from "next-auth";
 import { slugify } from "~/utils/slugify";
 
@@ -16,6 +16,13 @@ import useScreenSize from "./useScreenSize";
 import { MobileSurveyQuestionnaire } from "./mobile/survey-questions";
 import { SurveyQuestions } from "./survey-questions";
 import { MobileProgressionBar } from "./mobile/progression-bar";
+import {
+  GenerateFormAndSchema,
+  getInitialResponses,
+  SaveResponsesToDatabase,
+} from "~/utils/survey-utils";
+import { api } from "~/trpc/react";
+import { toast } from "./ui/use-toast";
 
 export function SurveyQuestionnaire({
   session,
@@ -52,6 +59,10 @@ export function SurveyQuestionnaire({
     slugToId[slugify(role.role)] = role.id;
   });
 
+  const [responses, setResponses] = useState(
+    getInitialResponses(userAnswersForRole, currentRole, userSelectedRoles),
+  );
+
   const filteredQuestions = questions.filter(
     (question) =>
       question.roleIds?.some(
@@ -80,6 +91,107 @@ export function SurveyQuestionnaire({
     return answeredQuestionsForRole.length >= totalQuestionsForRole;
   }
 
+  const screenSize = useScreenSize();
+
+  const submitResponse = api.survey.setQuestionResult.useMutation({
+    onSuccess: () => {
+      console.log("Response submitted successfully");
+      return true;
+    },
+    onError: (error) => {
+      console.error("Error submitting response:", error);
+      return false;
+    },
+  });
+
+  useEffect(() => {
+    let PreviouslyOffline = false;
+    const handleOnline = async () => {
+      if (PreviouslyOffline) {
+        try {
+          await SaveResponsesToDatabase(responses, session, submitResponse);
+          toast({
+            title: "Back online!",
+            description:
+              "Your (intermediate) responses have been submitted successfully.",
+          });
+        } catch (error) {
+          toast({
+            title: "Failed to resend responses",
+            description:
+              "An error occurred while attempting to resend responses.",
+            variant: "destructive",
+          });
+        }
+        PreviouslyOffline = false;
+      }
+    };
+
+    const handleOffline = () => {
+      PreviouslyOffline = true;
+      console.log("Offline - Failed to save responses. Retrying...");
+      // Display error toast if offline
+      toast({
+        title: "Failed to save responses. Retrying...",
+        description:
+          "Data submission in progress... Your responses will be automatically submitted once you're back online. Feel free to continue filling out the survey.",
+        variant: "informative",
+      });
+    };
+    if (!navigator.onLine) {
+      // Handle offline when component mounts
+      handleOffline();
+    } else {
+      handleOnline().catch(() => {
+        toast({
+          title: "Failed to resend responses",
+          description:
+            "An error occurred while attempting to resend responses.",
+          variant: "destructive",
+        });
+      });
+    }
+
+    // Add event listeners for online and offline events
+    window.addEventListener("online", () => {
+      handleOnline().catch(() => {
+        toast({
+          title: "Failed to resend responses",
+          description:
+            "An error occurred while attempting to resend responses.",
+          variant: "destructive",
+        });
+      });
+    });
+    window.addEventListener("offline", handleOffline);
+
+    return () => {
+      // Remove event listeners when component unmounts
+      window.addEventListener("online", () => {
+        handleOnline().catch(() => {
+          toast({
+            title: "Failed to resend responses",
+            description:
+              "An error occurred while attempting to resend responses.",
+            variant: "destructive",
+          });
+        });
+      });
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, [responses, session, submitResponse]);
+
+  const unansweredQuestions = filteredQuestions.filter(
+    (question) =>
+      !userAnswersForRole.some((answer) => answer.question.id === question.id),
+  );
+
+  const { form } = GenerateFormAndSchema(
+    unansweredQuestions,
+    answerOptions,
+    responses,
+  );
+
   const selectedRolesForProgressBar = userSelectedRoles
     .sort((a, b) => {
       const roleA = a.role.toLowerCase();
@@ -105,8 +217,6 @@ export function SurveyQuestionnaire({
       ),
     }));
 
-  const screenSize = useScreenSize();
-
   return (
     <div>
       {screenSize.width < 768 && (
@@ -116,12 +226,12 @@ export function SurveyQuestionnaire({
           </div>
           <MobileSurveyQuestionnaire
             session={session}
-            questions={questions}
             filteredQuestions={filteredQuestions}
             answerOptions={answerOptions}
-            userSelectedRoles={userSelectedRoles}
-            userAnswersForRole={userAnswersForRole}
-            currentRole={currentRole}
+            form={form}
+            selectedRolesForProgressBar={selectedRolesForProgressBar}
+            responses={responses}
+            setResponses={setResponses}
           />
         </div>
       )}
@@ -130,12 +240,12 @@ export function SurveyQuestionnaire({
           <ProgressionBar roles={selectedRolesForProgressBar} />
           <SurveyQuestions
             session={session}
-            questions={questions}
             filteredQuestions={filteredQuestions}
             answerOptions={answerOptions}
-            userSelectedRoles={userSelectedRoles}
-            userAnswersForRole={userAnswersForRole}
-            currentRole={currentRole}
+            form={form}
+            selectedRolesForProgressBar={selectedRolesForProgressBar}
+            responses={responses}
+            setResponses={setResponses}
           />
         </div>
       )}
