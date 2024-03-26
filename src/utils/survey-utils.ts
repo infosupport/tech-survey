@@ -18,6 +18,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "~/components/ui/use-toast";
 import { type Session } from "next-auth";
 import { slugify } from "./slugify";
+import { useSubmission } from "./submission-utils";
 
 export function getInitialResponses(
   userAnswersForRole: UserAnswer[],
@@ -87,7 +88,7 @@ export function hasAnsweredAllQuestionsForRole(
   return answeredQuestionsForRole.length >= totalQuestionsForRole;
 }
 
-export async function handleResponseSelection({
+export async function HandleResponseSelection({
   questionId,
   answerId,
   responses,
@@ -156,13 +157,17 @@ export async function SaveResponsesToDatabase(
   console.log("mappedResponses", mappedResponses);
 
   try {
+    const mappedResponsesWithUserId = mappedResponses.map((response) => ({
+      ...response,
+      userId: session?.user.id ?? "",
+    }));
+
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-    await Promise.all([submitResponse.mutateAsync(mappedResponses)]);
+    await Promise.all([submitResponse.mutateAsync(mappedResponsesWithUserId)]);
     console.log("Responses saved successfully");
     return true;
   } catch (error) {
     console.error("Error saving responses:", error);
-    // You might want to handle the error here, e.g., display a toast
     toast({
       title: "Error!",
       description: "Failed to save responses.",
@@ -170,8 +175,6 @@ export async function SaveResponsesToDatabase(
     });
     return false;
   }
-
-  return false; // Returning false temporarily, as actual result depends on asynchronous operations
 }
 
 export async function onSubmit(

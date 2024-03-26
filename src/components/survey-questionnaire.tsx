@@ -19,10 +19,14 @@ import { MobileProgressionBar } from "./mobile/progression-bar";
 import {
   GenerateFormAndSchema,
   getInitialResponses,
+  getNextHref,
   SaveResponsesToDatabase,
+  onSubmit,
 } from "~/utils/survey-utils";
-import { api } from "~/trpc/react";
 import { toast } from "./ui/use-toast";
+import { useSubmission } from "~/utils/submission-utils";
+import { SpinnerButton } from "./ui/button-spinner";
+import { Form } from "./ui/form";
 
 export function SurveyQuestionnaire({
   session,
@@ -59,6 +63,8 @@ export function SurveyQuestionnaire({
     slugToId[slugify(role.role)] = role.id;
   });
 
+  const { isSubmitting, setIsSubmitting, submitResponse } = useSubmission();
+
   const [responses, setResponses] = useState(
     getInitialResponses(userAnswersForRole, currentRole, userSelectedRoles),
   );
@@ -92,17 +98,6 @@ export function SurveyQuestionnaire({
   }
 
   const screenSize = useScreenSize();
-
-  const submitResponse = api.survey.setQuestionResult.useMutation({
-    onSuccess: () => {
-      console.log("Response submitted successfully");
-      return true;
-    },
-    onError: (error) => {
-      console.error("Error submitting response:", error);
-      return false;
-    },
-  });
 
   useEffect(() => {
     let PreviouslyOffline = false;
@@ -224,29 +219,79 @@ export function SurveyQuestionnaire({
           <div className="mb-4">
             <MobileProgressionBar roles={selectedRolesForProgressBar} />
           </div>
-          <MobileSurveyQuestionnaire
-            session={session}
-            filteredQuestions={filteredQuestions}
-            answerOptions={answerOptions}
-            form={form}
-            selectedRolesForProgressBar={selectedRolesForProgressBar}
-            responses={responses}
-            setResponses={setResponses}
-          />
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(async () => {
+                setIsSubmitting(true);
+                onSubmit(
+                  form.getValues(),
+                  session,
+                  selectedRolesForProgressBar,
+                  submitResponse,
+                ).catch((error) => {
+                  console.error("Error in form submission:", error);
+                });
+              })}
+              className="grid gap-4 md:grid-cols-1 lg:grid-cols-1"
+            >
+              <MobileSurveyQuestionnaire
+                session={session}
+                filteredQuestions={filteredQuestions}
+                answerOptions={answerOptions}
+                form={form}
+                responses={responses}
+                setResponses={setResponses}
+                submitResponse={submitResponse}
+              />
+              <SpinnerButton
+                type="submit"
+                state={isSubmitting || submitResponse.isLoading}
+                disabled={isSubmitting || submitResponse.isLoading}
+                name={
+                  getNextHref(selectedRolesForProgressBar) ? "Next" : "Submit"
+                }
+              />
+            </form>
+          </Form>
         </div>
       )}
       {screenSize.width >= 768 && (
         <div>
           <ProgressionBar roles={selectedRolesForProgressBar} />
-          <SurveyQuestions
-            session={session}
-            filteredQuestions={filteredQuestions}
-            answerOptions={answerOptions}
-            form={form}
-            selectedRolesForProgressBar={selectedRolesForProgressBar}
-            responses={responses}
-            setResponses={setResponses}
-          />
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(async () => {
+                setIsSubmitting(true);
+                onSubmit(
+                  form.getValues(),
+                  session,
+                  selectedRolesForProgressBar,
+                  submitResponse,
+                ).catch((error) => {
+                  console.error("Error in form submission:", error);
+                });
+              })}
+              className="grid gap-4 md:grid-cols-1 lg:grid-cols-1"
+            >
+              <SurveyQuestions
+                session={session}
+                filteredQuestions={filteredQuestions}
+                answerOptions={answerOptions}
+                form={form}
+                responses={responses}
+                setResponses={setResponses}
+                submitResponse={submitResponse}
+              />
+              <SpinnerButton
+                type="submit"
+                state={isSubmitting || submitResponse.isLoading}
+                disabled={isSubmitting || submitResponse.isLoading}
+                name={
+                  getNextHref(selectedRolesForProgressBar) ? "Next" : "Submit"
+                }
+              />
+            </form>
+          </Form>
         </div>
       )}
     </div>
