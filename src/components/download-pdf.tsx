@@ -4,8 +4,8 @@
 
 import React from "react";
 import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
-import { answerIdOrder, idToAnswerMap } from "~/utils/optionMapping";
-import { type PdfTransformedData } from "~/models/types";
+import { idToTextMap } from "~/utils/optionMapping";
+import { type AnswerOption, type PdfTransformedData } from "~/models/types";
 
 import dynamic from "next/dynamic";
 import { Button } from "~/components/ui/button";
@@ -24,12 +24,21 @@ const PDFDownloadLink = dynamic(
 
 const PDFDocument = ({
   userAnswersForRole,
+  answerOptions,
   session,
 }: {
   userAnswersForRole: PdfTransformedData[];
+  answerOptions: AnswerOption[];
   session: Session;
 }) => {
   const rolesIncluded: Record<string, boolean> = {};
+
+  function getOptionFromAnswerId(answerId: string): string {
+    const answerOption = answerOptions.find((option) => option.id === answerId);
+    return answerOption
+      ? idToTextMap[answerOption.option] ?? ""
+      : "Option not found";
+  }
 
   // First, sort UserAnswersForRole based on alphabetical order of question text.
   userAnswersForRole.sort((a, b) => {
@@ -48,8 +57,13 @@ const PDFDocument = ({
 
   // Sort all answers based on the custom order
   allAnswers.sort((a, b) => {
-    const positionA = answerIdOrder[a.answerId] ?? 0;
-    const positionB = answerIdOrder[b.answerId] ?? 0;
+    const positionA = answerOptions.findIndex(
+      (option) => option.id === a.answerId,
+    );
+    const positionB = answerOptions.findIndex(
+      (option) => option.id === b.answerId,
+    );
+
     return positionA - positionB;
   });
 
@@ -120,7 +134,9 @@ const PDFDocument = ({
                         {/* Render the answer */}
                         <Text style={styles.answerCell}>
                           {answers
-                            .map(({ answerId }) => idToAnswerMap[answerId])
+                            .map(({ answerId }) =>
+                              getOptionFromAnswerId(answerId),
+                            )
                             .join(", ")}
                         </Text>
                       </View>
@@ -206,9 +222,11 @@ const styles = StyleSheet.create({
 
 const PdfDownloadButton = ({
   userAnswersForRole,
+  answerOptions,
   session,
 }: {
   userAnswersForRole: PdfTransformedData[];
+  answerOptions: AnswerOption[];
   session: Session;
 }) => {
   return (
@@ -229,6 +247,7 @@ const PdfDownloadButton = ({
               document={
                 <PDFDocument
                   userAnswersForRole={userAnswersForRole}
+                  answerOptions={answerOptions}
                   session={session}
                 />
               }

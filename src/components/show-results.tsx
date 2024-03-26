@@ -11,19 +11,31 @@ import {
   Tooltip,
 } from "recharts";
 import { type TransformedData } from "~/models/types";
-import { slugToId, slugify } from "~/utils/slugify";
+import { slugify } from "~/utils/slugify";
 import { ResultCommons } from "./results";
+import { idToTextMap } from "~/utils/optionMapping";
 
 const ShowResults = ({ data }: { data: TransformedData }) => {
   const pathname = usePathname() || "";
 
   const currentRole = pathname.split("/").pop() ?? "";
-  if (!slugToId[currentRole]) {
-    notFound();
+
+  const roleExists = Object.keys(data).some(
+    (role) => slugify(role) === currentRole,
+  );
+  if (!roleExists) {
+    return notFound();
   }
 
   const { uniqueDataKeys, dataKeyColors, CustomTooltip } = ResultCommons({
     data,
+  });
+
+  // sort the uniqueDataKeys based on the order of the dataKeys
+  uniqueDataKeys.sort((a, b) => {
+    const aIndex = Object.keys(idToTextMap).indexOf(a);
+    const bIndex = Object.keys(idToTextMap).indexOf(b);
+    return aIndex - bIndex;
   });
 
   return (
@@ -36,7 +48,7 @@ const ShowResults = ({ data }: { data: TransformedData }) => {
               className="mr-2 h-4 w-4 rounded-full"
               style={{ backgroundColor: dataKeyColors[dataKey] }}
             ></div>
-            <span>{dataKey}</span>
+            <span>{idToTextMap[+dataKey]}</span>
           </div>
         ))}
       </div>

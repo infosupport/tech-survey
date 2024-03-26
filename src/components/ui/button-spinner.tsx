@@ -13,7 +13,7 @@ export const SpinnerButton = ({
   ...props
 }: SpinnerButtonProps) => {
   return (
-    <Button {...props}>
+    <Button variant={"outline"} {...props}>
       {state ? (
         <Loader2 className="h-4 w-4 animate-spin" />
       ) : (

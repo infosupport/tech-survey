@@ -18,7 +18,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "~/components/ui/use-toast";
 import { type Session } from "next-auth";
 import { slugify } from "./slugify";
-import { useSubmission } from "./submission-utils";
 
 export function getInitialResponses(
   userAnswersForRole: UserAnswer[],
