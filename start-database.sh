@@ -1,7 +1,7 @@
 #!/bin/bash
 # Use this script to start a docker container for a local development database
 
-# TO RUN ON WINDOWS: 
+# TO RUN ON WINDOWS:
 # 1. Install WSL (Windows Subsystem for Linux) - https://learn.microsoft.com/en-us/windows/wsl/install
 # 2. Install Docker Desktop for Windows - https://docs.docker.com/docker-for-windows/install/
 # 3. Open WSL - `wsl`
@@ -9,7 +9,7 @@
 
 # On Linux and macOS you can run this script directly - `./start-database.sh`
 
-DB_CONTAINER_NAME="paniek-t3-postgres"
+DB_CONTAINER_NAME="tech-survey-seed-db"
 
 if ! [ -x "$(command -v docker)" ]; then
   echo "Docker is not installed. Please install docker and try again.\nDocker install guide: https://docs.docker.com/engine/install/"
@@ -39,6 +39,6 @@ if [ "$DB_PASSWORD" = "password" ]; then
   sed -i -e "s#:password@#:$DB_PASSWORD@#" .env
 fi
 
-docker run --name $DB_CONTAINER_NAME -e POSTGRES_PASSWORD=$DB_PASSWORD -e POSTGRES_DB=paniek-t3 -d -p 5432:5432 docker.io/postgres
+docker run --name $DB_CONTAINER_NAME -e "POSTGRES_USER=$POSTGRES_USER" -e "POSTGRES_PASSWORD=$DB_PASSWORD" -e "POSTGRES_DB=$POSTGRES_DB" -d -p 5432:5432 docker.io/postgres
 
 echo "Database container was succesfuly created"
