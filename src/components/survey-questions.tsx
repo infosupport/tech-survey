@@ -89,9 +89,10 @@ export function SurveyQuestions({
             render={({ field }) => (
               <TableRow
                 key={question.id}
+                id={question.id}
                 className={
                   form.formState.errors[question.id]
-                    ? "!border-2 !border-dashed !border-red-500"
+                    ? "error !border-2 !border-dashed !border-red-500"
                     : ""
                 }
               >
