@@ -55,6 +55,7 @@ export function MobileSurveyQuestionnaire({
             key={`${question.id}`}
             render={({ field }) => (
               <Card
+                id={question.id}
                 className={`border-2 ${form.formState.errors[question.id] ? "border-red-500" : "border-gray-200 dark:border-slate-900"}`}
               >
                 <CardHeader>
