@@ -163,7 +163,6 @@ export async function SaveResponsesToDatabase(
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
     await Promise.all([submitResponse.mutateAsync(mappedResponsesWithUserId)]);
-    console.log("Responses saved successfully");
     return true;
   } catch (error) {
     console.error("Error saving responses:", error);
