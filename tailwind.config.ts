@@ -53,6 +53,10 @@ const config: Config = {
           DEFAULT: "hsl(var(--accent))",
           foreground: "hsl(var(--accent-foreground))",
         },
+        informative: {
+          DEFAULT: "hsl(31, 100%, 50%)",
+          foreground: "hsl(360, 100%, 100%)",
+        },
         popover: {
           DEFAULT: "hsl(var(--popover))",
           foreground: "hsl(var(--popover-foreground))",

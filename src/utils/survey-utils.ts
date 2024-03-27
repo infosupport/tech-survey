@@ -87,7 +87,7 @@ export function hasAnsweredAllQuestionsForRole(
   return answeredQuestionsForRole.length >= totalQuestionsForRole;
 }
 
-export async function handleResponseSelection({
+export async function HandleResponseSelection({
   questionId,
   answerId,
   responses,
@@ -100,13 +100,18 @@ export async function handleResponseSelection({
     [questionId]: answerId,
   }));
 
-  console.log("responses", responses);
-  await saveResponsesToDatabase(responses, session, submitResponse);
+  console.log("HandleResponseSelection responses", responses);
+  await SaveResponsesToDatabase(
+    { ...responses, [questionId]: answerId },
+    session,
+    submitResponse,
+  );
 }
 
-export function useGenerateFormAndSchema(
+export function GenerateFormAndSchema(
   unansweredQuestions: Question[],
   answerOptions: AnswerOption[],
+  formValues: Record<string, any>,
 ): {
   form: ReturnType<typeof useForm>;
   FormSchema: z.ZodObject<QuestionSchema>;
@@ -127,16 +132,17 @@ export function useGenerateFormAndSchema(
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
+    defaultValues: formValues,
   });
 
   return { form, FormSchema };
 }
 
-export async function saveResponsesToDatabase(
+export async function SaveResponsesToDatabase(
   responses: Record<string, string>,
   session: Session | null,
   submitResponse: any,
-): Promise<void> {
+): Promise<boolean> {
   console.log("responses", responses);
 
   const mappedResponses: SurveyResponse[] = Object.entries(responses).map(
@@ -150,20 +156,23 @@ export async function saveResponsesToDatabase(
   console.log("mappedResponses", mappedResponses);
 
   try {
-    // Submitting responses for each question
-    await Promise.all(
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-      mappedResponses.map((response) => submitResponse.mutateAsync(response)),
-    );
+    const mappedResponsesWithUserId = mappedResponses.map((response) => ({
+      ...response,
+      userId: session?.user.id ?? "",
+    }));
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+    await Promise.all([submitResponse.mutateAsync(mappedResponsesWithUserId)]);
     console.log("Responses saved successfully");
+    return true;
   } catch (error) {
     console.error("Error saving responses:", error);
-    // You might want to handle the error here, e.g., display a toast
     toast({
       title: "Error!",
       description: "Failed to save responses.",
       variant: "destructive",
     });
+    return false;
   }
 }
 
@@ -173,8 +182,18 @@ export async function onSubmit(
   selectedRolesForProgressBar: ProgressBar[],
   submitResponse: any,
 ): Promise<void> {
+  let responsesSaved = false;
   try {
-    await saveResponsesToDatabase(responses, session, submitResponse);
+    responsesSaved = await SaveResponsesToDatabase(
+      responses,
+      session,
+      submitResponse,
+    );
+  } catch (error) {
+    console.error("Error in onSubmit:", error);
+  }
+
+  if (responsesSaved) {
     const nextHref = getNextHref(selectedRolesForProgressBar);
     if (nextHref) {
       window.location.assign(nextHref);
@@ -188,7 +207,11 @@ export async function onSubmit(
         window.location.assign("/thank-you");
       }, 2000);
     }
-  } catch (error) {
-    console.error("Error in onSubmit:", error);
+  } else {
+    toast({
+      title: "Failed to save responses. Unable to reach the server.",
+      description: "Please try again later.",
+      variant: "destructive",
+    });
   }
 }

@@ -13,7 +13,7 @@ import {
 import { ScrollArea } from "~/components/ui/scroll-area";
 import { type Section } from "~/models/types";
 import Link from "next/link";
-import { notFound, usePathname } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { slugify } from "~/utils/slugify";
 
 const SelectRoleResults = ({ roles }: { roles: Section[] }) => {
@@ -29,7 +29,7 @@ const SelectRoleResults = ({ roles }: { roles: Section[] }) => {
     (section) => slugify(section.label) === currentRole,
   );
   if (!roleExists) {
-    return notFound();
+    return;
   }
 
   return (
