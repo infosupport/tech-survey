@@ -54,49 +54,11 @@ export function SurveyQuestionnaire({
     (role) => slugify(role.role) === currentRole,
   );
 
-  if (!roleExists) {
-    return renderNotFoundPage();
-  }
-
-  // Dynamically generate the slugToId mapping
-  const slugToId: Record<string, string> = {};
-  userSelectedRoles.forEach((role) => {
-    slugToId[slugify(role.role)] = role.id;
-  });
-
   const { isSubmitting, setIsSubmitting, submitResponse } = useSubmission();
 
   const [responses, setResponses] = useState(
     getInitialResponses(userAnswersForRole, currentRole, userSelectedRoles),
   );
-
-  const filteredQuestions = questions.filter(
-    (question) =>
-      question.roleIds?.some(
-        (roleId) => roleId === slugToId[currentRole ?? ""],
-      ) && selectedRoles.includes(slugToId[currentRole ?? ""] ?? ""),
-  );
-
-  // function that check if a user already has more than 1 response for a question
-  function hasAnsweredAllQuestionsForRole(
-    userAnswersForRole: QuestionResult[],
-    roleId: string,
-    questions: Question[],
-  ) {
-    const questionsForRole = userAnswersForRole.filter((answer) =>
-      answer.question.roles?.some((role) => role.id === roleId),
-    );
-
-    const totalQuestionsForRole = questions.filter((question) =>
-      question.roleIds?.some((role) => role === roleId),
-    ).length;
-
-    const answeredQuestionsForRole = questionsForRole.filter(
-      (answer) => answer.answerId !== undefined,
-    );
-
-    return answeredQuestionsForRole.length >= totalQuestionsForRole;
-  }
 
   const screenSize = useScreenSize();
 
@@ -176,6 +138,44 @@ export function SurveyQuestionnaire({
       window.removeEventListener("offline", handleOffline);
     };
   }, [responses, session, submitResponse]);
+
+  if (!roleExists) {
+    return renderNotFoundPage();
+  }
+
+  // Dynamically generate the slugToId mapping
+  const slugToId: Record<string, string> = {};
+  userSelectedRoles.forEach((role) => {
+    slugToId[slugify(role.role)] = role.id;
+  });
+
+  const filteredQuestions = questions.filter(
+    (question) =>
+      question.roleIds?.some(
+        (roleId) => roleId === slugToId[currentRole ?? ""],
+      ) && selectedRoles.includes(slugToId[currentRole ?? ""] ?? ""),
+  );
+
+  // function that check if a user already has more than 1 response for a question
+  function hasAnsweredAllQuestionsForRole(
+    userAnswersForRole: QuestionResult[],
+    roleId: string,
+    questions: Question[],
+  ) {
+    const questionsForRole = userAnswersForRole.filter((answer) =>
+      answer.question.roles?.some((role) => role.id === roleId),
+    );
+
+    const totalQuestionsForRole = questions.filter((question) =>
+      question.roleIds?.some((role) => role === roleId),
+    ).length;
+
+    const answeredQuestionsForRole = questionsForRole.filter(
+      (answer) => answer.answerId !== undefined,
+    );
+
+    return answeredQuestionsForRole.length >= totalQuestionsForRole;
+  }
 
   const unansweredQuestions = filteredQuestions.filter(
     (question) =>
