@@ -1,6 +1,6 @@
 "use client";
 
-import { notFound, usePathname } from "next/navigation";
+import { usePathname } from "next/navigation";
 import {
   ResponsiveContainer,
   BarChart,
@@ -14,6 +14,7 @@ import { type TransformedData } from "~/models/types";
 import { slugify } from "~/utils/slugify";
 import { ResultCommons } from "./results";
 import { idToTextMap } from "~/utils/optionMapping";
+import renderNotFoundPage from "~/app/[...not_found]/page";
 
 const ShowResults = ({ data }: { data: TransformedData }) => {
   const pathname = usePathname() || "";
@@ -24,7 +25,7 @@ const ShowResults = ({ data }: { data: TransformedData }) => {
     (role) => slugify(role) === currentRole,
   );
   if (!roleExists) {
-    return notFound();
+    return renderNotFoundPage();
   }
 
   const { uniqueDataKeys, dataKeyColors, CustomTooltip } = ResultCommons({

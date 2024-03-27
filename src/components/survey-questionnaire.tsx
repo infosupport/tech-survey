@@ -6,7 +6,7 @@ import {
   type Question,
   type QuestionResult,
 } from "~/models/types";
-import { usePathname, notFound } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { type Session } from "next-auth";
 import { slugify } from "~/utils/slugify";
@@ -27,6 +27,7 @@ import { toast } from "./ui/use-toast";
 import { useSubmission } from "~/utils/submission-utils";
 import { SpinnerButton } from "./ui/button-spinner";
 import { Form } from "./ui/form";
+import renderNotFoundPage from "~/app/[...not_found]/page";
 
 export function SurveyQuestionnaire({
   session,
@@ -54,7 +55,7 @@ export function SurveyQuestionnaire({
   );
 
   if (!roleExists) {
-    notFound();
+    return renderNotFoundPage();
   }
 
   // Dynamically generate the slugToId mapping
