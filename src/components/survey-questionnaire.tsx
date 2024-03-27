@@ -12,7 +12,7 @@ import { type Session } from "next-auth";
 import { slugify } from "~/utils/slugify";
 
 import ProgressionBar from "./progression-bar";
-import useScreenSize from "./useScreenSize";
+import useScreenSize from "./use-screen-size";
 import { MobileSurveyQuestionnaire } from "./mobile/survey-questions";
 import { SurveyQuestions } from "./survey-questions";
 import { MobileProgressionBar } from "./mobile/progression-bar";
@@ -28,6 +28,7 @@ import { useSubmission } from "~/utils/submission-utils";
 import { SpinnerButton } from "./ui/button-spinner";
 import { Form } from "./ui/form";
 import renderNotFoundPage from "~/app/[...not_found]/page";
+import useOnlineStatus from "./use-online-status";
 
 export function SurveyQuestionnaire({
   session,
@@ -62,82 +63,48 @@ export function SurveyQuestionnaire({
 
   const screenSize = useScreenSize();
 
+  const isOnline = useOnlineStatus();
+
+  const [previouslyOffline, setPreviouslyOffline] = useState(false);
+
   useEffect(() => {
-    let PreviouslyOffline = false;
+    console.log("isOnline", isOnline);
     const handleOnline = async () => {
-      if (PreviouslyOffline) {
+      if (previouslyOffline) {
         try {
           await SaveResponsesToDatabase(responses, session, submitResponse);
-          toast({
-            title: "Back online!",
-            description:
-              "Your (intermediate) responses have been submitted successfully.",
-          });
         } catch (error) {
-          toast({
-            title: "Failed to resend responses",
-            description:
-              "An error occurred while attempting to resend responses.",
-            variant: "destructive",
-          });
+          console.error("Error in online submission:", error);
         }
-        PreviouslyOffline = false;
+        setPreviouslyOffline(false);
       }
     };
 
-    const handleOffline = () => {
-      PreviouslyOffline = true;
-      console.log("Offline - Failed to save responses. Retrying...");
-      // Display error toast if offline
+    if (!isOnline) {
+      setPreviouslyOffline(true);
+    } else {
+      handleOnline().catch(() => {
+        console.log("Failed to save responses");
+      });
+    }
+  }, [isOnline, previouslyOffline, responses, session, submitResponse]);
+
+  useEffect(() => {
+    if (isOnline && previouslyOffline) {
+      toast({
+        title: "Back online!",
+        description:
+          "Your (intermediate) responses have been submitted successfully.",
+      });
+    } else if (!isOnline) {
       toast({
         title: "Failed to save responses. Retrying...",
         description:
           "Data submission in progress... Your responses will be automatically submitted once you're back online. Feel free to continue filling out the survey.",
         variant: "informative",
       });
-    };
-    if (!navigator.onLine) {
-      // Handle offline when component mounts
-      handleOffline();
-    } else {
-      handleOnline().catch(() => {
-        toast({
-          title: "Failed to resend responses",
-          description:
-            "An error occurred while attempting to resend responses.",
-          variant: "destructive",
-        });
-      });
     }
-
-    // Add event listeners for online and offline events
-    window.addEventListener("online", () => {
-      handleOnline().catch(() => {
-        toast({
-          title: "Failed to resend responses",
-          description:
-            "An error occurred while attempting to resend responses.",
-          variant: "destructive",
-        });
-      });
-    });
-    window.addEventListener("offline", handleOffline);
-
-    return () => {
-      // Remove event listeners when component unmounts
-      window.addEventListener("online", () => {
-        handleOnline().catch(() => {
-          toast({
-            title: "Failed to resend responses",
-            description:
-              "An error occurred while attempting to resend responses.",
-            variant: "destructive",
-          });
-        });
-      });
-      window.removeEventListener("offline", handleOffline);
-    };
-  }, [responses, session, submitResponse]);
+  }, [isOnline, previouslyOffline]);
 
   if (!roleExists) {
     return renderNotFoundPage();
@@ -259,8 +226,8 @@ export function SurveyQuestionnaire({
           />
           <SpinnerButton
             type="submit"
-            state={isSubmitting || submitResponse.isLoading}
-            disabled={isSubmitting || submitResponse.isLoading}
+            state={isSubmitting || submitResponse.isLoading || !isOnline}
+            disabled={isSubmitting || submitResponse.isLoading || !isOnline}
             name={getNextHref(selectedRolesForProgressBar) ? "Next" : "Submit"}
           />
         </form>
