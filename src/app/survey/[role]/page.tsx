@@ -80,7 +80,7 @@ const SurveyPage: React.FC = async () => {
     // print the session id
     <div>
       {process.env.STRESS_TEST === "true" && (
-        <div>SessionId:{session.user.id}</div>
+        <div>UserId:{session.user.id}</div>
       )}
 
       <div className="container flex h-full flex-col items-center justify-center gap-12 px-4 py-16">
