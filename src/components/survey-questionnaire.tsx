@@ -83,39 +83,18 @@ export function SurveyQuestionnaire({
     responses,
   );
 
-  // const { saveAnswer } = useSubmitAnswers();
-
   const screenSize = useScreenSize();
 
-  const isOnline = useOnlineStatus(); // todo: use isOnline | isOffline | isBackOnline
-
-  const [previouslyOffline, setPreviouslyOffline] = useState(false);
+  const onlineStatus = useOnlineStatus();
 
   useEffect(() => {
-    console.log("isOnline", isOnline);
-    const handleOnline = async () => {
-      if (previouslyOffline) {
-        setPreviouslyOffline(false);
-      }
-    };
-
-    if (!isOnline) {
-      setPreviouslyOffline(true);
-    } else {
-      handleOnline().catch(() => {
-        console.log("Failed to save responses");
-      });
-    }
-  }, [isOnline, previouslyOffline]);
-
-  useEffect(() => {
-    if (isOnline && previouslyOffline) {
+    if (onlineStatus === "isBackOnline") {
       toast({
         title: "Back online!",
         description:
           "Your (intermediate) responses have been submitted successfully.",
       });
-    } else if (!isOnline) {
+    } else if (onlineStatus === "isOffline") {
       toast({
         title: "Failed to save responses. Retrying...",
         description:
@@ -123,7 +102,7 @@ export function SurveyQuestionnaire({
         variant: "informative",
       });
     }
-  }, [isOnline, previouslyOffline]);
+  }, [onlineStatus]);
 
   if (!roleExists) {
     return renderNotFoundPage();
@@ -187,15 +166,7 @@ export function SurveyQuestionnaire({
         <form
           onSubmit={form.handleSubmit(
             async () => {
-              // setIsSubmitting(true);
-              // onSubmit(
-              //   form.getValues(),
-              //   session,
-              //   selectedRolesForProgressBar,
-              //   submitResponse,
-              // ).catch((error) => {
-              //   console.error("Error in form submission:", error);
-              // });
+              // Do nothing
             },
             (errors) => {
               // scroll to the first error
@@ -220,8 +191,8 @@ export function SurveyQuestionnaire({
           />
           <SpinnerButton
             type="submit"
-            state={isSubmitting || !isOnline}
-            disabled={isSubmitting || !isOnline}
+            state={isSubmitting || onlineStatus === "isOffline"}
+            disabled={isSubmitting || onlineStatus === "isOffline"}
             name={getNextHref(selectedRolesForProgressBar) ? "Next" : "Submit"}
           />
         </form>

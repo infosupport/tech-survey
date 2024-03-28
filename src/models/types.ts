@@ -96,3 +96,5 @@ export type SurveyResponse = {
   questionId: string;
   answerId: string;
 };
+
+export type OnlineStatus = "isOnline" | "isOffline" | "isBackOnline";
