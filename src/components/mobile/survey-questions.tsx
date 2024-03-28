@@ -8,7 +8,11 @@ import {
 
 import { InfoCircledIcon } from "@radix-ui/react-icons";
 
-import { type AnswerOption, type Question } from "~/models/types";
+import {
+  type AnswerOption,
+  type Question,
+  type SurveyResponse,
+} from "~/models/types";
 
 import {
   FormControl,
@@ -17,33 +21,29 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 
-import { type Dispatch, type SetStateAction } from "react";
 import { type Session } from "next-auth";
 import { idToMoreInfo, idToTextMap } from "~/utils/optionMapping";
 
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import { handleResponseSelection } from "~/utils/survey-utils";
 import { type useForm } from "react-hook-form";
+import { findAnswerId } from "~/utils/survey-utils";
 
 export function MobileSurveyQuestionnaire({
   session,
   filteredQuestions,
   answerOptions,
   form,
-  responses,
-  setResponses,
-  submitResponse,
+  saveAnswer,
+  currentAnswers,
 }: {
   session: Session;
   filteredQuestions: Question[];
   answerOptions: AnswerOption[];
   form: ReturnType<typeof useForm>;
-  responses: Record<string, string>;
-  setResponses: Dispatch<SetStateAction<Record<string, string>>>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  submitResponse: any;
+  saveAnswer: (answer: SurveyResponse) => void;
+  currentAnswers: SurveyResponse[];
 }) {
   return (
     <div>
@@ -71,35 +71,31 @@ export function MobileSurveyQuestionnaire({
                         <RadioGroup
                           onValueChange={async (value) => {
                             field.onChange(value);
-                            try {
-                              await handleResponseSelection({
-                                questionId: question.id,
-                                answerId: value,
-                                responses,
-                                setResponses,
-                                session,
-                                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                                submitResponse,
-                              });
-                            } catch (error) {
-                              console.error(
-                                "Error in handleResponseSelection:",
-                                error,
-                              );
-                            }
+                            saveAnswer({
+                              userId: session.user.id,
+                              questionId: question.id,
+                              answerId: value,
+                            });
                           }}
                           value={field.value as string}
                           className="flex flex-col space-y-1"
                         >
                           <label
-                            className={`flex cursor-pointer items-center space-x-2 rounded-lg p-2 ${field.value === option.id || responses[question.id] === option.id ? "bg-custom-selectedLight dark:bg-custom-selected" : "hover:bg-gray-100 dark:hover:bg-slate-900"}`}
+                            className={`flex cursor-pointer items-center space-x-2 rounded-lg p-2 ${
+                              field.value === option.id ||
+                              findAnswerId(currentAnswers, question.id) ===
+                                option.id
+                                ? "bg-custom-selectedLight dark:bg-custom-selected"
+                                : "hover:bg-gray-100 dark:hover:bg-slate-900"
+                            }`}
                           >
                             <FormControl>
                               <RadioGroupItem
                                 value={option.id}
                                 checked={
                                   field.value === option.id ||
-                                  responses[question.id] === option.id
+                                  findAnswerId(currentAnswers, question.id) ===
+                                    option.id
                                 }
                               />
                             </FormControl>

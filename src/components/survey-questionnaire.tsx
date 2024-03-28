@@ -20,17 +20,13 @@ import {
   useGenerateFormAndSchema,
   getInitialResponses,
   getNextHref,
-  saveResponsesToDatabase,
-  onSubmit,
 } from "~/utils/survey-utils";
 import { toast } from "./ui/use-toast";
-import { useSubmission } from "~/utils/submission-utils";
+import { useSubmitAnswers } from "~/utils/submission-utils";
 import { SpinnerButton } from "./ui/button-spinner";
 import { Form } from "./ui/form";
 import renderNotFoundPage from "~/app/[...not_found]/page";
 import useOnlineStatus from "./use-online-status";
-
-let prevSes: any = undefined;
 
 export function SurveyQuestionnaire({
   session,
@@ -45,11 +41,6 @@ export function SurveyQuestionnaire({
   userSelectedRoles: Role[];
   userAnswersForRole: QuestionResult[];
 }) {
-
-  if(prevSes !== session){
-    console.log('session changed');
-    prevSes = session;
-  }
   const [selectedRoles] = useState<string[]>(
     userSelectedRoles.map((role) => role.id),
   );
@@ -62,15 +53,41 @@ export function SurveyQuestionnaire({
     (role) => slugify(role.role) === currentRole,
   );
 
-  const { isSubmitting, setIsSubmitting, submitResponse } = useSubmission();
-
-  const [responses, setResponses] = useState(
+  const [responses] = useState(
     getInitialResponses(userAnswersForRole, currentRole, userSelectedRoles),
   );
 
+  const { saveAnswer, isSubmitting, currentAnswers } = useSubmitAnswers();
+
+  // Dynamically generate the slugToId mapping
+  const slugToId: Record<string, string> = {};
+  userSelectedRoles.forEach((role) => {
+    slugToId[slugify(role.role)] = role.id;
+  });
+
+  const filteredQuestions = questions.filter(
+    (question) =>
+      question.roleIds?.some(
+        (roleId) => roleId === slugToId[currentRole ?? ""],
+      ) && selectedRoles.includes(slugToId[currentRole ?? ""] ?? ""),
+  );
+
+  const unansweredQuestions = filteredQuestions.filter(
+    (question) =>
+      !userAnswersForRole.some((answer) => answer.question.id === question.id),
+  );
+
+  const { form } = useGenerateFormAndSchema(
+    unansweredQuestions,
+    answerOptions,
+    responses,
+  );
+
+  // const { saveAnswer } = useSubmitAnswers();
+
   const screenSize = useScreenSize();
 
-  const isOnline = useOnlineStatus();
+  const isOnline = useOnlineStatus(); // todo: use isOnline | isOffline | isBackOnline
 
   const [previouslyOffline, setPreviouslyOffline] = useState(false);
 
@@ -78,11 +95,6 @@ export function SurveyQuestionnaire({
     console.log("isOnline", isOnline);
     const handleOnline = async () => {
       if (previouslyOffline) {
-        try {
-          await saveResponsesToDatabase(responses, session, submitResponse);
-        } catch (error) {
-          console.error("Error in online submission:", error);
-        }
         setPreviouslyOffline(false);
       }
     };
@@ -94,7 +106,7 @@ export function SurveyQuestionnaire({
         console.log("Failed to save responses");
       });
     }
-  }, [isOnline, previouslyOffline, responses, session, submitResponse]);
+  }, [isOnline, previouslyOffline]);
 
   useEffect(() => {
     if (isOnline && previouslyOffline) {
@@ -117,19 +129,6 @@ export function SurveyQuestionnaire({
     return renderNotFoundPage();
   }
 
-  // Dynamically generate the slugToId mapping
-  const slugToId: Record<string, string> = {};
-  userSelectedRoles.forEach((role) => {
-    slugToId[slugify(role.role)] = role.id;
-  });
-
-  const filteredQuestions = questions.filter(
-    (question) =>
-      question.roleIds?.some(
-        (roleId) => roleId === slugToId[currentRole ?? ""],
-      ) && selectedRoles.includes(slugToId[currentRole ?? ""] ?? ""),
-  );
-
   // function that check if a user already has more than 1 response for a question
   function hasAnsweredAllQuestionsForRole(
     userAnswersForRole: QuestionResult[],
@@ -150,17 +149,6 @@ export function SurveyQuestionnaire({
 
     return answeredQuestionsForRole.length >= totalQuestionsForRole;
   }
-
-  const unansweredQuestions = filteredQuestions.filter(
-    (question) =>
-      !userAnswersForRole.some((answer) => answer.question.id === question.id),
-  );
-
-  const { form } = useGenerateFormAndSchema(
-    unansweredQuestions,
-    answerOptions,
-    responses,
-  );
 
   const selectedRolesForProgressBar = userSelectedRoles
     .sort((a, b) => {
@@ -199,15 +187,15 @@ export function SurveyQuestionnaire({
         <form
           onSubmit={form.handleSubmit(
             async () => {
-              setIsSubmitting(true);
-              onSubmit(
-                form.getValues(),
-                session,
-                selectedRolesForProgressBar,
-                submitResponse,
-              ).catch((error) => {
-                console.error("Error in form submission:", error);
-              });
+              // setIsSubmitting(true);
+              // onSubmit(
+              //   form.getValues(),
+              //   session,
+              //   selectedRolesForProgressBar,
+              //   submitResponse,
+              // ).catch((error) => {
+              //   console.error("Error in form submission:", error);
+              // });
             },
             (errors) => {
               // scroll to the first error
@@ -227,14 +215,13 @@ export function SurveyQuestionnaire({
             filteredQuestions={filteredQuestions}
             answerOptions={answerOptions}
             form={form}
-            responses={responses}
-            setResponses={setResponses}
-            submitResponse={submitResponse}
+            saveAnswer={saveAnswer}
+            currentAnswers={currentAnswers}
           />
           <SpinnerButton
             type="submit"
-            state={isSubmitting || submitResponse.isLoading || !isOnline}
-            disabled={isSubmitting || submitResponse.isLoading || !isOnline}
+            state={isSubmitting || !isOnline}
+            disabled={isSubmitting || !isOnline}
             name={getNextHref(selectedRolesForProgressBar) ? "Next" : "Submit"}
           />
         </form>

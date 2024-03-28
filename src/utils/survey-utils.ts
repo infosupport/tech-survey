@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { z } from "zod";
@@ -7,17 +6,13 @@ import {
   type Question,
   type QuestionResult,
   type ProgressBar,
-  type HandleResponseSelectionParams,
   type AnswerOption,
   type SurveyResponse,
   type QuestionSchema,
   type Role,
-  type SetQuestionResultMutation,
 } from "~/models/types";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "~/components/ui/use-toast";
-import { type Session } from "next-auth";
 import { slugify } from "./slugify";
 
 export function getInitialResponses(
@@ -88,31 +83,10 @@ export function hasAnsweredAllQuestionsForRole(
   return answeredQuestionsForRole.length >= totalQuestionsForRole;
 }
 
-export async function handleResponseSelection({
-  questionId,
-  answerId,
-  responses,
-  setResponses,
-  session,
-  submitResponse,
-}: HandleResponseSelectionParams) {
-  setResponses((prevResponses) => ({
-    ...prevResponses,
-    [questionId]: answerId,
-  }));
-
-  console.log("HandleResponseSelection responses", responses);
-  await saveResponsesToDatabase(
-    { ...responses, [questionId]: answerId },
-    session,
-    submitResponse,
-  );
-}
-
 export function useGenerateFormAndSchema(
   unansweredQuestions: Question[],
   answerOptions: AnswerOption[],
-  formValues: Record<string, any>,
+  formValues: Record<string, string>,
 ): {
   form: ReturnType<typeof useForm>;
   FormSchema: z.ZodObject<QuestionSchema>;
@@ -139,79 +113,12 @@ export function useGenerateFormAndSchema(
   return { form, FormSchema };
 }
 
-export async function saveResponsesToDatabase(
-  responses: Record<string, string>,
-  session: Session | null,
-  submitResponse: SetQuestionResultMutation,
-): Promise<boolean> {
-  console.log("responses", responses);
-
-  const mappedResponses: SurveyResponse[] = Object.entries(responses).map(
-    ([questionId, answerId]) => ({
-      userId: session?.user.id,
-      questionId,
-      answerId,
-    }),
+export const findAnswerId = (
+  currentAnswers: SurveyResponse[],
+  questionId: string,
+): string | undefined => {
+  const response = currentAnswers.find(
+    (response) => response.questionId === questionId,
   );
-
-  console.log("mappedResponses", mappedResponses);
-
-  try {
-    const mappedResponsesWithUserId = mappedResponses.map((response) => ({
-      ...response,
-      userId: session?.user.id ?? "",
-    }));
-
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-    await Promise.all([submitResponse.mutateAsync(mappedResponsesWithUserId)]);
-    return true;
-  } catch (error) {
-    console.error("Error saving responses:", error);
-    toast({
-      title: "Error!",
-      description: "Failed to save responses.",
-      variant: "destructive",
-    });
-    return false;
-  }
-}
-
-export async function onSubmit(
-  responses: Record<string, string>,
-  session: Session | null,
-  selectedRolesForProgressBar: ProgressBar[],
-  submitResponse: SetQuestionResultMutation,
-): Promise<void> {
-  let responsesSaved = false;
-  try {
-    responsesSaved = await saveResponsesToDatabase(
-      responses,
-      session,
-      submitResponse,
-    );
-  } catch (error) {
-    console.error("Error in onSubmit:", error);
-  }
-
-  if (responsesSaved) {
-    const nextHref = getNextHref(selectedRolesForProgressBar);
-    if (nextHref) {
-      window.location.assign(nextHref);
-    } else {
-      toast({
-        title: "Success!",
-        description: "Your survey has been submitted.",
-      });
-      // wait for 2 seconds before redirecting to the thank you page
-      setTimeout(() => {
-        window.location.assign("/thank-you");
-      }, 2000);
-    }
-  } else {
-    toast({
-      title: "Failed to save responses. Unable to reach the server.",
-      description: "Please try again later.",
-      variant: "destructive",
-    });
-  }
-}
+  return response?.answerId;
+};
