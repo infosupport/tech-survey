@@ -17,10 +17,10 @@ import { MobileSurveyQuestionnaire } from "./mobile/survey-questions";
 import { SurveyQuestions } from "./survey-questions";
 import { MobileProgressionBar } from "./mobile/progression-bar";
 import {
-  GenerateFormAndSchema,
+  useGenerateFormAndSchema,
   getInitialResponses,
   getNextHref,
-  SaveResponsesToDatabase,
+  saveResponsesToDatabase,
   onSubmit,
 } from "~/utils/survey-utils";
 import { toast } from "./ui/use-toast";
@@ -29,6 +29,8 @@ import { SpinnerButton } from "./ui/button-spinner";
 import { Form } from "./ui/form";
 import renderNotFoundPage from "~/app/[...not_found]/page";
 import useOnlineStatus from "./use-online-status";
+
+let prevSes: any = undefined;
 
 export function SurveyQuestionnaire({
   session,
@@ -43,6 +45,11 @@ export function SurveyQuestionnaire({
   userSelectedRoles: Role[];
   userAnswersForRole: QuestionResult[];
 }) {
+
+  if(prevSes !== session){
+    console.log('session changed');
+    prevSes = session;
+  }
   const [selectedRoles] = useState<string[]>(
     userSelectedRoles.map((role) => role.id),
   );
@@ -72,7 +79,7 @@ export function SurveyQuestionnaire({
     const handleOnline = async () => {
       if (previouslyOffline) {
         try {
-          await SaveResponsesToDatabase(responses, session, submitResponse);
+          await saveResponsesToDatabase(responses, session, submitResponse);
         } catch (error) {
           console.error("Error in online submission:", error);
         }
@@ -149,7 +156,7 @@ export function SurveyQuestionnaire({
       !userAnswersForRole.some((answer) => answer.question.id === question.id),
   );
 
-  const { form } = GenerateFormAndSchema(
+  const { form } = useGenerateFormAndSchema(
     unansweredQuestions,
     answerOptions,
     responses,

@@ -27,7 +27,7 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
-import { HandleResponseSelection } from "~/utils/survey-utils";
+import { handleResponseSelection } from "~/utils/survey-utils";
 import { type Dispatch, type SetStateAction } from "react";
 import { InfoCircledIcon } from "@radix-ui/react-icons";
 import { type useForm } from "react-hook-form";
@@ -118,7 +118,7 @@ export function SurveyQuestions({
                             onValueChange={async (value) => {
                               field.onChange(value);
                               try {
-                                await HandleResponseSelection({
+                                await handleResponseSelection({
                                   questionId: question.id,
                                   answerId: value,
                                   responses,

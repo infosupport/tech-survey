@@ -12,6 +12,7 @@ import {
   type SurveyResponse,
   type QuestionSchema,
   type Role,
+  type SetQuestionResultMutation,
 } from "~/models/types";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -87,7 +88,7 @@ export function hasAnsweredAllQuestionsForRole(
   return answeredQuestionsForRole.length >= totalQuestionsForRole;
 }
 
-export async function HandleResponseSelection({
+export async function handleResponseSelection({
   questionId,
   answerId,
   responses,
@@ -101,14 +102,14 @@ export async function HandleResponseSelection({
   }));
 
   console.log("HandleResponseSelection responses", responses);
-  await SaveResponsesToDatabase(
+  await saveResponsesToDatabase(
     { ...responses, [questionId]: answerId },
     session,
     submitResponse,
   );
 }
 
-export function GenerateFormAndSchema(
+export function useGenerateFormAndSchema(
   unansweredQuestions: Question[],
   answerOptions: AnswerOption[],
   formValues: Record<string, any>,
@@ -138,10 +139,10 @@ export function GenerateFormAndSchema(
   return { form, FormSchema };
 }
 
-export async function SaveResponsesToDatabase(
+export async function saveResponsesToDatabase(
   responses: Record<string, string>,
   session: Session | null,
-  submitResponse: any,
+  submitResponse: SetQuestionResultMutation,
 ): Promise<boolean> {
   console.log("responses", responses);
 
@@ -179,11 +180,11 @@ export async function onSubmit(
   responses: Record<string, string>,
   session: Session | null,
   selectedRolesForProgressBar: ProgressBar[],
-  submitResponse: any,
+  submitResponse: SetQuestionResultMutation,
 ): Promise<void> {
   let responsesSaved = false;
   try {
-    responsesSaved = await SaveResponsesToDatabase(
+    responsesSaved = await saveResponsesToDatabase(
       responses,
       session,
       submitResponse,

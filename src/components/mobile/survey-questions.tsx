@@ -24,7 +24,7 @@ import { idToMoreInfo, idToTextMap } from "~/utils/optionMapping";
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import { HandleResponseSelection } from "~/utils/survey-utils";
+import { handleResponseSelection } from "~/utils/survey-utils";
 import { type useForm } from "react-hook-form";
 
 export function MobileSurveyQuestionnaire({
@@ -72,7 +72,7 @@ export function MobileSurveyQuestionnaire({
                           onValueChange={async (value) => {
                             field.onChange(value);
                             try {
-                              await HandleResponseSelection({
+                              await handleResponseSelection({
                                 questionId: question.id,
                                 answerId: value,
                                 responses,

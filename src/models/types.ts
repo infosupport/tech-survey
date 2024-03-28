@@ -1,5 +1,6 @@
-import { type Session } from "next-auth";
-import { type z } from "zod";
+import type { Session } from "next-auth";
+import type { z } from "zod";
+import type { api } from "~/trpc/react";
 
 export interface Survey {
   id: string;
@@ -70,9 +71,12 @@ export interface HandleResponseSelectionParams {
   responses: Record<string, string>;
   setResponses: React.Dispatch<React.SetStateAction<Record<string, string>>>;
   session: Session;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  submitResponse: any;
+  submitResponse: SetQuestionResultMutation;
 }
+
+export type SetQuestionResultMutation = ReturnType<
+  typeof api.survey.setQuestionResult.useMutation
+>;
 
 export interface UserAnswer {
   question: {

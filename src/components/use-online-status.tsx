@@ -6,7 +6,7 @@ function useOnlineStatus() {
   const [isOnline, setIsOnline] = useState(true);
 
   useEffect(() => {
-    setIsOnline(window.navigator && window.navigator.onLine);
+    setIsOnline(window.navigator.onLine);
     function handleOnline() {
       setIsOnline(true);
     }
