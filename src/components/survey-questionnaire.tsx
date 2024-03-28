@@ -17,14 +17,12 @@ import { MobileSurveyQuestionnaire } from "./mobile/survey-questions";
 import { SurveyQuestions } from "./survey-questions";
 import { MobileProgressionBar } from "./mobile/progression-bar";
 import {
-  GenerateFormAndSchema,
+  useGenerateFormAndSchema,
   getInitialResponses,
   getNextHref,
-  SaveResponsesToDatabase,
-  onSubmit,
 } from "~/utils/survey-utils";
 import { toast } from "./ui/use-toast";
-import { useSubmission } from "~/utils/submission-utils";
+import { useSubmitAnswers } from "~/utils/submission-utils";
 import { SpinnerButton } from "./ui/button-spinner";
 import { Form } from "./ui/form";
 import renderNotFoundPage from "~/app/[...not_found]/page";
@@ -55,60 +53,11 @@ export function SurveyQuestionnaire({
     (role) => slugify(role.role) === currentRole,
   );
 
-  const { isSubmitting, setIsSubmitting, submitResponse } = useSubmission();
-
-  const [responses, setResponses] = useState(
+  const [responses] = useState(
     getInitialResponses(userAnswersForRole, currentRole, userSelectedRoles),
   );
 
-  const screenSize = useScreenSize();
-
-  const isOnline = useOnlineStatus();
-
-  const [previouslyOffline, setPreviouslyOffline] = useState(false);
-
-  useEffect(() => {
-    console.log("isOnline", isOnline);
-    const handleOnline = async () => {
-      if (previouslyOffline) {
-        try {
-          await SaveResponsesToDatabase(responses, session, submitResponse);
-        } catch (error) {
-          console.error("Error in online submission:", error);
-        }
-        setPreviouslyOffline(false);
-      }
-    };
-
-    if (!isOnline) {
-      setPreviouslyOffline(true);
-    } else {
-      handleOnline().catch(() => {
-        console.log("Failed to save responses");
-      });
-    }
-  }, [isOnline, previouslyOffline, responses, session, submitResponse]);
-
-  useEffect(() => {
-    if (isOnline && previouslyOffline) {
-      toast({
-        title: "Back online!",
-        description:
-          "Your (intermediate) responses have been submitted successfully.",
-      });
-    } else if (!isOnline) {
-      toast({
-        title: "Failed to save responses. Retrying...",
-        description:
-          "Data submission in progress... Your responses will be automatically submitted once you're back online. Feel free to continue filling out the survey.",
-        variant: "informative",
-      });
-    }
-  }, [isOnline, previouslyOffline]);
-
-  if (!roleExists) {
-    return renderNotFoundPage();
-  }
+  const { saveAnswer, isSubmitting, currentAnswers } = useSubmitAnswers();
 
   // Dynamically generate the slugToId mapping
   const slugToId: Record<string, string> = {};
@@ -122,6 +71,42 @@ export function SurveyQuestionnaire({
         (roleId) => roleId === slugToId[currentRole ?? ""],
       ) && selectedRoles.includes(slugToId[currentRole ?? ""] ?? ""),
   );
+
+  const unansweredQuestions = filteredQuestions.filter(
+    (question) =>
+      !userAnswersForRole.some((answer) => answer.question.id === question.id),
+  );
+
+  const { form } = useGenerateFormAndSchema(
+    unansweredQuestions,
+    answerOptions,
+    responses,
+  );
+
+  const screenSize = useScreenSize();
+
+  const onlineStatus = useOnlineStatus();
+
+  useEffect(() => {
+    if (onlineStatus === "isBackOnline") {
+      toast({
+        title: "Back online!",
+        description:
+          "Your (intermediate) responses have been submitted successfully.",
+      });
+    } else if (onlineStatus === "isOffline") {
+      toast({
+        title: "Failed to save responses. Retrying...",
+        description:
+          "Data submission in progress... Your responses will be automatically submitted once you're back online. Feel free to continue filling out the survey.",
+        variant: "informative",
+      });
+    }
+  }, [onlineStatus]);
+
+  if (!roleExists) {
+    return renderNotFoundPage();
+  }
 
   // function that check if a user already has more than 1 response for a question
   function hasAnsweredAllQuestionsForRole(
@@ -143,17 +128,6 @@ export function SurveyQuestionnaire({
 
     return answeredQuestionsForRole.length >= totalQuestionsForRole;
   }
-
-  const unansweredQuestions = filteredQuestions.filter(
-    (question) =>
-      !userAnswersForRole.some((answer) => answer.question.id === question.id),
-  );
-
-  const { form } = GenerateFormAndSchema(
-    unansweredQuestions,
-    answerOptions,
-    responses,
-  );
 
   const selectedRolesForProgressBar = userSelectedRoles
     .sort((a, b) => {
@@ -192,15 +166,7 @@ export function SurveyQuestionnaire({
         <form
           onSubmit={form.handleSubmit(
             async () => {
-              setIsSubmitting(true);
-              onSubmit(
-                form.getValues(),
-                session,
-                selectedRolesForProgressBar,
-                submitResponse,
-              ).catch((error) => {
-                console.error("Error in form submission:", error);
-              });
+              // Do nothing
             },
             (errors) => {
               // scroll to the first error
@@ -220,14 +186,13 @@ export function SurveyQuestionnaire({
             filteredQuestions={filteredQuestions}
             answerOptions={answerOptions}
             form={form}
-            responses={responses}
-            setResponses={setResponses}
-            submitResponse={submitResponse}
+            saveAnswer={saveAnswer}
+            currentAnswers={currentAnswers}
           />
           <SpinnerButton
             type="submit"
-            state={isSubmitting || submitResponse.isLoading || !isOnline}
-            disabled={isSubmitting || submitResponse.isLoading || !isOnline}
+            state={isSubmitting || onlineStatus === "isOffline"}
+            disabled={isSubmitting || onlineStatus === "isOffline"}
             name={getNextHref(selectedRolesForProgressBar) ? "Next" : "Submit"}
           />
         </form>

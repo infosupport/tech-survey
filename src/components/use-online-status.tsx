@@ -1,27 +1,36 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { type OnlineStatus } from "~/models/types";
 
-function useOnlineStatus() {
-  const [isOnline, setIsOnline] = useState(true);
+function useOnlineStatus(): OnlineStatus {
+  const [onlineStatus, setOnlineStatus] = useState<OnlineStatus>("isOnline");
+  const [prevOnline, setPrevOnline] = useState(true);
 
   useEffect(() => {
-    setIsOnline(window.navigator && window.navigator.onLine);
     function handleOnline() {
-      setIsOnline(true);
+      setOnlineStatus(() => {
+        if (!prevOnline) return "isBackOnline";
+        return "isOnline";
+      });
+      setPrevOnline(true);
     }
+
     function handleOffline() {
-      setIsOnline(false);
+      setOnlineStatus("isOffline");
+      setPrevOnline(false);
     }
+
+    setPrevOnline(window.navigator.onLine);
     window.addEventListener("online", handleOnline);
     window.addEventListener("offline", handleOffline);
     return () => {
       window.removeEventListener("online", handleOnline);
       window.removeEventListener("offline", handleOffline);
     };
-  }, []);
+  }, [prevOnline]);
 
-  return isOnline;
+  return onlineStatus;
 }
 
 export default useOnlineStatus;

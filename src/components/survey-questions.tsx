@@ -6,7 +6,11 @@ import {
   HoverCardTrigger,
 } from "~/components/ui/hover-card";
 
-import { type AnswerOption, type Question } from "~/models/types";
+import {
+  type AnswerOption,
+  type Question,
+  type SurveyResponse,
+} from "~/models/types";
 
 import {
   FormControl,
@@ -27,28 +31,24 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
-import { HandleResponseSelection } from "~/utils/survey-utils";
-import { type Dispatch, type SetStateAction } from "react";
 import { InfoCircledIcon } from "@radix-ui/react-icons";
 import { type useForm } from "react-hook-form";
+import { findAnswerId } from "~/utils/survey-utils";
 
 export function SurveyQuestions({
   session,
   filteredQuestions,
   answerOptions,
   form,
-  responses,
-  setResponses,
-  submitResponse,
+  saveAnswer,
+  currentAnswers,
 }: {
   session: Session;
   filteredQuestions: Question[];
   answerOptions: AnswerOption[];
   form: ReturnType<typeof useForm>;
-  responses: Record<string, string>;
-  setResponses: Dispatch<SetStateAction<Record<string, string>>>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  submitResponse: any;
+  saveAnswer: (answer: SurveyResponse) => void;
+  currentAnswers: SurveyResponse[];
 }) {
   return (
     <Table divClassname="">
@@ -96,18 +96,16 @@ export function SurveyQuestions({
                     : ""
                 }
               >
-                {/* add a dashed border of 1px in color red in case of validation error */}
                 <TableCell>
                   {question.questionText}
                   <FormMessage />
                 </TableCell>
                 {answerOptions.map((option) => (
                   <TableCell key={option.id} className="w-[300px]">
-                    {/* add a dashed border of 1px in color red in case of validation error */}
                     <label
                       className={`${
                         field.value === option.id ||
-                        responses[question.id] === option.id
+                        findAnswerId(currentAnswers, question.id) === option.id
                           ? "rounded-lg border-2 border-custom-selected "
                           : ""
                       }flex h-[40px] cursor-pointer items-center justify-center`}
@@ -117,22 +115,11 @@ export function SurveyQuestions({
                           <RadioGroup
                             onValueChange={async (value) => {
                               field.onChange(value);
-                              try {
-                                await HandleResponseSelection({
-                                  questionId: question.id,
-                                  answerId: value,
-                                  responses,
-                                  setResponses,
-                                  session,
-                                  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                                  submitResponse,
-                                });
-                              } catch (error) {
-                                console.error(
-                                  "Error in handleResponseSelection:",
-                                  error,
-                                );
-                              }
+                              saveAnswer({
+                                userId: session.user.id,
+                                questionId: question.id,
+                                answerId: value,
+                              });
                             }}
                             value={field.value as string}
                             className="flex flex-col space-y-1"
@@ -142,7 +129,8 @@ export function SurveyQuestions({
                                 value={option.id}
                                 checked={
                                   field.value === option.id ||
-                                  responses[question.id] === option.id
+                                  findAnswerId(currentAnswers, question.id) ===
+                                    option.id
                                 }
                               />
                             </FormControl>
