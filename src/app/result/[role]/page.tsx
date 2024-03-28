@@ -96,6 +96,7 @@ const ShowResultsWrapper = async () => {
 
   let transformedData: TransformedData = {};
 
+  // TODO: Does not handle multiple user answers for the same question
   userAnswersForRole.forEach((userAnswer) => {
     const { question, answerId } = userAnswer;
     const questionText: string = question?.questionText ?? "";
@@ -121,6 +122,8 @@ const ShowResultsWrapper = async () => {
       }
     });
   });
+
+  console.log(transformedData);
 
   return <ResultsWrapper data={transformedData} />;
 };
