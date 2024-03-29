@@ -8,15 +8,13 @@ import { ArrowRight } from "./svg";
 export function Login({ session }: { session?: Session | null }) {
   if (!session) {
     return (
-      <div className="mt-5 flex flex-col items-center gap-6">
-        <Button
-          onClick={() => signIn("azure-ad")}
-          className=" bg-custom-buttonPrimary text-custom-secondary hover:bg-custom-buttonHover dark:bg-custom-buttonPrimary dark:hover:bg-custom-buttonHover"
-        >
-          Sign in
-          <ArrowRight />
-        </Button>
-      </div>
+      <Button
+        onClick={() => signIn("azure-ad")}
+        className=" bg-custom-buttonPrimary text-custom-secondary hover:bg-custom-buttonHover dark:bg-custom-buttonPrimary dark:hover:bg-custom-buttonHover"
+      >
+        Start survey
+        <ArrowRight />
+      </Button>
     );
   }
 
