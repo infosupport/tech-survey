@@ -102,7 +102,67 @@ const ShowTableWrapper = async () => {
     }
   }
 
-  return <ShowDataTable dataByRoleAndQuestion={dataByRoleAndQuestion} />;
+  const aggregatedDataByRole: Record<
+    string,
+    Record<string, { name: string; counts: number[] }>
+  > = {};
+
+  for (const entry of userAnswersForRole) {
+    for (const role of entry.question.roles ?? []) {
+      const roleName = role.role || "Unknown Role";
+
+      if (!aggregatedDataByRole[roleName]) {
+        aggregatedDataByRole[roleName] = {};
+      }
+
+      const answerValue = parseInt(answerOptionMap[entry.answerId] ?? "");
+      const userName = userMap[entry.userId]?.name ?? "Unknown User";
+      const userEmail = userMap[entry.userId]?.email ?? "Unknown Email";
+
+      if (!isNaN(answerValue)) {
+        if (!aggregatedDataByRole[roleName]?.[userEmail]) {
+          aggregatedDataByRole[roleName]![userEmail] = {
+            name: userName,
+            counts: [0, 0, 0, 0],
+          };
+        }
+        aggregatedDataByRole[roleName]![userEmail]!.counts[answerValue]++;
+      }
+    }
+  }
+
+  // Sorting the results based on the counts of each answer
+  for (const role in aggregatedDataByRole) {
+    for (const user in aggregatedDataByRole[role]) {
+      const counts = aggregatedDataByRole[role]![user]?.counts ?? [0, 0, 0, 0];
+      aggregatedDataByRole[role]![user]!.counts = counts;
+    }
+  }
+
+  // Sorting users based on the total count of 0 answers, then 1, 2, and 3
+  for (const role in aggregatedDataByRole) {
+    const sortedEntries = Object.entries(aggregatedDataByRole[role] ?? {}).sort(
+      (a, b) => {
+        const countsA = a[1].counts;
+        const countsB = b[1].counts;
+        for (let i = 0; i < countsA.length; i++) {
+          const diff = (countsB[i] ?? 0) - (countsA[i] ?? 0);
+          if (diff !== 0) {
+            return diff;
+          }
+        }
+        return 0;
+      },
+    );
+    aggregatedDataByRole[role] = Object.fromEntries(sortedEntries);
+  }
+
+  return (
+    <ShowDataTable
+      dataByRoleAndQuestion={dataByRoleAndQuestion}
+      aggregatedDataByRole={aggregatedDataByRole}
+    />
+  );
 };
 
 export default ManagementPage;
