@@ -1,10 +1,29 @@
-import type { ColumnDef } from "@tanstack/react-table";
-import { columns } from "~/components/columns";
-import { DataTable } from "~/components/data-table";
-import type { QuestionResult } from "~/models/types";
+import type { Metadata } from "next";
+import { Suspense } from "react";
+import { ShowRolesWrapper } from "~/app/result/[role]/page";
+import ButtonSkeleton from "~/components/loading/button-loader";
+import ShowDataTable from "~/components/show-data-table";
+import type { DataByRoleAndQuestion, QuestionResult } from "~/models/types";
 import { db } from "~/server/db";
 
+export const metadata: Metadata = {
+  title: "Management insights",
+};
+
 const ManagementPage = async () => {
+  return (
+    <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
+      <Suspense fallback={<ButtonSkeleton />}>
+        <ShowRolesWrapper path="/management" />
+      </Suspense>
+      <Suspense fallback={<ButtonSkeleton />}>
+        <ShowTableWrapper />
+      </Suspense>
+    </div>
+  );
+};
+
+const ShowTableWrapper = async () => {
   const userAnswersForRole: QuestionResult[] = await db.questionResult.findMany(
     {
       include: {
@@ -54,10 +73,7 @@ const ManagementPage = async () => {
   }
 
   // Group the data by roles and questions
-  const dataByRoleAndQuestion: Record<
-    string,
-    Record<string, { name: string; email: string; answer: string }[]>
-  > = {};
+  const dataByRoleAndQuestion: DataByRoleAndQuestion = {};
 
   for (const entry of userAnswersForRole) {
     for (const role of entry.question.roles ?? []) {
@@ -78,7 +94,7 @@ const ManagementPage = async () => {
       });
 
       // Sort the answers based on the answer value (0, 1, 2, or 3)
-      dataByRoleAndQuestion[roleName][questionText].sort((a, b) => {
+      dataByRoleAndQuestion[roleName]?.[questionText]?.sort((a, b) => {
         const answerValueA = parseInt(a.answer);
         const answerValueB = parseInt(b.answer);
         return answerValueA - answerValueB;
@@ -86,33 +102,7 @@ const ManagementPage = async () => {
     }
   }
 
-  return (
-    <div>
-      {Object.keys(dataByRoleAndQuestion).map((role) => (
-        <div key={role}>
-          <h2 className="mb-4 text-2xl font-bold">{role}</h2>
-          {dataByRoleAndQuestion[role] &&
-            Object.keys(dataByRoleAndQuestion[role]).map((question) => (
-              <div key={question}>
-                <h3 className="mb-3 text-lg font-semibold">{question}</h3>
-                <div style={{ marginBottom: "1.5rem" }}>
-                  {" "}
-                  <DataTable
-                    columns={
-                      columns as ColumnDef<
-                        { name: string; email: string; answer: string },
-                        unknown
-                      >[]
-                    }
-                    data={dataByRoleAndQuestion[role]?.[question] ?? []}
-                  />
-                </div>
-              </div>
-            ))}
-        </div>
-      ))}
-    </div>
-  );
+  return <ShowDataTable dataByRoleAndQuestion={dataByRoleAndQuestion} />;
 };
 
 export default ManagementPage;

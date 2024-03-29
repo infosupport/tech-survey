@@ -66,7 +66,7 @@ export function DataTable<TData, TValue>({
                   data-state={row.getIsSelected() ? "selected" : undefined}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className="w-[400px]">
+                    <TableCell key={cell.id} className="w-[400px] pl-2">
                       {cell.column.columnDef?.header === "Answer" &&
                         idToTextMap[
                           (typeof cell.column.columnDef?.cell === "function"

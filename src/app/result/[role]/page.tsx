@@ -10,12 +10,12 @@ import {
   type TransformedData,
 } from "~/models/types";
 import { SelectRoleResults } from "../../../components/select-role-results";
-import { slugify } from "~/utils/slugify";
 import ResultsWrapper from "~/components/results";
 
 import { type Metadata } from "next";
 import ButtonSkeleton from "~/components/loading/button-loader";
 import LegendSkeleton from "~/components/loading/results-loader";
+import { generateRolesWithHref } from "~/utils/role-utils";
 
 export const metadata: Metadata = {
   title: "Results",
@@ -33,7 +33,7 @@ const Results: React.FC = async () => {
         <span className="block sm:inline"> Tech Survey - Results</span>
       </h1>
       <Suspense fallback={<ButtonSkeleton />}>
-        <ShowRolesWrapper />
+        <ShowRolesWrapper path="/result" />
       </Suspense>
 
       <Suspense fallback={<LegendSkeleton />}>
@@ -51,29 +51,8 @@ const Results: React.FC = async () => {
   );
 };
 
-const ShowRolesWrapper = async () => {
-  const roles: Role[] = await db.role.findMany();
-
-  const availableRoles = roles
-
-    // sort roles by general first
-    .sort((a, b) => {
-      const roleA = a.role.toLowerCase();
-      const roleB = b.role.toLowerCase();
-
-      if (roleA === "general") return -1;
-      if (roleB === "general") return 1;
-
-      return 0;
-    })
-    .map((role) => ({
-      id: role.id,
-      href: `/result/${slugify(role.role)}`,
-      label: role.role,
-      current: false,
-      completed: false,
-      started: false,
-    }));
+export const ShowRolesWrapper = async ({ path }: { path: string }) => {
+  const availableRoles = await generateRolesWithHref(path)();
 
   return <SelectRoleResults roles={availableRoles} />;
 };
@@ -116,8 +95,6 @@ const ShowResultsWrapper = async () => {
       }
     });
   });
-
-  console.log(transformedData);
 
   return <ResultsWrapper data={transformedData} />;
 };
