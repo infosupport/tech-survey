@@ -98,3 +98,15 @@ export type SurveyResponse = {
 };
 
 export type OnlineStatus = "isOnline" | "isOffline" | "isBackOnline";
+
+export type DataByRoleAndQuestion = Record<
+  string,
+  Record<
+    string,
+    {
+      name: string;
+      email: string;
+      answer: string;
+    }[]
+  >
+>;
