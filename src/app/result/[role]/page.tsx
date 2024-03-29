@@ -85,11 +85,17 @@ const ShowResultsWrapper = async () => {
       if (roleName && questionText) {
         // Check for existence of roleName and questionText
         transformedData[roleName] ??= {};
-        transformedData[roleName][questionText] ??= {};
+        transformedData[roleName]![questionText] ??= {};
 
         const answerString =
           answerOptions.find((option) => option.id === answerId)?.option ?? "";
-        const roleData = transformedData[roleName][questionText];
+        let roleData = transformedData[roleName]?.[questionText];
+
+        // Ensure roleData is properly initialized
+        if (!roleData) {
+          roleData = {};
+          transformedData[roleName]![questionText] = roleData;
+        }
 
         roleData[answerString] = (roleData[answerString] ?? 0) + 1;
       }

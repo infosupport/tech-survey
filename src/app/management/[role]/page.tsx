@@ -83,11 +83,11 @@ const ShowTableWrapper = async () => {
       if (!dataByRoleAndQuestion[roleName]) {
         dataByRoleAndQuestion[roleName] = {};
       }
-      if (!dataByRoleAndQuestion[roleName][questionText]) {
-        dataByRoleAndQuestion[roleName][questionText] = [];
+      if (!dataByRoleAndQuestion[roleName]![questionText]) {
+        dataByRoleAndQuestion[roleName]![questionText] = [];
       }
 
-      dataByRoleAndQuestion[roleName][questionText]?.push({
+      dataByRoleAndQuestion[roleName]?.[questionText]?.push({
         name: userMap[entry.userId]?.name ?? "Unknown User",
         email: userMap[entry.userId]?.email ?? "Unknown Email",
         answer: answerOptionMap[entry.answerId] ?? "Unknown Answer",
