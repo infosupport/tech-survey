@@ -1,9 +1,5 @@
-/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
-import { getServerAuthSession } from "~/server/auth";
-
 import React, { Suspense } from "react";
 import { db } from "~/server/db";
-import { Login } from "../../../components/login";
 import {
   type Role,
   type QuestionResult,
@@ -22,8 +18,6 @@ export const metadata: Metadata = {
 };
 
 const Results: React.FC = async () => {
-  const session = await getServerAuthSession();
-
   return (
     <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
       <h1 className="text-center text-5xl font-extrabold tracking-tight">
@@ -39,14 +33,6 @@ const Results: React.FC = async () => {
       <Suspense fallback={<LegendSkeleton />}>
         <ShowResultsWrapper />
       </Suspense>
-      {!session && (
-        <div>
-          <div className="max-w-2xl text-center">
-            <p>Please log in to view the results of the 2024 Tech Survey.</p>
-          </div>
-          <Login session={session} />
-        </div>
-      )}
     </div>
   );
 };
