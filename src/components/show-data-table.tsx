@@ -42,6 +42,7 @@ const ShowDataTable: React.FC<ShowDataTableProps> = ({
           return (
             <div key={role}>
               <h2 className="mb-4 text-2xl font-bold">{role}</h2>
+              <h3 className="mb-3 text-lg font-semibold">Aggregated Results</h3>
 
               <DataTable<AggregatedSurveyResult, unknown>
                 columns={aggregateColumns}
@@ -59,6 +60,7 @@ const ShowDataTable: React.FC<ShowDataTableProps> = ({
                   },
                 )}
               />
+              <hr className="my-10" />
 
               {Object.keys(dataByRoleAndQuestion[role] ?? {}).map(
                 (question) => (
@@ -74,6 +76,7 @@ const ShowDataTable: React.FC<ShowDataTableProps> = ({
                         }
                         data={dataByRoleAndQuestion[role]?.[question] ?? []}
                       />
+                      <hr className="my-10" />
                     </div>
                   </div>
                 ),

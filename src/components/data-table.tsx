@@ -39,12 +39,12 @@ export function DataTable<TData, TValue>({
     <div>
       <div className="rounded-md border">
         <Table>
-          <TableHeader>
+          <TableHeader className="bg-slate-100 dark:bg-slate-900">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead key={header.id} className="w-1/4">
+                    <TableHead key={header.id} className="w-1/12">
                       {" "}
                       {header.isPlaceholder
                         ? null
