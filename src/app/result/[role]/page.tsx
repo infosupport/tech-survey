@@ -94,9 +94,8 @@ const ShowResultsWrapper = async () => {
 
   const answerOptions = await db.answerOption.findMany();
 
-  let transformedData: TransformedData = {};
+  const transformedData: TransformedData = {};
 
-  // TODO: Does not handle multiple user answers for the same question
   userAnswersForRole.forEach((userAnswer) => {
     const { question, answerId } = userAnswer;
     const questionText: string = question?.questionText ?? "";
@@ -104,21 +103,16 @@ const ShowResultsWrapper = async () => {
 
     roles.forEach((role) => {
       const roleName = role?.role ?? "";
-      if (
-        roleName &&
-        transformedData &&
-        !transformedData[roleName]?.[questionText]
-      ) {
-        transformedData ??= {};
+      if (roleName && questionText) {
+        // Check for existence of roleName and questionText
         transformedData[roleName] ??= {};
-        transformedData![roleName]![questionText] ??= {};
+        transformedData[roleName][questionText] ??= {};
 
         const answerString =
           answerOptions.find((option) => option.id === answerId)?.option ?? "";
-        const roleData = transformedData[roleName]?.[questionText] ?? {};
+        const roleData = transformedData[roleName][questionText];
 
-        roleData![answerString] = roleData![answerString] ?? 0;
-        roleData![answerString]++;
+        roleData[answerString] = (roleData[answerString] ?? 0) + 1;
       }
     });
   });
