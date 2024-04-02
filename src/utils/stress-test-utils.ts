@@ -16,7 +16,7 @@ export async function createNewUserAndSession(): Promise<Session | null> {
   });
   let nrOfUsers = users.length;
 
-  while (nrOfUsers < 50) {
+  while (nrOfUsers < 500) {
     const email = `test-${Math.random().toString(36).substring(7)}@test.com`;
 
     await db.user.create({

@@ -8,6 +8,7 @@ import { type Adapter } from "next-auth/adapters";
 import AzureADProvider from "next-auth/providers/azure-ad";
 
 import { env } from "~/env";
+import type { User } from "~/models/types";
 import { db } from "~/server/db";
 
 /**
@@ -26,8 +27,8 @@ declare module "next-auth" {
   }
 
   // interface User {
-  //   // ...other properties
-  //   // role: UserRole;
+  // ...other properties
+  // role: UserRole;
   // }
 }
 
@@ -43,12 +44,21 @@ export const authOptions: NextAuthOptions = {
       user: {
         ...session.user,
         id: user.id,
+        groups: user.groups,
       },
     }),
   },
   adapter: PrismaAdapter(db) as Adapter,
   providers: [
     AzureADProvider({
+      profile(profile) {
+        return {
+          id: profile.sub,
+          name: profile.name,
+          email: profile.email,
+          groups: profile.groups,
+        } as User;
+      },
       clientId: env.AZURE_AD_CLIENT_ID,
       clientSecret: env.AZURE_AD_CLIENT_SECRET,
       tenantId: env.AZURE_AD_TENANT_ID,

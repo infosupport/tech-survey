@@ -47,6 +47,9 @@ export interface PdfTransformedData {
 
 export interface User {
   id: string;
+  email: string;
+  name: string;
+  groups: string[];
 }
 
 export interface Section {
@@ -110,3 +113,20 @@ export type DataByRoleAndQuestion = Record<
     }[]
   >
 >;
+
+export interface Office365User {
+  displayName: string;
+  givenName: string;
+  id: string;
+  mail: string;
+  preferredLanguage: string;
+  surname: string;
+  userPrincipalName: string;
+}
+export interface MemberOfResponse {
+  value: { id: string }[];
+}
+
+export const authConstants = {
+  manager: process.env.MANAGER_GROUP_OBJECT_ID,
+};
