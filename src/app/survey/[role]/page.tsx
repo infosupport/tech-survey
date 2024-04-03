@@ -77,7 +77,6 @@ const SurveyPage: React.FC = async () => {
   );
 
   return (
-    // print the session id
     <div>
       {process.env.STRESS_TEST === "true" && (
         <div>UserId:{session.user.id}</div>

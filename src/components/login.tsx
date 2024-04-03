@@ -5,14 +5,20 @@ import { signIn, signOut } from "next-auth/react";
 import { Button } from "~/components/ui/button";
 import { ArrowRight } from "./svg";
 
-export function Login({ session }: { session?: Session | null }) {
+export function Login({
+  session,
+  text,
+}: {
+  session?: Session | null;
+  text: string;
+}) {
   if (!session) {
     return (
       <Button
         onClick={() => signIn("azure-ad")}
         className=" bg-custom-buttonPrimary text-custom-secondary hover:bg-custom-buttonHover dark:bg-custom-buttonPrimary dark:hover:bg-custom-buttonHover"
       >
-        Start survey
+        {text}
         <ArrowRight />
       </Button>
     );

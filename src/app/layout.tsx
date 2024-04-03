@@ -68,5 +68,5 @@ export default async function RootLayout({
 }
 
 const LoginWrapper: React.FC<{ session: Session }> = async ({ session }) => {
-  return <Login session={session} />;
+  return <Login session={session} text="Go to survey" />;
 };

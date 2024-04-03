@@ -12,12 +12,15 @@ import { type Metadata } from "next";
 import ButtonSkeleton from "~/components/loading/button-loader";
 import LegendSkeleton from "~/components/loading/results-loader";
 import { generateRolesWithHref } from "~/utils/role-utils";
+import { getServerAuthSession } from "~/server/auth";
+import { Login } from "~/components/login";
 
 export const metadata: Metadata = {
   title: "Results",
 };
 
 const Results: React.FC = async () => {
+  const session = await getServerAuthSession();
   return (
     <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
       <h1 className="text-center text-5xl font-extrabold tracking-tight">
@@ -26,13 +29,25 @@ const Results: React.FC = async () => {
         </span>
         <span className="block sm:inline"> Tech Survey - Results</span>
       </h1>
-      <Suspense fallback={<ButtonSkeleton />}>
-        <ShowRolesWrapper path="/result" />
-      </Suspense>
+      {!session && (
+        <>
+          <p className="text-center text-lg">
+            Unable to view anonymised results without logging in.
+          </p>
+          <Login session={session} text={"Log in"} />
+        </>
+      )}
+      {session && (
+        <>
+          <Suspense fallback={<ButtonSkeleton />}>
+            <ShowRolesWrapper path="/result" />
+          </Suspense>
 
-      <Suspense fallback={<LegendSkeleton />}>
-        <ShowResultsWrapper />
-      </Suspense>
+          <Suspense fallback={<LegendSkeleton />}>
+            <ShowResultsWrapper />
+          </Suspense>
+        </>
+      )}
     </div>
   );
 };
