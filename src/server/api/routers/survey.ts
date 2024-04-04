@@ -71,7 +71,7 @@ export const surveyRouter = createTRPCRouter({
           id: input.userId,
         },
         include: {
-          roles: true, // Include the roles associated with the user
+          roles: true,
         },
       });
 
@@ -97,6 +97,9 @@ export const surveyRouter = createTRPCRouter({
       if (!hasDefaultRole) {
         // If the user doesn't have the default role, add it to their roles
         const updatedRoles = [...user.roles, defaultRole];
+
+        console.log("Setting default role for user", user.id);
+        console.log("Updated roles", updatedRoles);
 
         await ctx.db.user.update({
           where: {
