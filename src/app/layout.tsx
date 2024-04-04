@@ -48,8 +48,8 @@ export default async function RootLayout({
           disableTransitionOnChange
         >
           <TRPCReactProvider>
-            <main className="flex min-h-screen items-center justify-center">
-              <div className="absolute right-4 top-4 z-50 flex items-center space-x-4">
+            <main className="min-h-screen items-center justify-center">
+              <div className="absolute right-4 top-4 z-50 flex space-x-4">
                 {session && (
                   <Suspense fallback={<ButtonSkeleton />}>
                     <LoginWrapper session={session} />

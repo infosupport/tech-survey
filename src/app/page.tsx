@@ -12,7 +12,7 @@ const Home: React.FC = async () => {
 
   return (
     <div>
-      <div className="container flex flex-col items-center justify-center px-4 py-16">
+      <div className="mx-auto py-16 sm:px-4 sm:py-16 md:px-8 lg:px-16">
         <h1 className="text-center text-5xl font-extrabold tracking-tight">
           Welcome to the{" "}
           <span className="block text-custom-primary sm:inline">
