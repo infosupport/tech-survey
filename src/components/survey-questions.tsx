@@ -81,7 +81,7 @@ export function SurveyQuestions({
         </TableRow>
       </TableHeader>
       <TableBody>
-        {filteredQuestions?.map((question) => (
+        {filteredQuestions?.map((question, questionIndex) => (
           <FormField
             control={form.control}
             name={question.id}
@@ -90,18 +90,22 @@ export function SurveyQuestions({
               <TableRow
                 key={question.id}
                 id={question.id}
-                className={
+                className={`${
                   form.formState.errors[question.id]
                     ? "error !border-2 !border-dashed !border-red-500"
                     : ""
-                }
+                } ${
+                  questionIndex % 2 === 0
+                    ? "bg-slate-50 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-600"
+                    : "bg-slate-100 hover:bg-slate-300 dark:bg-slate-900 dark:hover:bg-slate-700"
+                }`}
               >
                 <TableCell>
                   {question.questionText}
                   <FormMessage />
                 </TableCell>
                 {answerOptions.map((option) => (
-                  <TableCell key={option.id} className="w-[300px]">
+                  <TableCell key={option.id} className={`w-[300px] `}>
                     <label
                       className={`${
                         field.value === option.id ||

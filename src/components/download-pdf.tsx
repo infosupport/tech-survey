@@ -230,10 +230,10 @@ const PdfDownloadButton = ({
   return (
     <div>
       <div className="mt-5 flex items-center justify-around gap-6">
-        <Link href="/survey/general" passHref>
+        <Link href="/" passHref>
           <Button className="bg-custom-buttonPrimary text-custom-secondary hover:bg-custom-buttonHover dark:bg-custom-buttonPrimary dark:hover:bg-custom-buttonHover">
             <ArrowLeft />
-            Go back to Survey
+            Go back to home
           </Button>
         </Link>
         {/* Add a download link/button */}
