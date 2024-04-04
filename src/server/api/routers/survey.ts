@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 import { type Role } from "~/models/types";
+import { TRPCClientError } from "@trpc/client";
 
 export const surveyRouter = createTRPCRouter({
   getQuestions: publicProcedure.query(async ({ ctx }) => {
@@ -10,7 +11,6 @@ export const surveyRouter = createTRPCRouter({
         roles: true,
       },
     });
-    // await new Promise((resolve) => setTimeout(resolve, 10000));
     return questions;
   }),
 
@@ -38,7 +38,7 @@ export const surveyRouter = createTRPCRouter({
       });
 
       if (!user) {
-        throw new Error("User not found");
+        throw new TRPCClientError("User not found");
       }
 
       return user.roles as Role[];
@@ -76,7 +76,7 @@ export const surveyRouter = createTRPCRouter({
       });
 
       if (!user) {
-        throw new Error("User not found");
+        throw new TRPCClientError("User not found");
       }
 
       const defaultRole = await ctx.db.role.findFirst({
@@ -86,7 +86,7 @@ export const surveyRouter = createTRPCRouter({
       });
 
       if (!defaultRole) {
-        throw new Error("Default role not found");
+        throw new TRPCClientError("Default role not found");
       }
 
       // Check if the default role is already assigned to the user
@@ -116,41 +116,65 @@ export const surveyRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { userId, roleIds } = input;
 
-      // find the user
-      const user = await ctx.db.user.findUnique({
-        where: {
-          id: userId,
-        },
-      });
-
-      if (!user) {
-        throw new Error("User not found");
-      }
-
-      // find the roles
-      const roles = await ctx.db.role.findMany({
-        where: {
-          id: {
-            in: roleIds,
+      try {
+        // find the user
+        const user = await ctx.db.user.findUnique({
+          where: {
+            id: userId,
           },
-        },
-      });
+        });
 
-      if (roles.length !== roleIds.length) {
-        throw new Error("Invalid role");
-      }
+        if (!user) {
+          throw new TRPCClientError("User not found");
+        }
 
-      // set the roles
-      await ctx.db.user.update({
-        where: {
-          id: userId,
-        },
-        data: {
-          roles: {
-            set: roles,
+        // find the roles
+        const roles = await ctx.db.role.findMany({
+          where: {
+            id: {
+              in: roleIds,
+            },
           },
-        },
-      });
+        });
+
+        if (roles.length !== roleIds.length) {
+          throw new TRPCClientError("Invalid role");
+        }
+
+        // set the roles
+        await ctx.db.user.update({
+          where: {
+            id: userId,
+          },
+          data: {
+            roles: {
+              set: roles,
+            },
+          },
+        });
+      } catch (error: unknown) {
+        if (error instanceof TRPCClientError) {
+          throw error;
+        } else if (
+          typeof error === "object" &&
+          error !== null &&
+          "message" in error &&
+          typeof error.message === "string"
+        ) {
+          if (error.message.includes("ETIMEDOUT")) {
+            throw new TRPCClientError(
+              "Timeout error occurred while accessing the database",
+            );
+          } else if (error.message.includes("ER_DUP_ENTRY")) {
+            throw new TRPCClientError("Duplicate entry error occurred");
+          } else if (error.message.includes("ER_NO_REFERENCED_ROW")) {
+            throw new TRPCClientError(
+              "Referenced row not found error occurred",
+            );
+          }
+        }
+        throw new TRPCClientError("An unexpected error occurred");
+      }
     }),
 
   setQuestionResult: protectedProcedure
@@ -177,7 +201,9 @@ export const surveyRouter = createTRPCRouter({
             });
 
             if (!question) {
-              throw new Error(`Question with ID ${questionId} not found`);
+              throw new TRPCClientError(
+                `Question with ID ${questionId} not found`,
+              );
             }
 
             // find the answer
@@ -188,7 +214,7 @@ export const surveyRouter = createTRPCRouter({
             });
 
             if (!answerOption) {
-              throw new Error(`Answer with ID ${answerId} not found`);
+              throw new TRPCClientError(`Answer with ID ${answerId} not found`);
             }
 
             // find the user
@@ -199,7 +225,7 @@ export const surveyRouter = createTRPCRouter({
             });
 
             if (!user) {
-              throw new Error(`User with ID ${userId} not found`);
+              throw new TRPCClientError(`User with ID ${userId} not found`);
             }
 
             // find the existing answer
@@ -241,7 +267,7 @@ export const surveyRouter = createTRPCRouter({
         console.log("All answers processed successfully");
       } catch (error) {
         console.error("Error processing answers:", error);
-        throw new Error("Failed to process all answers");
+        throw new TRPCClientError("Failed to process all answers");
       }
     }),
 });

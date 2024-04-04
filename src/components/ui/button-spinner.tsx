@@ -5,6 +5,7 @@ import { Button, type ButtonProps } from "~/components/ui/button";
 interface SpinnerButtonProps extends ButtonProps {
   state: boolean;
   name: string;
+
 }
 
 export const SpinnerButton = ({

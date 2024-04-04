@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { ShowRolesWrapper } from "~/app/result/[role]/page";
 import ButtonSkeleton from "~/components/loading/button-loader";
+import { Login } from "~/components/login";
 import ShowDataTable from "~/components/show-data-table";
 import type { DataByRoleAndQuestion, QuestionResult } from "~/models/types";
+import { getServerAuthSession } from "~/server/auth";
 import { db } from "~/server/db";
 
 export const metadata: Metadata = {
@@ -11,14 +13,33 @@ export const metadata: Metadata = {
 };
 
 const ManagementPage = async () => {
+  const session = await getServerAuthSession();
   return (
     <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
-      <Suspense fallback={<ButtonSkeleton />}>
-        <ShowRolesWrapper path="/management" />
-      </Suspense>
-      <Suspense fallback={<ButtonSkeleton />}>
-        <ShowTableWrapper />
-      </Suspense>
+      <h1 className="text-center text-5xl font-extrabold tracking-tight">
+        <span className="block text-custom-primary sm:inline">
+          Info Support
+        </span>
+        <span className="block sm:inline"> Tech Survey - Find the expert</span>
+      </h1>
+      {!session && (
+        <>
+          <p className="text-center text-lg">
+            Unable to find experts without logging in.
+          </p>
+          <Login session={session} text={"Log in"} />
+        </>
+      )}
+      {session && (
+        <>
+          <Suspense fallback={<ButtonSkeleton />}>
+            <ShowRolesWrapper path="/management" />
+          </Suspense>
+          <Suspense fallback={<ButtonSkeleton />}>
+            <ShowTableWrapper />
+          </Suspense>
+        </>
+      )}
     </div>
   );
 };

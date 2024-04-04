@@ -133,11 +133,9 @@ const PDFDocument = ({
                         </Text>
                         {/* Render the answer */}
                         <Text style={styles.answerCell}>
-                          {answers
-                            .map(({ answerId }) =>
-                              getOptionFromAnswerId(answerId),
-                            )
-                            .join(", ")}
+                          {answers.length > 0
+                            ? getOptionFromAnswerId(answers[0]?.answerId ?? "")
+                            : ""}
                         </Text>
                       </View>
                     </View>

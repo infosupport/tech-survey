@@ -1,14 +1,11 @@
 import { getServerAuthSession } from "~/server/auth";
-import { Login } from "../components/login";
 import SelectRole from "../components/select-role";
 
 import React, { Suspense } from "react";
 import { type Session } from "next-auth";
 import { db } from "~/server/db";
 import RoleSelectionSkeleton from "~/components/loading/role-selection-loader";
-import { Button } from "~/components/ui/button";
-import { ArrowRight } from "~/components/svg";
-import Link from "next/link";
+import Buttons from "~/components/additional-buttons-homepage";
 
 const Home: React.FC = async () => {
   const session = await getServerAuthSession();
@@ -77,23 +74,7 @@ const Home: React.FC = async () => {
                   to drive innovation and excellence in technology solutions.
                 </p>
               </div>
-              <div className="mt-5 flex justify-center">
-                <div className="mt-5 flex flex-row items-center gap-6">
-                  <Login session={session} />
-                  <Link href="/result/general">
-                    <Button className=" bg-custom-buttonPrimary text-custom-secondary hover:bg-custom-buttonHover dark:bg-custom-buttonPrimary dark:hover:bg-custom-buttonHover">
-                      Show anonymised results
-                      <ArrowRight />
-                    </Button>
-                  </Link>
-                  <Link href="/management/general">
-                    <Button className=" bg-custom-buttonPrimary text-custom-secondary hover:bg-custom-buttonHover dark:bg-custom-buttonPrimary dark:hover:bg-custom-buttonHover">
-                      Find the Expert
-                      <ArrowRight />
-                    </Button>
-                  </Link>
-                </div>
-              </div>
+              <Buttons session={session} />
             </div>
           </div>
         )}

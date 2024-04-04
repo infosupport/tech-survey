@@ -159,6 +159,18 @@ export function SurveyQuestionnaire({
   const QuestionsComponent =
     screenSize.width < 768 ? MobileSurveyQuestionnaire : SurveyQuestions;
 
+  function handleButtonClick(event: React.MouseEvent<HTMLButtonElement>): void {
+    if (getNextHref(selectedRolesForProgressBar)) {
+      event.preventDefault();
+      const nextHref = getNextHref(selectedRolesForProgressBar);
+      if (nextHref) {
+        window.location.href = nextHref;
+      }
+    } else {
+      window.location.href = "/thank-you";
+    }
+  }
+
   return (
     <div>
       <ProgressionBarComponent roles={selectedRolesForProgressBar} />
@@ -194,6 +206,7 @@ export function SurveyQuestionnaire({
             state={isSubmitting || onlineStatus === "isOffline"}
             disabled={isSubmitting || onlineStatus === "isOffline"}
             name={getNextHref(selectedRolesForProgressBar) ? "Next" : "Submit"}
+            onClick={handleButtonClick}
           />
         </form>
       </Form>
