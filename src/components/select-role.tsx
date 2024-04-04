@@ -124,12 +124,7 @@ export default function SelectRoles({
           <div className="flex">
             <Button
               onClick={handleSetGeneralRole}
-              disabled={
-                setDefaultRoleIsLoading ||
-                setRoleIsLoading ||
-                selectedRoles.length === 0 ||
-                setRoleError !== null
-              }
+              disabled={setRoleIsLoading || setRoleError !== null}
               className="flex items-center justify-center bg-custom-buttonPrimary text-custom-secondary hover:bg-custom-buttonHover dark:bg-custom-buttonPrimary dark:hover:bg-custom-buttonHover"
             >
               <span className="mr-2">Go to survey</span>
