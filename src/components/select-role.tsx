@@ -120,7 +120,7 @@ export default function SelectRoles({
       </ul>
 
       <div className="mt-5 flex justify-center">
-        <div className="mt-5 flex flex-row items-center gap-6">
+        <div className="mt-5 flex flex-col items-center gap-6 md:flex-row">
           <div className="flex">
             <Button
               onClick={handleSetGeneralRole}
