@@ -56,7 +56,7 @@ export function MobileSurveyQuestionnaire({
             render={({ field }) => (
               <Card
                 id={question.id}
-                className={`border-2 ${form.formState.errors[question.id] ? "border-red-500" : "border-gray-200 dark:border-slate-900"}`}
+                className={`mt-4 border-2 ${form.formState.errors[question.id] ? "border-red-500" : "border-gray-200 dark:border-slate-900"}`}
               >
                 <CardHeader>
                   <CardTitle>
