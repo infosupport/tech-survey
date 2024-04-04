@@ -20,7 +20,7 @@ function parseCSV(filePath) {
     /** @type {Map<string, string[]>} */
     const roleQuestionsMapping = new Map();
 
-    fs.createReadStream(filePath)
+    fs.createReadStream(filePath, { encoding: "utf-8" })
       .pipe(csv({ separator: ";" }))
       .on("headers", (/** @type {string[]} */ headers) => {
         roles.push(...headers.slice(1, -1));
@@ -36,7 +36,7 @@ function parseCSV(filePath) {
           if (key !== questionKey) {
             const role = key;
             const rowValue = row[key];
-            if (rowValue?.includes("X") ?? rowValue?.includes("x")) {
+            if (rowValue?.toLowerCase().includes("x")) {
               if (roleQuestionsMapping.has(question)) {
                 roleQuestionsMapping.get(question)?.push(role);
               } else {
