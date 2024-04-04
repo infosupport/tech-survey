@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { set } from "zod";
 import { toast } from "~/components/ui/use-toast";
 import type { SurveyResponse } from "~/models/types";
 import { api } from "~/trpc/react";
@@ -22,7 +21,7 @@ export const useSubmitAnswers = () => {
         variant: "destructive",
       });
     }
-  }, [submitResponse.isError]);
+  }, [submitResponse.isError, submitResponse.error]);
 
   useEffect(() => {
     submitAsyncRef.current = async () => {

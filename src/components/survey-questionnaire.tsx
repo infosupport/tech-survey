@@ -173,7 +173,6 @@ export function SurveyQuestionnaire({
 
   return (
     <div>
-      <ProgressionBarComponent roles={selectedRolesForProgressBar} />
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(
@@ -193,6 +192,7 @@ export function SurveyQuestionnaire({
           )}
           className="grid gap-4 md:grid-cols-1 lg:grid-cols-1"
         >
+          <ProgressionBarComponent roles={selectedRolesForProgressBar} />
           <QuestionsComponent
             session={session}
             filteredQuestions={filteredQuestions}

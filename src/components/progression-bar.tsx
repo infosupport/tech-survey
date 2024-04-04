@@ -19,6 +19,7 @@ const ProgressionBar = ({ roles }: { roles: Section[] }) => {
             <Fragment key={section.id}>
               {/* Circle with clickable area */}
               <Link
+                type="submit"
                 href={section.href}
                 className="relative flex items-center justify-center"
               >
