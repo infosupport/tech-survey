@@ -93,6 +93,9 @@ const PDFDocument = ({
             <Text style={styles.subtitle}>
               Results for: {session.user?.name ?? "Name not found"}
             </Text>
+            <Text style={styles.subsubtitle}>
+              Last updated: {new Date().toLocaleDateString("nl-NL")}
+            </Text>
           </View>
         </View>
       </Page>
@@ -210,6 +213,11 @@ const styles = StyleSheet.create({
   subtitle: {
     // Styles for the subtitle
     fontSize: 20, // Adjust size as needed
+    textAlign: "center",
+  },
+  subsubtitle: {
+    // Styles for the subtitle
+    fontSize: 14, // Adjust size as needed
     textAlign: "center",
   },
   infoSupport: {
