@@ -31,21 +31,39 @@ const MobileProgressionBar = ({ roles }: { roles: Section[] }) => {
         <DropdownMenuSeparator />
         <ScrollArea className="w-50 h-72 rounded-md border">
           {roles.map((section) => (
-            <Link href={section.href} key={section.id}>
-              <DropdownMenuCheckboxItem checked={section.current}>
-                {section.completed && (
-                  <div className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
-                    <CheckIcon className="h-4 w-4 text-green-500" />{" "}
-                  </div>
-                )}
-                {section.started && !section.completed ? (
-                  <div className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
-                    <DotFilledIcon className="h-4 w-4 text-orange-500" />{" "}
-                  </div>
-                ) : null}
-                {section.label}
-              </DropdownMenuCheckboxItem>
-            </Link>
+            <div key={section.id}>
+              {section.currentCompleted ? (
+                <Link href={section.href}>
+                  <DropdownMenuCheckboxItem checked={section.current}>
+                    {section.completed && (
+                      <div className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
+                        <CheckIcon className="h-4 w-4 text-green-500" />{" "}
+                      </div>
+                    )}
+                    {section.started && !section.completed ? (
+                      <div className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
+                        <DotFilledIcon className="h-4 w-4 text-orange-500" />{" "}
+                      </div>
+                    ) : null}
+                    {section.label}
+                  </DropdownMenuCheckboxItem>
+                </Link>
+              ) : (
+                <DropdownMenuCheckboxItem disabled>
+                  {section.completed && (
+                    <div className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
+                      <CheckIcon className="h-4 w-4 text-green-500" />{" "}
+                    </div>
+                  )}
+                  {section.started && !section.completed ? (
+                    <div className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
+                      <DotFilledIcon className="h-4 w-4 text-orange-500" />{" "}
+                    </div>
+                  ) : null}
+                  {section.label}
+                </DropdownMenuCheckboxItem>
+              )}
+            </div>
           ))}
         </ScrollArea>
       </DropdownMenuContent>

@@ -110,11 +110,11 @@ export function SurveyQuestionnaire({
 
   // function that check if a user already has more than 1 response for a question
   function hasAnsweredAllQuestionsForRole(
-    userAnswersForRole: QuestionResult[],
+    currentAnswers: QuestionResult[],
     roleId: string,
     questions: Question[],
   ) {
-    const questionsForRole = userAnswersForRole.filter((answer) =>
+    const questionsForRole = currentAnswers.filter((answer) =>
       answer.question.roles?.some((role) => role.id === roleId),
     );
 
@@ -127,6 +127,19 @@ export function SurveyQuestionnaire({
     );
 
     return answeredQuestionsForRole.length >= totalQuestionsForRole;
+  }
+
+  function hasAnsweredAllQuestionsForCurrentRole(
+    form: ReturnType<typeof useGenerateFormAndSchema>["form"],
+  ) {
+    const formValues = form.getValues();
+
+    // count the number of undefined values in the form
+    const unansweredQuestions = Object.values(formValues).filter(
+      (value) => value === undefined,
+    );
+
+    return unansweredQuestions.length === 0;
   }
 
   const selectedRolesForProgressBar = userSelectedRoles
@@ -152,6 +165,7 @@ export function SurveyQuestionnaire({
       started: userAnswersForRole.some((answer) =>
         answer.question.roles?.some((role) => role.id === role.id),
       ),
+      currentCompleted: hasAnsweredAllQuestionsForCurrentRole(form),
     }));
 
   const ProgressionBarComponent =
@@ -170,6 +184,8 @@ export function SurveyQuestionnaire({
       window.location.href = "/thank-you";
     }
   }
+
+  console.log(selectedRolesForProgressBar);
 
   return (
     <div>

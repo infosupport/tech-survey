@@ -18,33 +18,62 @@ const ProgressionBar = ({ roles }: { roles: Section[] }) => {
           {roles.map((section, index) => (
             <Fragment key={section.id}>
               {/* Circle with clickable area */}
-              <Link
-                type="submit"
-                href={section.href}
-                className="relative flex items-center justify-center"
-              >
-                <div
-                  className={`mb-1 h-6 w-6 rounded-full border-2 ${
-                    section.current
-                      ? "border-custom-secondary bg-custom-primary dark:border-custom-primary dark:bg-custom-secondary"
-                      : section.completed
-                        ? "border-green-500 bg-green-500"
-                        : section.started
-                          ? "border-orange-500 bg-orange-500"
-                          : "border-gray-300"
-                  }`}
-                ></div>
-                <div
-                  className="absolute -rotate-45 whitespace-nowrap text-xs font-semibold"
-                  style={{
-                    transformOrigin: "bottom left",
-                    top: "-22px",
-                    left: "calc(100% - 0px)",
-                  }}
-                >
-                  {section.label}
-                </div>
-              </Link>
+              <div className="relative flex items-center justify-center">
+                {section.currentCompleted ? (
+                  <Link
+                    type="submit"
+                    href={section.href}
+                    className="flex items-center justify-center"
+                  >
+                    <div
+                      className={`mb-1 h-6 w-6 rounded-full border-2 ${
+                        section.current
+                          ? "border-custom-secondary bg-custom-primary dark:border-custom-primary dark:bg-custom-secondary"
+                          : section.completed
+                            ? "border-green-500 bg-green-500"
+                            : section.started
+                              ? "border-orange-500 bg-orange-500"
+                              : "border-gray-300"
+                      }`}
+                    ></div>
+                    <div
+                      className="absolute -rotate-45 whitespace-nowrap text-xs font-semibold"
+                      style={{
+                        transformOrigin: "bottom left",
+                        top: "-22px",
+                        left: "calc(100% - 0px)",
+                      }}
+                    >
+                      {section.label}
+                    </div>
+                  </Link>
+                ) : (
+                  <div>
+                    <div
+                      className={`mb-1 h-6 w-6 rounded-full border-2 ${
+                        section.current
+                          ? "border-custom-secondary bg-custom-primary dark:border-custom-primary dark:bg-custom-secondary"
+                          : section.completed
+                            ? "border-green-500 bg-green-500"
+                            : section.started
+                              ? "border-orange-500 bg-orange-500"
+                              : "border-gray-300"
+                      }`}
+                    ></div>
+                    <div
+                      className="absolute -rotate-45 whitespace-nowrap text-xs font-semibold"
+                      style={{
+                        transformOrigin: "bottom left",
+                        top: "-22px",
+                        left: "calc(100% - 0px)",
+                      }}
+                    >
+                      {section.label}
+                    </div>
+                  </div>
+                )}
+              </div>
+
               {/* Line (except for the last section) */}
               {index !== roles.length - 1 && (
                 <div
