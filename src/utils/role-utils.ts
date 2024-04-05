@@ -25,6 +25,7 @@ export function generateRolesWithHref(
         current: false,
         completed: false,
         started: false,
+        currentCompleted: false,
       }));
 
     return availableRoles;
