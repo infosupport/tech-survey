@@ -114,19 +114,25 @@ export function SurveyQuestionnaire({
     roleId: string,
     questions: Question[],
   ) {
-    const questionsForRole = currentAnswers.filter((answer) =>
-      answer.question.roles?.some((role) => role.id === roleId),
+    const totalQuestionsForRole = questions
+      .filter((question) => question.roleIds?.includes(roleId))
+      .map((question) => question.id);
+
+    // Get unique question IDs from totalQuestionsForRole
+    const uniqueQuestionIds = new Set(totalQuestionsForRole);
+
+    // Filter currentAnswersForRole to remove duplicates
+    const currentAnswersForRole = currentAnswers.filter(
+      (answer, index, self) =>
+        self.findIndex((a) => a.question.id === answer.question.id) === index &&
+        uniqueQuestionIds.has(answer.question.id),
     );
 
-    const totalQuestionsForRole = questions.filter((question) =>
-      question.roleIds?.some((role) => role === roleId),
-    ).length;
-
-    const answeredQuestionsForRole = questionsForRole.filter(
+    const answeredQuestionsForRole = currentAnswersForRole.filter(
       (answer) => answer.answerId !== undefined,
     );
 
-    return answeredQuestionsForRole.length >= totalQuestionsForRole;
+    return answeredQuestionsForRole.length >= totalQuestionsForRole.length;
   }
 
   function hasAnsweredAllQuestionsForCurrentRole(
