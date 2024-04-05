@@ -100,7 +100,7 @@ export function SurveyQuestions({
                     : "bg-slate-100 hover:bg-slate-300 dark:bg-slate-900 dark:hover:bg-slate-700"
                 }`}
               >
-                <TableCell>
+                <TableCell className="pl-2">
                   {question.questionText}
                   <FormMessage />
                 </TableCell>

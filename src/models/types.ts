@@ -56,6 +56,7 @@ export interface Section {
   current: boolean;
   completed: boolean;
   started: boolean;
+  currentCompleted: boolean;
 }
 
 export type TransformedData = Record<

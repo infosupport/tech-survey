@@ -110,23 +110,42 @@ export function SurveyQuestionnaire({
 
   // function that check if a user already has more than 1 response for a question
   function hasAnsweredAllQuestionsForRole(
-    userAnswersForRole: QuestionResult[],
+    currentAnswers: QuestionResult[],
     roleId: string,
     questions: Question[],
   ) {
-    const questionsForRole = userAnswersForRole.filter((answer) =>
-      answer.question.roles?.some((role) => role.id === roleId),
+    const totalQuestionsForRole = questions
+      .filter((question) => question.roleIds?.includes(roleId))
+      .map((question) => question.id);
+
+    // Get unique question IDs from totalQuestionsForRole
+    const uniqueQuestionIds = new Set(totalQuestionsForRole);
+
+    // Filter currentAnswersForRole to remove duplicates
+    const currentAnswersForRole = currentAnswers.filter(
+      (answer, index, self) =>
+        self.findIndex((a) => a.question.id === answer.question.id) === index &&
+        uniqueQuestionIds.has(answer.question.id),
     );
 
-    const totalQuestionsForRole = questions.filter((question) =>
-      question.roleIds?.some((role) => role === roleId),
-    ).length;
-
-    const answeredQuestionsForRole = questionsForRole.filter(
+    const answeredQuestionsForRole = currentAnswersForRole.filter(
       (answer) => answer.answerId !== undefined,
     );
 
-    return answeredQuestionsForRole.length >= totalQuestionsForRole;
+    return answeredQuestionsForRole.length >= totalQuestionsForRole.length;
+  }
+
+  function hasAnsweredAllQuestionsForCurrentRole(
+    form: ReturnType<typeof useGenerateFormAndSchema>["form"],
+  ) {
+    const formValues = form.getValues();
+
+    // count the number of undefined values in the form
+    const unansweredQuestions = Object.values(formValues).filter(
+      (value) => value === undefined,
+    );
+
+    return unansweredQuestions.length === 0;
   }
 
   const selectedRolesForProgressBar = userSelectedRoles
@@ -152,6 +171,7 @@ export function SurveyQuestionnaire({
       started: userAnswersForRole.some((answer) =>
         answer.question.roles?.some((role) => role.id === role.id),
       ),
+      currentCompleted: hasAnsweredAllQuestionsForCurrentRole(form),
     }));
 
   const ProgressionBarComponent =
@@ -170,6 +190,8 @@ export function SurveyQuestionnaire({
       window.location.href = "/thank-you";
     }
   }
+
+  console.log(selectedRolesForProgressBar);
 
   return (
     <div>
