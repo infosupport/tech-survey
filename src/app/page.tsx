@@ -20,73 +20,70 @@ const Home: React.FC = async () => {
           </span>
           <span className="block sm:inline"> Tech Survey of 2024</span>
         </h1>
-        {!session && (
-          <div className="items-center justify-center  py-6">
-            <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-              <div className="text-center">
-                <p className="mb-8 text-lg ">
-                  An organization-wide initiative designed for all our
-                  consultant colleagues. This comprehensive survey covers a wide
-                  array of technological roles, ranging from &quot;Data
-                  Engineering&quot; to &quot;Product Owner / Analyst /
-                  Requirements Engineer.&quot; The data gathered reflects inputs
-                  from diverse areas and communities within the realm of
-                  technology, collected over the past year.
-                </p>
-                <div className="mb-8">
-                  <h2 className="mb-4 text-xl font-bold ">
-                    Our survey serves several essential purposes:
-                  </h2>
-                  <ol className="list-decimal pl-4 text-left">
-                    <li className="mb-4">
-                      <strong>Self-Evaluation:</strong> As a consultant, this
-                      survey offers you a valuable opportunity to assess your
-                      knowledge across various technologies. It enables you to
-                      gauge your familiarity with different areas and identify
-                      areas for further improvement or exploration through
-                      additional training or experimentation.
-                    </li>
-                    <li className="mb-4">
-                      <strong>Thermometer:</strong> For community leads, area
-                      leads, teachers, and managers, the survey acts as a
-                      thermometer, providing insights into the prevailing trends
-                      among Info Supporters. For instance, it offers visibility
-                      into the collective expertise in Java or any other
-                      technology, guiding decisions related to training
-                      initiatives or topics for discussion in ISKA (Info Support
-                      Knowledge Academy).
-                    </li>
-                    <li className="mb-4">
-                      <strong>
-                        &apos;Find the Expert&apos; (Managers Only):
-                      </strong>{" "}
-                      Managers gain access to a powerful search functionality
-                      that enables them to identify experts within Info Support.
-                      This feature proves invaluable when clients present
-                      specific inquiries, as it allows managers to swiftly
-                      pinpoint the right consultant equipped to address their
-                      needs.
-                    </li>
-                  </ol>
-                </div>
-                <p className="mb-8 text-lg ">
-                  Join us in leveraging the collective expertise of Info Support
-                  to drive innovation and excellence in technology solutions.
-                </p>
-              </div>
-              <Buttons session={session} />
-            </div>
-          </div>
-        )}
 
-        {/* If the user is logged in, show the SelectRole component */}
-        {session && (
-          <div>
-            <Suspense fallback={<RoleSelectionSkeleton />}>
-              <SelectRoleWrapper session={session} />
-            </Suspense>
+        <div className="items-center justify-center  py-6">
+          <div className="mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center">
+              <p className="mb-8 text-lg ">
+                An organization-wide initiative designed for all our consultant
+                colleagues. This comprehensive survey covers a wide array of
+                technological roles, ranging from &quot;Data Engineering&quot;
+                to &quot;Product Owner / Analyst / Requirements Engineer.&quot;
+                The data gathered reflects inputs from diverse areas and
+                communities within the realm of technology, collected over the
+                past year.
+              </p>
+              <div className="mb-8">
+                <h2 className="mb-4 text-xl font-bold ">
+                  Our survey serves several essential purposes:
+                </h2>
+                <ol className="list-decimal pl-4 text-left">
+                  <li className="mb-4">
+                    <strong>Self-Evaluation:</strong> As a consultant, this
+                    survey offers you a valuable opportunity to assess your
+                    knowledge across various technologies. It enables you to
+                    gauge your familiarity with different areas and identify
+                    areas for further improvement or exploration through
+                    additional training or experimentation.
+                  </li>
+                  <li className="mb-4">
+                    <strong>Thermometer:</strong> For community leads, area
+                    leads, teachers, and managers, the survey acts as a
+                    thermometer, providing insights into the prevailing trends
+                    among Info Supporters. For instance, it offers visibility
+                    into the collective expertise in Java or any other
+                    technology, guiding decisions related to training
+                    initiatives or topics for discussion in ISKA (Info Support
+                    Knowledge Academy).
+                  </li>
+                  <li className="mb-4">
+                    <strong>
+                      &apos;Find the Expert&apos; (Managers Only):
+                    </strong>{" "}
+                    Managers gain access to a powerful search functionality that
+                    enables them to identify experts within Info Support. This
+                    feature proves invaluable when clients present specific
+                    inquiries, as it allows managers to swiftly pinpoint the
+                    right consultant equipped to address their needs.
+                  </li>
+                </ol>
+              </div>
+              <p className="mb-8 text-lg ">
+                Join us in leveraging the collective expertise of Info Support
+                to drive innovation and excellence in technology solutions.
+              </p>
+            </div>
+            {/* If the user is logged in, show the SelectRole component */}
+            {session && (
+              <div>
+                <Suspense fallback={<RoleSelectionSkeleton />}>
+                  <SelectRoleWrapper session={session} />
+                </Suspense>
+              </div>
+            )}
+            <Buttons session={session} />
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

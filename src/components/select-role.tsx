@@ -25,11 +25,8 @@ export default function SelectRoles({
     error: setRoleError,
     isLoading: setRoleIsLoading,
   } = api.survey.setRole.useMutation();
-  const {
-    mutate: setDefaultRoleMutate,
-    isLoading: setDefaultRoleIsLoading,
-    isSuccess: setDefaultRoleIsSuccess,
-  } = api.survey.setDefaultRole.useMutation();
+  const { mutate: setDefaultRoleMutate, isSuccess: setDefaultRoleIsSuccess } =
+    api.survey.setDefaultRole.useMutation();
 
   useEffect(() => {
     if (setRoleError) {
@@ -97,18 +94,21 @@ export default function SelectRoles({
         {roles.map((role) => (
           <li
             key={role.id}
-            className={`rounded-lg border p-4 hover:bg-gray-100 hover:bg-opacity-25 ${
-              role.default ? "" : "cursor-pointer"
+            className={`rounded-lg border p-4 ${
+              role.default
+                ? ""
+                : "cursor-pointer hover:bg-gray-400 hover:bg-opacity-25 dark:hover:bg-gray-800"
             }`}
             onClick={() => handleRoleToggle(role.id, role.default)}
           >
             <input
               type="checkbox"
-              className="mr-2 cursor-pointer accent-custom-primary"
+              className={`mr-2 ${role.default ? "" : "cursor-pointer"} accent-custom-primary`}
               checked={role.default || selectedRoles.includes(role.id)}
               onChange={() => handleRoleToggle(role.id, role.default)}
               disabled={role.default}
             />
+
             <label
               className={role.default ? "" : "cursor-pointer"}
               style={{ color: role.default ? "#999" : "inherit" }}
