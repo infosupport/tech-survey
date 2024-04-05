@@ -1,10 +1,10 @@
 "use client";
 
 import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "~/components/ui/hover-card";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "~/components/ui/popover";
 
 import { InfoCircledIcon } from "@radix-ui/react-icons";
 
@@ -29,34 +29,7 @@ import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { type useForm } from "react-hook-form";
 import { findAnswerId } from "~/utils/survey-utils";
-import { useState } from "react";
-
-const InfoHoverCard = ({ option }: { option: number }) => {
-  const [isContentVisible, setIsContentVisible] = useState(false);
-
-  const toggleContentVisibility = () => {
-    setIsContentVisible(!isContentVisible);
-  };
-
-  return (
-    <HoverCard>
-      <HoverCardTrigger asChild>
-        <div className="ml-2">
-          <InfoCircledIcon onClick={toggleContentVisibility} />
-        </div>
-      </HoverCardTrigger>
-      {isContentVisible && (
-        <HoverCardContent className="w-80">
-          <div className="flex justify-between space-x-4">
-            <div className="space-y-1">
-              <p className="text-sm font-normal">{idToMoreInfo[option]}</p>
-            </div>
-          </div>
-        </HoverCardContent>
-      )}
-    </HoverCard>
-  );
-};
+import { Button } from "../ui/button";
 
 export function MobileSurveyQuestionnaire({
   session,
@@ -132,7 +105,22 @@ export function MobileSurveyQuestionnaire({
                                 {idToTextMap[option.option]}
                               </span>
 
-                              <InfoHoverCard option={option.option} />
+                              <Popover>
+                                <PopoverTrigger asChild>
+                                  <Button variant="ghost" size="icon">
+                                    <InfoCircledIcon />
+                                  </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-80">
+                                  <div className="flex justify-between space-x-4">
+                                    <div className="space-y-1">
+                                      <p className="text-sm font-normal">
+                                        {idToMoreInfo[option.option]}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </PopoverContent>
+                              </Popover>
                             </div>
                           </label>
                         </RadioGroup>
