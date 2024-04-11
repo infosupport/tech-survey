@@ -15,12 +15,9 @@ const navigateAndCheckSurveyPage = async (
     selectedRoles = roles;
   } else {
     selectedRoles = (await landingPage.selectRandomRoles()).filter(
-
       (role): role is string => typeof role === "string",
     );
   }
-
-
   await landingPage.navigateToSurveyPage();
   await surveyPage.getCurrentURL();
   const sortedSelectedRoles =
