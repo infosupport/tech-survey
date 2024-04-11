@@ -10,6 +10,40 @@ import Buttons from "~/components/additional-buttons-homepage";
 const Home: React.FC = async () => {
   const session = await getServerAuthSession();
 
+  if (process.env.FRESH_RUN === "true") {
+    // Find users with the name 'e2eTestAccount'
+    const users = await db.user.findMany({
+      where: {
+        name: "e2eTestAccount",
+      },
+      include: {
+        roles: true,
+        questionResults: true,
+      },
+    });
+
+    // For each user, disconnect all roles
+    for (const user of users) {
+      await db.user.update({
+        where: { id: user.id },
+        data: {
+          roles: {
+            disconnect: user.roles.map((role) => ({ id: role.id })),
+          },
+        },
+      });
+    }
+
+    // for each user, remove all question results
+    for (const user of users) {
+      await db.questionResult.deleteMany({
+        where: {
+          userId: user.id,
+        },
+      });
+    }
+  }
+
   return (
     <div>
       <div className="mx-auto py-16 sm:px-4 sm:py-16 md:px-8 lg:px-16">

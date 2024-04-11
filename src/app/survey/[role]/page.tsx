@@ -6,7 +6,6 @@ import SurveyQuestionLoader from "~/components/loading/survey-question-loader";
 import { db } from "~/server/db";
 
 import { type Metadata } from "next";
-import { createNewUserAndSession } from "~/utils/stress-test-utils";
 
 export const metadata: Metadata = {
   title: "Survey",
@@ -19,13 +18,10 @@ const SuspenseSurveyData = () => (
 );
 
 const SurveyPage: React.FC = async () => {
-  let session = await getServerAuthSession();
+  const session = await getServerAuthSession();
 
   if (!session) {
-    session = await createNewUserAndSession();
-    if (!session) {
-      return <div>Unauthenticated</div>;
-    }
+    return <div>Unauthenticated</div>;
   }
 
   const [questions, answerOptions, userRoles, userAnswersForRole] =
@@ -78,10 +74,6 @@ const SurveyPage: React.FC = async () => {
 
   return (
     <div>
-      {process.env.STRESS_TEST === "true" && (
-        <div>UserId:{session.user.id}</div>
-      )}
-
       <div className="container flex h-full flex-col items-center justify-center gap-12 px-4 py-16">
         <SurveyQuestionnaire
           session={session}

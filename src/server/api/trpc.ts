@@ -89,23 +89,14 @@ export const publicProcedure = t.procedure;
  *
  * @see https://trpc.io/docs/procedures
  */
-// Check if STRESS_TEST environment variable is set to "false"
 export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
-  if (env.STRESS_TEST === "false") {
-    if (!ctx.session || !ctx.session.user) {
-      throw new TRPCError({ code: "UNAUTHORIZED" });
-    }
-    return next({
-      ctx: {
-        // infers the `session` as non-nullable
-        session: { ...ctx.session, user: ctx.session.user },
-      },
-    });
-  } else {
-    return next({
-      ctx: {
-        session: { ...ctx.session, user: ctx.session?.user ?? "" },
-      },
-    });
+  if (!ctx.session || !ctx.session.user) {
+    throw new TRPCError({ code: "UNAUTHORIZED" });
   }
+  return next({
+    ctx: {
+      // infers the `session` as non-nullable
+      session: { ...ctx.session, user: ctx.session.user },
+    },
+  });
 });
