@@ -15,7 +15,6 @@ export const env = createEnv({
     NEXTAUTH_SECRET: z.string(),
     NEXTAUTH_URL: z.string(),
     FRESH_RUN: z.string(),
-    SIGNIN_METHOD: z.string(),
     EMAIL: z.string(),
     PASSWORD: z.string(),
 
@@ -47,7 +46,6 @@ export const env = createEnv({
     NEXTAUTH_URL: process.env.NEXTAUTH_URL,
     FRESH_RUN: process.env.FRESH_RUN,
     NODE_ENV: process.env.NODE_ENV,
-    SIGNIN_METHOD: process.env.SIGNIN_METHOD,
     EMAIL: process.env.EMAIL,
     PASSWORD: process.env.PASSWORD,
   },
