@@ -10,9 +10,14 @@ export const env = createEnv({
     AZURE_AD_CLIENT_ID: z.string(),
     AZURE_AD_CLIENT_SECRET: z.string(),
     AZURE_AD_TENANT_ID: z.string(),
+    GITHUB_ID: z.string(),
+    GITHUB_SECRET: z.string(),
     NEXTAUTH_SECRET: z.string(),
     NEXTAUTH_URL: z.string(),
-    STRESS_TEST: z.string(),
+    FRESH_RUN: z.string(),
+    SIGNIN_METHOD: z.string(),
+    EMAIL: z.string(),
+    PASSWORD: z.string(),
 
     NODE_ENV: z
       .enum(["development", "test", "production"])
@@ -36,10 +41,15 @@ export const env = createEnv({
     AZURE_AD_CLIENT_ID: process.env.AZURE_AD_CLIENT_ID,
     AZURE_AD_CLIENT_SECRET: process.env.AZURE_AD_CLIENT_SECRET,
     AZURE_AD_TENANT_ID: process.env.AZURE_AD_TENANT_ID,
+    GITHUB_ID: process.env.GITHUB_ID,
+    GITHUB_SECRET: process.env.GITHUB_SECRET,
     NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
     NEXTAUTH_URL: process.env.NEXTAUTH_URL,
-    STRESS_TEST: process.env.STRESS_TEST,
+    FRESH_RUN: process.env.FRESH_RUN,
     NODE_ENV: process.env.NODE_ENV,
+    SIGNIN_METHOD: process.env.SIGNIN_METHOD,
+    EMAIL: process.env.EMAIL,
+    PASSWORD: process.env.PASSWORD,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

@@ -180,6 +180,12 @@ export function SurveyQuestionnaire({
     screenSize.width < 768 ? MobileSurveyQuestionnaire : SurveyQuestions;
 
   function handleButtonClick(event: React.MouseEvent<HTMLButtonElement>): void {
+    // Check if the form is currently valid or all questions have been answered
+    if (!hasAnsweredAllQuestionsForCurrentRole(form)) {
+      // Form is not valid, do not proceed to the next page
+      return;
+    }
+
     if (getNextHref(selectedRolesForProgressBar)) {
       event.preventDefault();
       const nextHref = getNextHref(selectedRolesForProgressBar);
@@ -191,10 +197,9 @@ export function SurveyQuestionnaire({
     }
   }
 
-  console.log(selectedRolesForProgressBar);
-
   return (
     <div>
+      <ProgressionBarComponent roles={selectedRolesForProgressBar} />
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(
@@ -214,7 +219,6 @@ export function SurveyQuestionnaire({
           )}
           className="grid gap-4 md:grid-cols-1 lg:grid-cols-1"
         >
-          <ProgressionBarComponent roles={selectedRolesForProgressBar} />
           <QuestionsComponent
             session={session}
             filteredQuestions={filteredQuestions}

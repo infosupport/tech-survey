@@ -89,7 +89,9 @@ export default function SelectRoles({
 
   return (
     <div className="container mx-auto py-8">
-      <h1 className="mb-4 text-2xl font-bold">Select Roles</h1>
+      <h2 id="select-roles" className="mb-4 text-2xl font-bold">
+        Select Roles
+      </h2>
       <ul className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         {roles.map((role) => (
           <li
