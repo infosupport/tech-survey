@@ -13,7 +13,6 @@ import { ZodError } from "zod";
 
 import { getServerAuthSession } from "~/server/auth";
 import { db } from "~/server/db";
-import { env } from "~/env";
 
 /**
  * 1. CONTEXT
