@@ -15,8 +15,6 @@ export const env = createEnv({
     NEXTAUTH_SECRET: z.string(),
     NEXTAUTH_URL: z.string(),
     FRESH_RUN: z.string(),
-    EMAIL: z.string(),
-    PASSWORD: z.string(),
 
     NODE_ENV: z
       .enum(["development", "test", "production"])
@@ -46,8 +44,6 @@ export const env = createEnv({
     NEXTAUTH_URL: process.env.NEXTAUTH_URL,
     FRESH_RUN: process.env.FRESH_RUN,
     NODE_ENV: process.env.NODE_ENV,
-    EMAIL: process.env.EMAIL,
-    PASSWORD: process.env.PASSWORD,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
