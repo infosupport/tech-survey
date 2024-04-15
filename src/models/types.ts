@@ -47,6 +47,7 @@ export interface PdfTransformedData {
 
 export interface User {
   id: string;
+  findExpertOptIn: boolean;
 }
 
 export interface Section {

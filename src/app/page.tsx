@@ -91,14 +91,12 @@ const Home: React.FC = async () => {
                     Knowledge Academy).
                   </li>
                   <li className="mb-4">
-                    <strong>
-                      &apos;Find the Expert&apos; (Managers Only):
-                    </strong>{" "}
-                    Managers gain access to a powerful search functionality that
-                    enables them to identify experts within Info Support. This
-                    feature proves invaluable when clients present specific
-                    inquiries, as it allows managers to swiftly pinpoint the
-                    right consultant equipped to address their needs.
+                    <strong>&apos;Find the Expert&apos; (opt in):</strong> Gain
+                    access to a powerful search functionality that empowers you
+                    to pinpoint experts in specific technologies at Info
+                    Support. This feature proves invaluable when clients have
+                    precise inquiries, enabling you to quickly locate the
+                    consultant with the expertise needed to address their needs.
                   </li>
                 </ol>
               </div>
@@ -115,6 +113,7 @@ const Home: React.FC = async () => {
                 </Suspense>
               </div>
             )}
+
             <Buttons session={session} />
           </div>
         </div>
