@@ -29,8 +29,8 @@ export default function OptIn({ session }: { session: Session }) {
           onClick={() => handleOptInToggle()}
         >
           <input
-            type="checkbox"
-            className={`mr-2 cursor-pointer accent-custom-primary`}
+            type="radio"
+            className={`mr-2 cursor-pointer `}
             checked={!optIn}
             onChange={() => handleOptInToggle()}
           />
@@ -41,8 +41,8 @@ export default function OptIn({ session }: { session: Session }) {
           onClick={() => handleOptInToggle()}
         >
           <input
-            type="checkbox"
-            className={`mr-2 cursor-pointer accent-custom-primary`}
+            type="radio"
+            className={`mr-2 cursor-pointer `}
             checked={optIn}
             onChange={() => handleOptInToggle()}
           />
