@@ -91,7 +91,7 @@ const Home: React.FC = async () => {
                     Knowledge Academy).
                   </li>
                   <li className="mb-4">
-                    <strong>&apos;Find the Expert&apos; (opt in):</strong> Gain
+                    <strong>&apos;Find the Expert&apos;:</strong> Gain
                     access to a powerful search functionality that empowers you
                     to pinpoint experts in specific technologies at Info
                     Support. This feature proves invaluable when clients have
