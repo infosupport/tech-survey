@@ -20,13 +20,13 @@ declare module "next-auth" {
   interface Session extends DefaultSession {
     user: {
       id: string;
-      findExpertOptIn: boolean;
+      // findExpertOptIn: boolean;
     } & DefaultSession["user"];
   }
 
   interface User {
     id: string;
-    findExpertOptIn: boolean;
+    // findExpertOptIn: boolean;
   }
 }
 
@@ -42,7 +42,7 @@ export const authOptions: NextAuthOptions = {
       user: {
         ...session.user,
         id: user.id,
-        findExpertOptIn: user.findExpertOptIn,
+        // findExpertOptIn: user.findExpertOptIn,
       },
     }),
   },

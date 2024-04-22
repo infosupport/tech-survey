@@ -53,7 +53,6 @@ model User {
   email           String?          @unique
   emailVerified   DateTime?
   image           String?
-  findExpertOptIn Boolean          @default(false)
   roles           Role[]           @relation("UserRole")
   accounts        Account[]
   questionResults QuestionResult[]

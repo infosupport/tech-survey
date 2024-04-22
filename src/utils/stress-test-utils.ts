@@ -80,7 +80,7 @@ export async function createNewUserAndSession(): Promise<Session | null> {
       id: randomUser?.id ?? "",
       email: randomUser?.email,
       name: randomUser?.name,
-      findExpertOptIn: true,
+      // findExpertOptIn: true,
     },
     expires: "2025-12-31T23:59:59Z",
   };

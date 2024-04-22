@@ -45,14 +45,8 @@ const FindTheExpertPage = async () => {
 };
 
 const ShowTableWrapper = async () => {
-  // Only retrieve the question results for users that have opted in (findExpertOptIn)
   const userAnswersForRole: QuestionResult[] = await db.questionResult.findMany(
     {
-      where: {
-        user: {
-          findExpertOptIn: true,
-        },
-      },
       include: {
         question: {
           include: {
