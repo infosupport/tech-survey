@@ -9,10 +9,10 @@ import { getServerAuthSession } from "~/server/auth";
 import { db } from "~/server/db";
 
 export const metadata: Metadata = {
-  title: "Management insights",
+  title: "Find the expert",
 };
 
-const ManagementPage = async () => {
+const FindTheExpertPage = async () => {
   const session = await getServerAuthSession();
   return (
     <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
@@ -33,7 +33,7 @@ const ManagementPage = async () => {
       {session && (
         <>
           <Suspense fallback={<ButtonSkeleton />}>
-            <ShowRolesWrapper path="/management" />
+            <ShowRolesWrapper path="/find-the-expert" />
           </Suspense>
           <Suspense fallback={<ButtonSkeleton />}>
             <ShowTableWrapper />
@@ -45,8 +45,14 @@ const ManagementPage = async () => {
 };
 
 const ShowTableWrapper = async () => {
+  // Only retrieve the question results for users that have opted in (findExpertOptIn)
   const userAnswersForRole: QuestionResult[] = await db.questionResult.findMany(
     {
+      where: {
+        user: {
+          findExpertOptIn: true,
+        },
+      },
       include: {
         question: {
           include: {
@@ -186,4 +192,4 @@ const ShowTableWrapper = async () => {
   );
 };
 
-export default ManagementPage;
+export default FindTheExpertPage;

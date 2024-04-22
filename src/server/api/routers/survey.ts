@@ -20,7 +20,6 @@ export const surveyRouter = createTRPCRouter({
   }),
 
   getRoles: publicProcedure.query(async ({ ctx }) => {
-    // await new Promise((resolve) => setTimeout(resolve, 3000));
     const roles = await ctx.db.role.findMany();
     return roles;
   }),
@@ -61,6 +60,29 @@ export const surveyRouter = createTRPCRouter({
       });
 
       return userAnswers;
+    }),
+
+  setOptIn: protectedProcedure
+    .input(z.object({ userId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const user = await ctx.db.user.findUnique({
+        where: {
+          id: input.userId,
+        },
+      });
+
+      if (!user) {
+        throw new TRPCClientError("User not found");
+      }
+
+      await ctx.db.user.update({
+        where: {
+          id: input.userId,
+        },
+        data: {
+          findExpertOptIn: !user.findExpertOptIn,
+        },
+      });
     }),
 
   setDefaultRole: protectedProcedure

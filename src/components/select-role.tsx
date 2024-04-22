@@ -9,6 +9,7 @@ import { Button } from "~/components/ui/button";
 import { ArrowRight } from "./svg";
 import { toast } from "./ui/use-toast";
 import { ToastAction } from "./ui/toast";
+import OptIn from "./opt-in";
 
 export default function SelectRoles({
   session,
@@ -121,6 +122,8 @@ export default function SelectRoles({
         ))}
       </ul>
 
+      <OptIn session={session} />
+
       <div className="mt-5 flex justify-center">
         <div className="mt-5 flex flex-col items-center gap-6 md:flex-row">
           <div className="flex">
@@ -141,7 +144,7 @@ export default function SelectRoles({
               <ArrowRight />
             </Button>
           </Link>
-          <Link href="/management/general">
+          <Link href="/find-the-expert/general">
             <Button className=" bg-custom-buttonPrimary text-custom-secondary hover:bg-custom-buttonHover dark:bg-custom-buttonPrimary dark:hover:bg-custom-buttonHover">
               Find the Expert
               <ArrowRight />

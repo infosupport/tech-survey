@@ -24,7 +24,7 @@ const Buttons = ({ session }: { session: Session | null }) => {
             </Button>
             <Button
               onClick={() =>
-                signIn("azure-ad", { callbackUrl: "/management/general" })
+                signIn("azure-ad", { callbackUrl: "/find-the-expert/general" })
               }
               className=" bg-custom-buttonPrimary text-custom-secondary hover:bg-custom-buttonHover dark:bg-custom-buttonPrimary dark:hover:bg-custom-buttonHover"
             >
