@@ -6,7 +6,6 @@ import {
 } from "next-auth";
 import { type Adapter } from "next-auth/adapters";
 import AzureADProvider from "next-auth/providers/azure-ad";
-import GitHubProvider from "next-auth/providers/github";
 
 import { env } from "~/env";
 import { db } from "~/server/db";
@@ -53,10 +52,6 @@ export const authOptions: NextAuthOptions = {
       clientId: env.AZURE_AD_CLIENT_ID,
       clientSecret: env.AZURE_AD_CLIENT_SECRET,
       tenantId: env.AZURE_AD_TENANT_ID,
-    }),
-    GitHubProvider({
-      clientId: process.env.GITHUB_ID ?? "",
-      clientSecret: process.env.GITHUB_SECRET ?? "",
     }),
   ],
 };
