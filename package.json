@@ -13,7 +13,8 @@
     "dev": "next dev",
     "lint": "next lint",
     "start": "node ./node_modules/next/dist/bin/next start",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "playwright test"
   },
   "prisma": {
     "seed": "node prisma/seed.js"
@@ -65,6 +66,7 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.43.0",
+    "@types/cookies": "^0.9.0",
     "@types/eslint": "^8.56.2",
     "@types/k6": "^0.50.0",
     "@types/node": "^20.11.30",
