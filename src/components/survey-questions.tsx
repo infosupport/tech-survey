@@ -51,7 +51,7 @@ export function SurveyQuestions({
   currentAnswers: SurveyResponse[];
 }) {
   return (
-    <Table divClassname="">
+    <Table className="overflow-hidden rounded-lg shadow-md ">
       <TableHeader className="sticky top-0 z-10 h-10 w-full bg-slate-100 dark:bg-slate-900">
         <TableRow>
           <TableHead className="w-[400px]">Question</TableHead>

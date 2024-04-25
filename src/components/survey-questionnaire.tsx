@@ -217,7 +217,7 @@ export function SurveyQuestionnaire({
               });
             },
           )}
-          className="grid gap-4 md:grid-cols-1 lg:grid-cols-1"
+          className="grid justify-items-end gap-4 md:grid-cols-1 lg:grid-cols-1"
         >
           <QuestionsComponent
             session={session}

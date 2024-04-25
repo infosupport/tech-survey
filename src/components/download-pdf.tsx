@@ -10,7 +10,7 @@ import { type AnswerOption, type PdfTransformedData } from "~/models/types";
 import dynamic from "next/dynamic";
 import { Button } from "~/components/ui/button";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight } from "./svg";
+import { ArrowLeftDarkModeFriendly, ArrowRight } from "./svg";
 import { type Session } from "next-auth";
 
 const PDFDownloadLink = dynamic(
@@ -239,8 +239,8 @@ const PdfDownloadButton = ({
     <div>
       <div className="mt-5 flex items-center justify-around gap-6">
         <Link href="/" passHref>
-          <Button className="bg-custom-buttonPrimary text-custom-secondary hover:bg-custom-buttonHover dark:bg-custom-buttonPrimary dark:hover:bg-custom-buttonHover">
-            <ArrowLeft />
+          <Button variant="outline" className="border-2 border-[#bed62f]">
+            <ArrowLeftDarkModeFriendly />
             Go back to home
           </Button>
         </Link>

@@ -166,10 +166,10 @@ export function InfoSupportLogo() {
   );
 }
 
-export function ArrowRight() {
+export function ArrowRightDarkModeFriendly() {
   return (
     <svg
-      className="arrow-right ml-2"
+      className="arrow-right ml-2 fill-[#003865] dark:fill-white "
       width="10"
       height="10"
       viewBox="0 0 4 6"
@@ -181,35 +181,118 @@ export function ArrowRight() {
         fillRule="evenodd"
         clipRule="evenodd"
         d="M2.39352 3.60724H3.60801V2.39278H2.39352V3.60724Z"
-        fill="#003865"
       ></path>
       <path
         id="Vector_2"
         fillRule="evenodd"
         clipRule="evenodd"
         d="M1.19662 4.80365H2.41102V3.58923H1.19662V4.80365Z"
-        fill="#003865"
       ></path>
       <path
         id="Vector_3"
         fillRule="evenodd"
         clipRule="evenodd"
         d="M1.19662 2.41089H2.41102V1.19641H1.19662V2.41089Z"
-        fill="#003865"
       ></path>
       <path
         id="Vector_4"
         fillRule="evenodd"
         clipRule="evenodd"
         d="M0 6H1.21442V4.78559L0 4.78558L0 6Z"
-        fill="#003865"
       ></path>
       <path
         id="Vector_5"
         fillRule="evenodd"
         clipRule="evenodd"
         d="M0 1.21448H1.21442V9.50098e-05L0 -5.24521e-06L0 1.21448Z"
-        fill="#003865"
+      ></path>
+    </svg>
+  );
+}
+
+export function ArrowRight() {
+  return (
+    <svg
+      className="arrow-right ml-2 fill-[#003865]"
+      width="10"
+      height="10"
+      viewBox="0 0 4 6"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        id="Vector"
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M2.39352 3.60724H3.60801V2.39278H2.39352V3.60724Z"
+      ></path>
+      <path
+        id="Vector_2"
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M1.19662 4.80365H2.41102V3.58923H1.19662V4.80365Z"
+      ></path>
+      <path
+        id="Vector_3"
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M1.19662 2.41089H2.41102V1.19641H1.19662V2.41089Z"
+      ></path>
+      <path
+        id="Vector_4"
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M0 6H1.21442V4.78559L0 4.78558L0 6Z"
+      ></path>
+      <path
+        id="Vector_5"
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M0 1.21448H1.21442V9.50098e-05L0 -5.24521e-06L0 1.21448Z"
+      ></path>
+    </svg>
+  );
+}
+
+export function ArrowLeftDarkModeFriendly() {
+  return (
+    <svg
+      className="arrow-left mr-2 fill-[#003865] dark:fill-white"
+      width="10"
+      height="10"
+      viewBox="0 0 4 6"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        id="Vector"
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M1.60648 3.60724H0.391989V2.39278H1.60648V3.60724Z"
+      ></path>
+      <path
+        id="Vector_2"
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M2.80338 4.80365H1.58898V3.58923H2.80338V4.80365Z"
+      ></path>
+      <path
+        id="Vector_3"
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M2.80338 2.41089H1.58898V1.19641H2.80338V2.41089Z"
+      ></path>
+      <path
+        id="Vector_4"
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M4 6H2.78558V4.78559L4 4.78558L4 6Z"
+      ></path>
+      <path
+        id="Vector_5"
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M4 1.21448H2.78558V9.50098e-05L4 -5.24521e-06L4 1.21448Z"
       ></path>
     </svg>
   );
