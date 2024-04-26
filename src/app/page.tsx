@@ -46,7 +46,7 @@ const Home: React.FC = async () => {
 
   return (
     <div>
-      <div className="mx-auto py-16 sm:px-4 sm:py-16 md:px-8 lg:px-16">
+      <div className="container mx-auto py-16 sm:px-4 sm:py-16 md:px-8 lg:px-16">
         <h1 className="text-center text-5xl font-extrabold tracking-tight">
           Welcome to the{" "}
           <span className="block text-custom-primary sm:inline">
@@ -91,12 +91,12 @@ const Home: React.FC = async () => {
                     Knowledge Academy).
                   </li>
                   <li className="mb-4">
-                    <strong>&apos;Find the Expert&apos;:</strong> Gain
-                    access to a powerful search functionality that empowers you
-                    to pinpoint experts in specific technologies at Info
-                    Support. This feature proves invaluable when clients have
-                    precise inquiries, enabling you to quickly locate the
-                    consultant with the expertise needed to address their needs.
+                    <strong>&apos;Find the Expert&apos;:</strong> Gain access to
+                    a powerful search functionality that empowers you to
+                    pinpoint experts in specific technologies at Info Support.
+                    This feature proves invaluable when clients have precise
+                    inquiries, enabling you to quickly locate the consultant
+                    with the expertise needed to address their needs.
                   </li>
                 </ol>
               </div>

@@ -28,7 +28,7 @@ export function Login({
     <>
       <p>Logged in as {session.user?.name}</p>
       <Button
-        className="ml-2"
+        className="ml-2 mr-2"
         variant={"outline"}
         onClick={() => signOut({ callbackUrl: "/" })}
       >

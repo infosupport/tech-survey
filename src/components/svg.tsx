@@ -400,3 +400,33 @@ export function ArrowDown() {
     </svg>
   );
 }
+
+export function ArrowDownDarkModeFriendly() {
+  return (
+    <svg
+      className="arrow-down ml-2 mt-0.5 fill-[#003865] dark:fill-white"
+      width="10"
+      height="10"
+      viewBox="0 0 6 4"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        id="Vector"
+        d="M2.39275 2.39352V3.60801H3.60721V2.39352H2.39275Z"
+      ></path>
+      <path
+        id="Vector_2"
+        d="M1.19637 1.19662V2.41102H2.41079V1.19662H1.19637Z"
+      ></path>
+      <path
+        id="Vector_3"
+        d="M3.58911 1.19662V2.41102H4.80359V1.19662H3.58911Z"
+      ></path>
+      <path id="Vector_4" d="M0 0V1.21442H1.21441L1.21442 0H0Z"></path>
+      <path
+        id="Vector_5"
+        d="M4.78552 0V1.21442H5.9999L6.00001 0H4.78552Z"
+      ></path>
+    </svg>
+  );
+}
