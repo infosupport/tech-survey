@@ -34,6 +34,7 @@ import {
 import { InfoCircledIcon } from "@radix-ui/react-icons";
 import { type useForm } from "react-hook-form";
 import { findAnswerId } from "~/utils/survey-utils";
+import { useEffect, useRef } from "react";
 
 export function SurveyQuestions({
   session,
@@ -50,9 +51,87 @@ export function SurveyQuestions({
   saveAnswer: (answer: SurveyResponse) => void;
   currentAnswers: SurveyResponse[];
 }) {
+  const tableRef = useRef<HTMLTableElement>(null);
+  const currentRowIndex = useRef<number>(1);
+  const currentCellIndex = useRef<number>(1);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "ArrowDown") {
+        if (currentRowIndex.current < filteredQuestions.length) {
+          currentRowIndex.current++;
+          focusCell();
+        }
+      } else if (event.key === "ArrowUp") {
+        if (currentRowIndex.current > 1) {
+          currentRowIndex.current--;
+          focusCell();
+        }
+      } else if (event.key === "ArrowRight") {
+        if (currentCellIndex.current < answerOptions.length) {
+          currentCellIndex.current++;
+          focusCell();
+        }
+      } else if (event.key === "ArrowLeft") {
+        if (currentCellIndex.current > 1) {
+          currentCellIndex.current--;
+          focusCell();
+        }
+      } else if (event.key === "Enter" || event.key === " ") {
+        selectCell();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [
+    currentRowIndex,
+    currentCellIndex,
+    filteredQuestions.length,
+    answerOptions.length,
+  ]);
+
+  const focusCell = () => {
+    console.log(currentRowIndex.current, currentCellIndex.current);
+
+    if (tableRef.current) {
+      const rows = tableRef.current.querySelectorAll("tr");
+      const cells = rows[currentRowIndex.current]?.querySelectorAll("td");
+
+      // Remove outline class from previously focused button
+      const previousButton = tableRef.current.querySelector(".outline");
+      previousButton?.classList.remove("outline");
+
+      // find the button in the cell
+      const button = cells?.[currentCellIndex.current]?.querySelector("button");
+
+      // remove the outline:focus-none class from the button
+      button?.classList.remove("outline-none");
+
+      // add the outline class to the button
+      button?.classList.add("outline");
+      button?.classList.add("outline-1");
+    }
+  };
+
+  const selectCell = () => {
+    if (tableRef.current) {
+      const rows = tableRef.current.querySelectorAll("tr");
+      const cells = rows[currentRowIndex.current]?.querySelectorAll("td");
+
+      const button = cells?.[currentCellIndex.current]?.querySelector("button");
+
+      button?.focus();
+      button?.click();
+    }
+  };
+
   return (
     <>
-      <Table className="overflow-hidden rounded-lg shadow-md ">
+      <Table ref={tableRef} className="overflow-hidden rounded-lg shadow-md ">
         <TableHeader className="sticky top-0 z-10 h-10 w-full bg-slate-100 dark:bg-slate-900">
           <TableRow>
             <TableHead className="w-[400px]">Question</TableHead>
@@ -126,6 +205,11 @@ export function SurveyQuestions({
                                   questionId: question.id,
                                   answerId: value,
                                 });
+                                currentRowIndex.current = questionIndex + 1;
+                                currentCellIndex.current =
+                                  answerOptions.findIndex(
+                                    (option) => option.id === value,
+                                  ) + 1;
                               }}
                               value={field.value as string}
                               className="flex flex-col space-y-1"
