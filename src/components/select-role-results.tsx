@@ -6,8 +6,6 @@ import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { ScrollArea } from "~/components/ui/scroll-area";
@@ -15,7 +13,7 @@ import { type Section } from "~/models/types";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { slugify } from "~/utils/slugify";
-import { ArrowDown } from "./svg";
+import { ArrowDownDarkModeFriendly } from "./svg";
 
 const SelectRoleResults = ({ roles }: { roles: Section[] }) => {
   const pathname = usePathname() || "";
@@ -39,7 +37,8 @@ const SelectRoleResults = ({ roles }: { roles: Section[] }) => {
         <div className="mt-5 flex justify-center">
           <div className="mt-5 flex flex-col items-center gap-6 md:flex-row">
             <Button variant="outline" className="max-w-[550px]">
-              Viewing results for role: {currentRoleBeautified} <ArrowDown />
+              Viewing results for role: {currentRoleBeautified}{" "}
+              <ArrowDownDarkModeFriendly />
             </Button>
           </div>
         </div>
