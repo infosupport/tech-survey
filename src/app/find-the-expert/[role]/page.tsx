@@ -144,7 +144,7 @@ const ShowTableWrapper = async () => {
       }
 
       if (userMap[entry.userId]) {
-        const answerValue = parseInt(answerOptionMap[entry.answerId] ?? "");
+        const answerValue = parseInt(answerOptionMap[entry.answerId] ?? "", 10);
         const userName = userMap[entry.userId]?.name ?? "Unknown User";
         const userEmail = userMap[entry.userId]?.email ?? "Unknown Email";
         if (!isNaN(answerValue)) {
@@ -161,8 +161,8 @@ const ShowTableWrapper = async () => {
             aggregatedDataByRole[roleName]![userEmail]!.counts[answerValue] = 0;
           }
 
-          aggregatedDataByRole[roleName][userEmail].counts[answerValue] =
-            (aggregatedDataByRole[roleName][userEmail].counts[answerValue] ??
+          aggregatedDataByRole[roleName]![userEmail]!.counts[answerValue] =
+            (aggregatedDataByRole[roleName]![userEmail]?.counts[answerValue] ??
               0) + 1;
         }
       }
