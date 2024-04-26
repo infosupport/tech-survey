@@ -25,14 +25,15 @@ export function Login({
   }
 
   return (
-    <div className="flex items-center">
+    <>
       <p>Logged in as {session.user?.name}</p>
       <Button
-        className="ml-2 bg-slate-500"
+        className="ml-2"
+        variant={"outline"}
         onClick={() => signOut({ callbackUrl: "/" })}
       >
         Sign out
       </Button>
-    </div>
+    </>
   );
 }
