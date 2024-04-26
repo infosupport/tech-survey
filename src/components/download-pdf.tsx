@@ -10,7 +10,7 @@ import { type AnswerOption, type PdfTransformedData } from "~/models/types";
 import dynamic from "next/dynamic";
 import { Button } from "~/components/ui/button";
 import Link from "next/link";
-import { ArrowLeftDarkModeFriendly, ArrowRight } from "./svg";
+import { ArrowLeftDarkModeFriendly, Download } from "./svg";
 import { type Session } from "next-auth";
 
 const PDFDownloadLink = dynamic(
@@ -263,7 +263,7 @@ const PdfDownloadButton = ({
                 loading ? "Loading document..." : "Download results as PDF"
               }
             </PDFDownloadLink>
-            <ArrowRight />
+            <Download />
           </Button>
         )}
       </div>
