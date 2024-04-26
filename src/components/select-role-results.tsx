@@ -6,8 +6,6 @@ import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { ScrollArea } from "~/components/ui/scroll-area";
@@ -15,7 +13,7 @@ import { type Section } from "~/models/types";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { slugify } from "~/utils/slugify";
-import { ArrowDown } from "./svg";
+import { ArrowDownDarkModeFriendly } from "./svg";
 
 const SelectRoleResults = ({ roles }: { roles: Section[] }) => {
   const pathname = usePathname() || "";
@@ -38,15 +36,14 @@ const SelectRoleResults = ({ roles }: { roles: Section[] }) => {
       <DropdownMenuTrigger asChild>
         <div className="mt-5 flex justify-center">
           <div className="mt-5 flex flex-col items-center gap-6 md:flex-row">
-            <Button className=" bg-custom-buttonPrimary text-custom-secondary hover:bg-custom-buttonHover dark:bg-custom-buttonPrimary dark:hover:bg-custom-buttonHover">
-              Viewing results for role: {currentRoleBeautified} <ArrowDown />
+            <Button variant="outline" className="max-w-[550px]">
+              Viewing results for role: {currentRoleBeautified}{" "}
+              <ArrowDownDarkModeFriendly />
             </Button>
           </div>
         </div>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56">
-        <DropdownMenuLabel>Roles:</DropdownMenuLabel>
-        <DropdownMenuSeparator />
+      <DropdownMenuContent className="w-[450px]">
         <ScrollArea className="w-50 h-72 rounded-md border">
           {roles.map((section) => (
             <Link href={section.href} key={section.id}>

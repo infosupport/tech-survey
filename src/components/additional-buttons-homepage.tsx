@@ -3,7 +3,7 @@
 import type { Session } from "next-auth";
 import { Login } from "./login";
 import { Button } from "./ui/button";
-import { ArrowRight } from "./svg";
+import { ArrowRightDarkModeFriendly } from "./svg";
 import { signIn } from "next-auth/react";
 
 const Buttons = ({ session }: { session: Session | null }) => {
@@ -17,19 +17,21 @@ const Buttons = ({ session }: { session: Session | null }) => {
               onClick={() =>
                 signIn("azure-ad", { callbackUrl: "/result/general" })
               }
-              className="bg-custom-buttonPrimary text-custom-secondary hover:bg-custom-buttonHover dark:bg-custom-buttonPrimary dark:hover:bg-custom-buttonHover"
+              variant="outline"
+              className="border-2 border-[#bed62f]"
             >
               Show anonymised results
-              <ArrowRight />
+              <ArrowRightDarkModeFriendly />
             </Button>
             <Button
               onClick={() =>
                 signIn("azure-ad", { callbackUrl: "/find-the-expert/general" })
               }
-              className=" bg-custom-buttonPrimary text-custom-secondary hover:bg-custom-buttonHover dark:bg-custom-buttonPrimary dark:hover:bg-custom-buttonHover"
+              variant="outline"
+              className="border-2 border-[#bed62f]"
             >
               Find the Expert
-              <ArrowRight />
+              <ArrowRightDarkModeFriendly />
             </Button>
           </>
         )}

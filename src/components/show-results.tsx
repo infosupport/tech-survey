@@ -76,6 +76,7 @@ const ShowResults = ({ data }: { data: TransformedData }) => {
                           }}
                         />
                         <Tooltip
+                          cursor={{ fill: "transparent" }}
                           content={
                             <CustomTooltip active={false} payload={[]} />
                           }

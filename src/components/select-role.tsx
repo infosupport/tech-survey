@@ -6,7 +6,7 @@ import { type Session } from "next-auth";
 import { type Role } from "~/models/types";
 import Link from "next/link";
 import { Button } from "~/components/ui/button";
-import { ArrowRight } from "./svg";
+import { ArrowRight, ArrowRightDarkModeFriendly } from "./svg";
 import { toast } from "./ui/use-toast";
 import { ToastAction } from "./ui/toast";
 // import OptIn from "./opt-in";
@@ -140,15 +140,15 @@ export default function SelectRoles({
             </Button>
           </div>
           <Link href="/result/general">
-            <Button className=" bg-custom-buttonPrimary text-custom-secondary hover:bg-custom-buttonHover dark:bg-custom-buttonPrimary dark:hover:bg-custom-buttonHover">
+            <Button variant="outline" className="border-2 border-[#bed62f]">
               Show anonymised results
-              <ArrowRight />
+              <ArrowRightDarkModeFriendly />
             </Button>
           </Link>
           <Link href="/find-the-expert/general">
-            <Button className=" bg-custom-buttonPrimary text-custom-secondary hover:bg-custom-buttonHover dark:bg-custom-buttonPrimary dark:hover:bg-custom-buttonHover">
+            <Button variant="outline" className="border-2 border-[#bed62f]">
               Find the Expert
-              <ArrowRight />
+              <ArrowRightDarkModeFriendly />
             </Button>
           </Link>
         </div>

@@ -118,7 +118,14 @@ const ShowTableWrapper = async () => {
       dataByRoleAndQuestion[roleName]?.[questionText]?.sort((a, b) => {
         const answerValueA = parseInt(a.answer);
         const answerValueB = parseInt(b.answer);
-        return answerValueA - answerValueB;
+
+        if (answerValueA === answerValueB) {
+          // Returns a random value between -0.5 and 0.5
+          return Math.random() - 0.5;
+        } else {
+          // Sort based on answer value
+          return answerValueA - answerValueB;
+        }
       });
     }
   }
@@ -136,18 +143,28 @@ const ShowTableWrapper = async () => {
         aggregatedDataByRole[roleName] = {};
       }
 
-      const answerValue = parseInt(answerOptionMap[entry.answerId] ?? "");
-      const userName = userMap[entry.userId]?.name ?? "Unknown User";
-      const userEmail = userMap[entry.userId]?.email ?? "Unknown Email";
+      if (userMap[entry.userId]) {
+        const answerValue = parseInt(answerOptionMap[entry.answerId] ?? "", 10);
+        const userName = userMap[entry.userId]?.name ?? "Unknown User";
+        const userEmail = userMap[entry.userId]?.email ?? "Unknown Email";
+        if (!isNaN(answerValue)) {
+          if (!aggregatedDataByRole[roleName]?.[userEmail]) {
+            aggregatedDataByRole[roleName]![userEmail] = {
+              name: userName,
+              counts: [0, 0, 0, 0],
+            };
+          }
 
-      if (!isNaN(answerValue)) {
-        if (!aggregatedDataByRole[roleName]?.[userEmail]) {
-          aggregatedDataByRole[roleName]![userEmail] = {
-            name: userName,
-            counts: [0, 0, 0, 0],
-          };
+          if (
+            !aggregatedDataByRole[roleName]?.[userEmail]?.counts[answerValue]
+          ) {
+            aggregatedDataByRole[roleName]![userEmail]!.counts[answerValue] = 0;
+          }
+
+          aggregatedDataByRole[roleName]![userEmail]!.counts[answerValue] =
+            (aggregatedDataByRole[roleName]![userEmail]?.counts[answerValue] ??
+              0) + 1;
         }
-        aggregatedDataByRole[roleName]![userEmail]!.counts[answerValue]++;
       }
     }
   }

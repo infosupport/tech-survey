@@ -12,6 +12,10 @@ import { Login } from "~/components/login";
 import { type Session } from "next-auth";
 import { getServerAuthSession } from "~/server/auth";
 import ButtonSkeleton from "~/components/loading/button-loader";
+import { Button } from "~/components/ui/button";
+import { ArrowLeftDarkModeFriendly } from "~/components/svg";
+import Link from "next/link";
+import { headers } from "next/headers";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -26,6 +30,13 @@ export const metadata = {
   description: "Info Support Tech Survey - 2024",
   icons: [{ rel: "icon", url: "/favicon.png" }],
 };
+
+function getNextUrl() {
+  const headersList = headers();
+  const nextUrl = headersList.get("next-url");
+
+  return nextUrl;
+}
 
 export default async function RootLayout({
   children,
@@ -49,7 +60,18 @@ export default async function RootLayout({
         >
           <TRPCReactProvider>
             <main className="min-h-screen items-center justify-center">
-              <div className="absolute right-4 top-4 z-50 flex space-x-4">
+              <div className="mx-auto flex flex-wrap items-center justify-between p-4">
+                {/* only show this back to home button if the getNextUrl is not '/' */}
+                {getNextUrl() !== "/" && (
+                  <Link href="/" passHref>
+                    <Button variant="outline">
+                      <ArrowLeftDarkModeFriendly />
+                      Back to home
+                    </Button>
+                  </Link>
+                )}
+
+                <div className="flex-grow"></div>
                 {session && (
                   <Suspense fallback={<ButtonSkeleton />}>
                     <LoginWrapper session={session} />

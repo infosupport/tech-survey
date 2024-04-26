@@ -200,6 +200,11 @@ export function SurveyQuestionnaire({
   return (
     <div>
       <ProgressionBarComponent roles={selectedRolesForProgressBar} />
+      <h2 className="mb-4 mt-4 text-2xl font-bold">
+        {userSelectedRoles.find((role) => slugify(role.role) === currentRole)
+          ?.role ?? ""}{" "}
+        questions
+      </h2>
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(
@@ -217,7 +222,7 @@ export function SurveyQuestionnaire({
               });
             },
           )}
-          className="grid gap-4 md:grid-cols-1 lg:grid-cols-1"
+          className="grid justify-items-end gap-4 md:grid-cols-1 lg:grid-cols-1"
         >
           <QuestionsComponent
             session={session}
