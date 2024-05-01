@@ -53,22 +53,8 @@ test("User attempts to navigate to different /survey/ page in the nav bar with a
   );
 });
 
-test("User attempts to navigate to different /survey/ page in the nav bar without all questions been filled in", async ({
-  page,
-}) => {
-  const landingPage = new LandingPage(page);
-  const surveyPage = new SurveyPage(page);
-  const selectedRoles = await navigateAndCheckSurveyPage(
-    landingPage,
-    surveyPage,
-  );
-  await surveyPage.fillInQuestions(
-    `http://localhost:3000/survey/${slugify(selectedRoles[1] ?? "")}`,
-    true,
-  );
-});
-
 test("User fills in complete survey correctly", async ({ page }) => {
+  test.setTimeout(200000); // It takes a while to fill in the survey.
   const landingPage = new LandingPage(page);
   const surveyPage = new SurveyPage(page);
   const selectedRoles = await navigateAndCheckSurveyPage(

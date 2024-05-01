@@ -17,6 +17,17 @@ jobs:
         run: npm ci
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
+      - name: "🙌 Prepare"
+        run: az storage file download --share-name import --path survey.csv --account-name $AZURE_STORAGE_ACCOUNT --account-key $AZURE_STORAGE_KEY --dest import/survey.csv
+        env:
+          AZURE_STORAGE_ACCOUNT: ${{ secrets.AZURE_STORAGE_ACCOUNT }}
+          AZURE_STORAGE_KEY: ${{ secrets.AZURE_STORAGE_KEY }}
+      - name: Start the database
+        run: docker run -e "POSTGRES_USER=postgres" -e "POSTGRES_PASSWORD=emQMcnC8J9IH3h0" -e "POSTGRES_DB=tech-survey" -d -p 5432:5432 docker.io/postgres
+      - name: "🚀 Seed"
+        run: npm run db:seed
+      - name: "push"
+        run: npm run db:push
       - name: Run Playwright tests
         run: npm run test
       - uses: actions/upload-artifact@v4
