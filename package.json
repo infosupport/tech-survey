@@ -65,6 +65,7 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.43.0",
+    "@testcontainers/postgresql": "^10.9.0",
     "@types/eslint": "^8.56.2",
     "@types/k6": "^0.50.0",
     "@types/node": "^20.11.30",
