@@ -9,16 +9,19 @@ import { Button } from "~/components/ui/button";
 import { ArrowRight, ArrowRightDarkModeFriendly } from "./svg";
 import { toast } from "./ui/use-toast";
 import { ToastAction } from "./ui/toast";
+import SelectCommunicationMethod from "./selectCommunicationMethod";
 // import OptIn from "./opt-in";
 
 export default function SelectRoles({
   session,
   roles,
   userSelectedRoles,
+  methods,
 }: {
   session: Session;
   roles: Role[];
   userSelectedRoles: Role[];
+  methods: string[];
 }) {
   const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
   const {
@@ -124,6 +127,8 @@ export default function SelectRoles({
 
       {/* Disabled until further notice. */}
       {/* <OptIn session={session} /> */}
+
+      <SelectCommunicationMethod session={session} methods={methods} />
 
       <div className="mt-5 flex justify-center">
         <div className="mt-5 flex flex-col items-center gap-6 md:flex-row">

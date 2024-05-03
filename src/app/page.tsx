@@ -122,11 +122,10 @@ const Home: React.FC = async () => {
   );
 };
 
-// Define a separate component to encapsulate the SelectRole component and database calls
 const SelectRoleWrapper: React.FC<{ session: Session }> = async ({
   session,
 }) => {
-  const [roles, userRoles] = await Promise.all([
+  const [roles, userRoles, userCommunicationMethods] = await Promise.all([
     db.role.findMany(),
     db.user.findUnique({
       where: {
@@ -136,15 +135,28 @@ const SelectRoleWrapper: React.FC<{ session: Session }> = async ({
         roles: true,
       },
     }),
+    db.user.findUnique({
+      where: {
+        id: session.user.id,
+      },
+      include: {
+        communicationPreferences: true,
+      },
+    }),
   ]);
 
   const userSelectedRoles = userRoles?.roles ?? [];
+  const communicationPreferences =
+    userCommunicationMethods?.communicationPreferences ?? [];
+  const methods = communicationPreferences.map((method) => method.methods);
+  const methodStrings = methods.map((method) => method.toString());
 
   return (
     <SelectRole
       session={session}
       roles={roles}
       userSelectedRoles={userSelectedRoles}
+      methods={methodStrings}
     />
   );
 };
