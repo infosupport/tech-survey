@@ -131,8 +131,6 @@ const ShowTableWrapper = async () => {
         answer: answerOptionMap[entry.answerId] ?? "Unknown Answer",
       });
 
-      // console.log(dataByRoleAndQuestion[roleName]?.[questionText]);
-
       // Sort the answers based on the answer value (0, 1, 2, or 3)
       dataByRoleAndQuestion[roleName]?.[questionText]?.sort((a, b) => {
         const answerValueA = parseInt(a.answer);

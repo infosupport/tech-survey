@@ -4,6 +4,14 @@ import { CommunicationMethod } from "@prisma/client";
 import { type Session } from "next-auth";
 import { useEffect, useState } from "react";
 import { api } from "~/trpc/react";
+import {
+  SlackLogo,
+  TeamsLogo,
+  EmailLogo,
+  PhoneLogo,
+  SignalLogo,
+  WhatsappLogo,
+} from "./svg";
 
 export default function SelectCommunicationMethod({
   session,
@@ -43,6 +51,15 @@ export default function SelectCommunicationMethod({
     });
   };
 
+  const communicationMethodToIcon: Record<string, JSX.Element> = {
+    SLACK: <SlackLogo />,
+    EMAIL: <EmailLogo />,
+    PHONE: <PhoneLogo />,
+    SIGNAL: <SignalLogo />,
+    TEAMS: <TeamsLogo />,
+    WHATSAPP: <WhatsappLogo />,
+  };
+
   return (
     <div className="mx-auto py-8">
       <h2 id="select-roles" className="mb-4 text-2xl font-bold">
@@ -57,7 +74,7 @@ export default function SelectCommunicationMethod({
         {Object.values(CommunicationMethod).map((method) => (
           <li
             key={method}
-            className={`cursor-pointer rounded-lg border p-4 hover:bg-gray-400 hover:bg-opacity-25 dark:hover:bg-gray-800`}
+            className={`flex cursor-pointer rounded-lg border p-4 hover:bg-gray-400 hover:bg-opacity-25 dark:hover:bg-gray-800`}
             onClick={() => handleMethodChange(method)}
           >
             <input
@@ -66,7 +83,8 @@ export default function SelectCommunicationMethod({
               onChange={() => handleMethodChange(method)}
               className={`mr-2 accent-custom-primary`}
             />
-            <label className={"cursor-pointer"}>
+            <label className={"flex cursor-pointer items-center"}>
+              {communicationMethodToIcon[method]}
               {/* Only capitalise the first letter */}
               {method.charAt(0) + method.slice(1).toLowerCase()}
             </label>

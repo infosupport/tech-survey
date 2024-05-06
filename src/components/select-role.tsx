@@ -9,7 +9,7 @@ import { Button } from "~/components/ui/button";
 import { ArrowRight, ArrowRightDarkModeFriendly } from "./svg";
 import { toast } from "./ui/use-toast";
 import { ToastAction } from "./ui/toast";
-import SelectCommunicationMethod from "./selectCommunicationMethod";
+import SelectCommunicationMethod from "./select-communication-method";
 // import OptIn from "./opt-in";
 
 export default function SelectRoles({
