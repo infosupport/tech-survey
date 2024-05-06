@@ -14,6 +14,7 @@ export type SurveyResult = {
 export type AggregatedSurveyResult = {
   name: string;
   email: string;
+  communicationPreferences: string[];
   0: number;
   1: number;
   2: number;

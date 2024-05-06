@@ -108,7 +108,7 @@ export type DataByRoleAndQuestion = Record<
     {
       name: string;
       email: string;
-      communicationPreferences: string[];
+      communicationPreferences: string[] | undefined;
       answer: string;
     }[]
   >

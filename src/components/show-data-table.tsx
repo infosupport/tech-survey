@@ -22,6 +22,7 @@ type ShowDataTableProps = {
       string,
       {
         name: string;
+        communicationPreferences: string[];
         counts: number[];
       }
     >
@@ -57,6 +58,8 @@ const ShowDataTable: React.FC<ShowDataTableProps> = ({
                       return {
                         name: rowData?.name ?? "",
                         email: question,
+                        communicationPreferences:
+                          rowData?.communicationPreferences ?? [],
                         "0": rowData?.counts[0] ?? 0,
                         "1": rowData?.counts[1] ?? 0,
                         "2": rowData?.counts[2] ?? 0,

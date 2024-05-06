@@ -126,8 +126,10 @@ const ShowTableWrapper = async () => {
       dataByRoleAndQuestion[roleName]?.[questionText]?.push({
         name: userMap[entry.userId]?.name ?? "Unknown User",
         email: userMap[entry.userId]?.email ?? "Unknown Email",
-        communicationPreferences: userMap[entry.userId]
-          ?.communicationPreferences ?? ["Do not contact"],
+        communicationPreferences:
+          userMap[entry.userId]!.communicationPreferences?.length > 0
+            ? userMap[entry.userId]?.communicationPreferences
+            : ["Do not contact"],
         answer: answerOptionMap[entry.answerId] ?? "Unknown Answer",
       });
 
@@ -149,7 +151,14 @@ const ShowTableWrapper = async () => {
 
   const aggregatedDataByRole: Record<
     string,
-    Record<string, { name: string; counts: number[] }>
+    Record<
+      string,
+      {
+        name: string;
+        communicationPreferences: string[];
+        counts: number[];
+      }
+    >
   > = {};
 
   for (const entry of userAnswersForRole) {
@@ -164,10 +173,18 @@ const ShowTableWrapper = async () => {
         const answerValue = parseInt(answerOptionMap[entry.answerId] ?? "", 10);
         const userName = userMap[entry.userId]?.name ?? "Unknown User";
         const userEmail = userMap[entry.userId]?.email ?? "Unknown Email";
+        let userCommunicationPreferences =
+          userMap[entry.userId]?.communicationPreferences;
+        // Check if communicationPreferences is empty
+        userCommunicationPreferences =
+          userCommunicationPreferences?.length ?? 0 > 0
+            ? userCommunicationPreferences
+            : ["Do not contact"] ?? [];
         if (!isNaN(answerValue)) {
           if (!aggregatedDataByRole[roleName]?.[userEmail]) {
             aggregatedDataByRole[roleName]![userEmail] = {
               name: userName,
+              communicationPreferences: userCommunicationPreferences ?? [],
               counts: [0, 0, 0, 0],
             };
           }

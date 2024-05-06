@@ -81,10 +81,10 @@ export function DataTable<TData, TValue>({
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
-                  key={row.id}
+                  key={`${row.id}-${Math.random()}`}
                   data-state={row.getIsSelected() ? "selected" : undefined}
                 >
-                  {row.getVisibleCells().map((cell) => {
+                  {row.getVisibleCells().map((cell, index) => {
                     const { columnDef } = cell.column;
                     const header = columnDef?.header;
                     const cellContent: React.ReactNode =
@@ -95,20 +95,34 @@ export function DataTable<TData, TValue>({
                     if (header === "Answer") {
                       content = idToTextMap[cellContent as number];
                     } else if (header === "Top choice for communication") {
+                      console.log(cellContent);
                       if (typeof cellContent === "string") {
-                        const individualMethods = cellContent.split(",");
-                        const methodValues = individualMethods.map(
-                          (individualMethod) =>
-                            communicationMethodToIcon[individualMethod],
-                        );
-                        content = <div className="flex">{methodValues}</div>;
+                        if (cellContent === "Do not contact") {
+                          content = cellContent;
+                        } else {
+                          const individualMethods = cellContent.split(",");
+                          const methodValues = individualMethods.map(
+                            (individualMethod, methodIndex) => (
+                              <div
+                                key={`${cell.id}-method-${methodIndex}`}
+                                className="flex"
+                              >
+                                {communicationMethodToIcon[individualMethod]}
+                              </div>
+                            ),
+                          );
+                          content = <div className="flex">{methodValues}</div>;
+                        }
                       }
                     } else {
                       content = cellContent;
                     }
 
                     return (
-                      <TableCell key={cell.id} className="w-[400px] pl-2">
+                      <TableCell
+                        key={`${cell.id}-${index}`}
+                        className="w-[400px] pl-2"
+                      >
                         {content}
                       </TableCell>
                     );
