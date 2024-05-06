@@ -18,11 +18,30 @@ import {
 } from "~/components/ui/table";
 import { idToTextMap } from "~/utils/optionMapping";
 import { DataTablePagination } from "./data-table-pagination";
+import {
+  SlackLogo,
+  TeamsLogo,
+  EmailLogo,
+  PhoneLogo,
+  SignalLogo,
+  WhatsappLogo,
+} from "./svg";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
 }
+
+// for communication preferences, we want to show the method as an clickable icon.
+// we need to map the method to an icon
+const communicationMethodToIcon: Record<string, JSX.Element> = {
+  SLACK: <SlackLogo />,
+  EMAIL: <EmailLogo />,
+  PHONE: <PhoneLogo />,
+  SIGNAL: <SignalLogo />,
+  TEAMS: <TeamsLogo />,
+  WHATSAPP: <WhatsappLogo />,
+};
 
 export function DataTable<TData, TValue>({
   columns,
@@ -65,20 +84,35 @@ export function DataTable<TData, TValue>({
                   key={row.id}
                   data-state={row.getIsSelected() ? "selected" : undefined}
                 >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className="w-[400px] pl-2">
-                      {cell.column.columnDef?.header === "Answer" &&
-                        idToTextMap[
-                          (typeof cell.column.columnDef?.cell === "function"
-                            ? cell.column.columnDef?.cell(cell.getContext())
-                            : "") as number
-                        ]}
-                      {cell.column.columnDef?.header !== "Answer" &&
-                      typeof cell.column.columnDef?.cell === "function"
-                        ? cell.column.columnDef?.cell(cell.getContext())
-                        : ""}
-                    </TableCell>
-                  ))}
+                  {row.getVisibleCells().map((cell) => {
+                    const { columnDef } = cell.column;
+                    const header = columnDef?.header;
+                    const cellContent: React.ReactNode =
+                      typeof columnDef?.cell === "function" &&
+                      (columnDef.cell(cell.getContext()) as React.ReactNode);
+
+                    let content = null;
+                    if (header === "Answer") {
+                      content = idToTextMap[cellContent as number];
+                    } else if (header === "Top choice for communication") {
+                      if (typeof cellContent === "string") {
+                        const individualMethods = cellContent.split(",");
+                        const methodValues = individualMethods.map(
+                          (individualMethod) =>
+                            communicationMethodToIcon[individualMethod],
+                        );
+                        content = <div className="flex">{methodValues}</div>;
+                      }
+                    } else {
+                      content = cellContent;
+                    }
+
+                    return (
+                      <TableCell key={cell.id} className="w-[400px] pl-2">
+                        {content}
+                      </TableCell>
+                    );
+                  })}
                 </TableRow>
               ))
             ) : (

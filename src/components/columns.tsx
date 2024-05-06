@@ -7,7 +7,7 @@ import { type ColumnDef } from "@tanstack/react-table";
 export type SurveyResult = {
   id: string;
   name: string;
-  email: string;
+  communicationPreferences: JSX.Element;
   answer: string;
 };
 
@@ -26,8 +26,8 @@ export const columns: ColumnDef<SurveyResult>[] = [
     header: "Name",
   },
   {
-    accessorKey: "email",
-    header: "Email",
+    accessorKey: "communicationPreferences",
+    header: "Top choice for communication",
   },
   {
     accessorKey: "answer",
@@ -41,8 +41,8 @@ export const aggregateColumns: ColumnDef<AggregatedSurveyResult>[] = [
     header: "Name",
   },
   {
-    accessorKey: "email",
-    header: "Email",
+    accessorKey: "communicationPreferences",
+    header: "Top choice for communication",
   },
   {
     accessorKey: "0",

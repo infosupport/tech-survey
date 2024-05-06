@@ -69,7 +69,12 @@ const ShowTableWrapper = async () => {
   const [users, answerOptions] = await Promise.all([
     db.user.findMany({
       where: { id: { in: userIds } },
-      select: { id: true, name: true, email: true },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        communicationPreferences: true,
+      },
     }),
     db.answerOption.findMany({
       where: { id: { in: answerIds } },
@@ -78,11 +83,21 @@ const ShowTableWrapper = async () => {
   ]);
 
   // Create a map of user IDs to user objects for easy lookup
-  const userMap: Record<string, { name: string; email: string }> = {};
+  const userMap: Record<
+    string,
+    {
+      name: string;
+      email: string;
+      communicationPreferences: string[];
+    }
+  > = {};
   for (const user of users) {
     userMap[user.id] = {
       name: user.name ?? "Unknown User",
       email: user.email ?? "Unknown Email",
+      communicationPreferences: user.communicationPreferences.map((method) =>
+        method.methods.toString(),
+      ),
     };
   }
 
@@ -111,8 +126,12 @@ const ShowTableWrapper = async () => {
       dataByRoleAndQuestion[roleName]?.[questionText]?.push({
         name: userMap[entry.userId]?.name ?? "Unknown User",
         email: userMap[entry.userId]?.email ?? "Unknown Email",
+        communicationPreferences: userMap[entry.userId]
+          ?.communicationPreferences ?? ["Do not contact"],
         answer: answerOptionMap[entry.answerId] ?? "Unknown Answer",
       });
+
+      // console.log(dataByRoleAndQuestion[roleName]?.[questionText]);
 
       // Sort the answers based on the answer value (0, 1, 2, or 3)
       dataByRoleAndQuestion[roleName]?.[questionText]?.sort((a, b) => {
