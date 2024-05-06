@@ -16,16 +16,20 @@ import {
 export default function SelectCommunicationMethod({
   session,
   methods,
+  setCommunicationMethodIsLoading,
 }: {
   session: Session;
   methods: string[];
+  setCommunicationMethodIsLoading: (value: boolean) => void;
 }) {
   const [selectedMethods, setSelectedMethods] = useState<CommunicationMethod[]>(
     [],
   );
 
-  const { mutate: setMethodMutate } =
+  const { mutate: setMethodMutate, isLoading: setMethodIsLoading } =
     api.survey.setCommunicationMethods.useMutation();
+
+  setCommunicationMethodIsLoading(setMethodIsLoading);
 
   // If we have multiple selected role, we get `"SLACK,SIGNAL,TEAMS"` as a string
   // We need to split this string into an array of strings
