@@ -69,9 +69,14 @@ export default function SelectCommunicationMethod({
       <h2 id="select-roles" className="mb-4 text-2xl font-bold">
         Select communication preference
       </h2>
-      <p>
-        Please select your preferred method of communication. You can select
-        more than one.
+      <p className="text-md mb-8">
+        We encourage you to include your{" "}
+        <strong>preferred means of communication</strong>&mdash;such as email,
+        phone, or messaging platform&mdash;so that colleagues seeking experts in
+        specific skills can easily reach out to you with any inquiries they may
+        have. You can opt to not share your communication preferences. In this
+        case a &apos;Do not contact&apos; message will be displayed to your
+        colleagues in the &apos;find the expert&apos; section.
       </p>
       <ul className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         {/* Loop through all available communication methods */}

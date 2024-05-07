@@ -80,6 +80,16 @@ export default async function RootLayout({
                 <ModeToggle />
               </div>
               {children}
+              <div className="text-center">
+                <p className="text-md mb-8">
+                  Your privacy is important to us. We invite you to read our{" "}
+                  <Link className="underline" href={"/privacy"}>
+                    Privacy Statement
+                  </Link>{" "}
+                  to understand how we protect and handle your personal
+                  information.
+                </p>
+              </div>
             </main>
           </TRPCReactProvider>
           <Toaster />

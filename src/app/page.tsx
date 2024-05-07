@@ -6,6 +6,7 @@ import { type Session } from "next-auth";
 import { db } from "~/server/db";
 import RoleSelectionSkeleton from "~/components/loading/role-selection-loader";
 import Buttons from "~/components/additional-buttons-homepage";
+import Link from "next/link";
 
 const Home: React.FC = async () => {
   const session = await getServerAuthSession();
@@ -101,8 +102,10 @@ const Home: React.FC = async () => {
                 </ol>
               </div>
               <p className="mb-8 text-lg ">
-                Join us in leveraging the collective expertise of Info Support
-                to drive innovation and excellence in technology solutions.
+                We appreciate your willingness to share your expertise with us.
+                Please be aware that the information you provide regarding your
+                technical skills will be <strong>visible to colleagues</strong>{" "}
+                for the three goals described above.
               </p>
             </div>
             {/* If the user is logged in, show the SelectRole component */}
@@ -115,6 +118,7 @@ const Home: React.FC = async () => {
             )}
 
             <Buttons session={session} />
+
           </div>
         </div>
       </div>
