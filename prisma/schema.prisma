@@ -8,6 +8,15 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum CommunicationMethod {
+  SLACK
+  EMAIL
+  WHATSAPP
+  SIGNAL
+  PHONE
+  TEAMS
+}
+
 model Survey {
   id         String     @id @default(cuid())
   surveyName String     @unique
@@ -47,16 +56,24 @@ model QuestionResult {
   user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+model CommunicationPreference {
+  id      String                @id @default(cuid())
+  userId  String
+  methods CommunicationMethod[] @default([])
+  user    User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
 model User {
-  id              String           @id @default(cuid())
-  name            String?
-  email           String?          @unique
-  emailVerified   DateTime?
-  image           String?
-  roles           Role[]           @relation("UserRole")
-  accounts        Account[]
-  questionResults QuestionResult[]
-  sessions        Session[]
+  id                       String                    @id @default(cuid())
+  name                     String?
+  email                    String?                   @unique
+  emailVerified            DateTime?
+  image                    String?
+  roles                    Role[]                    @relation("UserRole")
+  accounts                 Account[]
+  questionResults          QuestionResult[]
+  communicationPreferences CommunicationPreference[]
+  sessions                 Session[]
 }
 
 model Account {

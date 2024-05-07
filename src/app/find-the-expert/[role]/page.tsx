@@ -69,7 +69,12 @@ const ShowTableWrapper = async () => {
   const [users, answerOptions] = await Promise.all([
     db.user.findMany({
       where: { id: { in: userIds } },
-      select: { id: true, name: true, email: true },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        communicationPreferences: true,
+      },
     }),
     db.answerOption.findMany({
       where: { id: { in: answerIds } },
@@ -78,11 +83,21 @@ const ShowTableWrapper = async () => {
   ]);
 
   // Create a map of user IDs to user objects for easy lookup
-  const userMap: Record<string, { name: string; email: string }> = {};
+  const userMap: Record<
+    string,
+    {
+      name: string;
+      email: string;
+      communicationPreferences: string[];
+    }
+  > = {};
   for (const user of users) {
     userMap[user.id] = {
       name: user.name ?? "Unknown User",
       email: user.email ?? "Unknown Email",
+      communicationPreferences: user.communicationPreferences.map((method) =>
+        method.methods.toString(),
+      ),
     };
   }
 
@@ -111,6 +126,10 @@ const ShowTableWrapper = async () => {
       dataByRoleAndQuestion[roleName]?.[questionText]?.push({
         name: userMap[entry.userId]?.name ?? "Unknown User",
         email: userMap[entry.userId]?.email ?? "Unknown Email",
+        communicationPreferences:
+          userMap[entry.userId]!.communicationPreferences?.length > 0
+            ? userMap[entry.userId]?.communicationPreferences
+            : ["Do not contact"],
         answer: answerOptionMap[entry.answerId] ?? "Unknown Answer",
       });
 
@@ -132,7 +151,14 @@ const ShowTableWrapper = async () => {
 
   const aggregatedDataByRole: Record<
     string,
-    Record<string, { name: string; counts: number[] }>
+    Record<
+      string,
+      {
+        name: string;
+        communicationPreferences: string[];
+        counts: number[];
+      }
+    >
   > = {};
 
   for (const entry of userAnswersForRole) {
@@ -147,10 +173,18 @@ const ShowTableWrapper = async () => {
         const answerValue = parseInt(answerOptionMap[entry.answerId] ?? "", 10);
         const userName = userMap[entry.userId]?.name ?? "Unknown User";
         const userEmail = userMap[entry.userId]?.email ?? "Unknown Email";
+        let userCommunicationPreferences =
+          userMap[entry.userId]?.communicationPreferences;
+        // Check if communicationPreferences is empty
+        userCommunicationPreferences =
+          userCommunicationPreferences?.length ?? 0 > 0
+            ? userCommunicationPreferences
+            : ["Do not contact"] ?? [];
         if (!isNaN(answerValue)) {
           if (!aggregatedDataByRole[roleName]?.[userEmail]) {
             aggregatedDataByRole[roleName]![userEmail] = {
               name: userName,
+              communicationPreferences: userCommunicationPreferences ?? [],
               counts: [0, 0, 0, 0],
             };
           }
