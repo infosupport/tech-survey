@@ -1,14 +1,17 @@
 // @ts-check
 import { expect } from "@playwright/test";
 import { type Page } from "playwright";
+import { type PrismaClient } from "@prisma/client";
 
 export class LandingPage {
   private readonly page: Page;
   private readonly port;
+  private readonly client: PrismaClient;
 
-  constructor(page: Page, port: number) {
+  constructor(page: Page, port: number, client: PrismaClient) {
     this.page = page;
     this.port = port;
+    this.client = client;
   }
 
   async navigateToLandingPage() {
@@ -18,32 +21,84 @@ export class LandingPage {
     ).toBeVisible();
   }
 
-  async selectRandomRoles() {
-    const roles = this.page.locator("input[type=checkbox]");
-    const elementsCount = await roles.count();
-    const texts = [];
-
-    // select n random roles
-    const randomRoles = Math.floor(Math.random() * elementsCount);
-    for (let i = 0; i < randomRoles; i++) {
-      const randomIndex = Math.floor(Math.random() * elementsCount);
-      const role = roles.nth(randomIndex);
-
-      // get the text of the role, which is under the input element as a label
-      const roleElement = await role.elementHandle();
-      const siblingElement = await roleElement?.$("+ *");
-      const innerText = await siblingElement?.innerText();
-
-      texts.push(innerText);
-      await role.check();
-    }
-    return texts;
+  async createSurvey(surveyName: string): Promise<string> {
+    const survey = await this.client.survey.create({
+      data: {
+        surveyName: surveyName,
+      },
+    });
+    return survey.id;
   }
 
-  async navigateToSurveyPage() {
-    await this.page
-      .getByRole("button", { name: "Go to survey", exact: true })
-      .click();
-    await this.page.waitForURL("/survey/general");
+  async createQuestion(
+    surveyId: string,
+    roleIds: string[],
+    questionText: string,
+  ): Promise<string> {
+    const question = await this.client.question.create({
+      data: {
+        questionText: questionText,
+        surveyId: surveyId,
+        roles: { connect: roleIds.map((id) => ({ id })) },
+      },
+    });
+    return question.id;
+  }
+
+  async createAnswerOption(option: number) {
+    await this.client.answerOption.create({
+      data: {
+        option: option,
+      },
+    });
+  }
+
+  async createRole(roleName: string) {
+    const role = await this.client.role.create({
+      data: {
+        role: roleName,
+      },
+    });
+    return role.id;
+  }
+
+  async getSurveys() {
+    return this.client.survey.findMany();
+  }
+
+  async getRoles() {
+    return this.client.role.findMany();
+  }
+
+  async getQuestions() {
+    return this.client.question.findMany();
+  }
+
+  async getAnswerOptions() {
+    return this.client.answerOption.findMany();
+  }
+
+  async getQuestionsCount() {
+    return this.client.question.count();
+  }
+
+  async getNumberOfQuestionsForSurvey(surveyId: string) {
+    return this.client.question.count({
+      where: {
+        surveyId: surveyId,
+      },
+    });
+  }
+
+  async getRolesAssignedToQuestion(questionId: string) {
+    const question = await this.client.question.findUnique({
+      where: {
+        id: questionId,
+      },
+      include: {
+        roles: true,
+      },
+    });
+    return question?.roles ?? [];
   }
 }

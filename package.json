@@ -13,7 +13,8 @@
     "dev": "next dev",
     "lint": "next lint",
     "start": "node ./node_modules/next/dist/bin/next start",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "playwright test"
   },
   "prisma": {
     "seed": "node prisma/seed.js"

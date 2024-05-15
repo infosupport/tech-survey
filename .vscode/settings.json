@@ -6,7 +6,17 @@
     }
   ],
   "cSpell.words": [
+    "clsx",
+    "cmdk",
     "datasources",
-    "Postgre"
+    "hookform",
+    "lucide",
+    "nextjs",
+    "Postgre",
+    "superjson",
+    "tailwindcss",
+    "tanstack",
+    "TRPC",
+    "typecheck"
   ]
 }
