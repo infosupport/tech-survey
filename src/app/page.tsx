@@ -9,6 +9,7 @@ import Buttons from "~/components/additional-buttons-homepage";
 
 const Home: React.FC = async () => {
   const session = await getServerAuthSession();
+  console.log(session);
 
   if (process.env.FRESH_RUN === "true") {
     // Find users with the name 'e2eTestAccount'

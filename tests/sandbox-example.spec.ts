@@ -11,7 +11,7 @@ import { PrismaClient } from "@prisma/client";
 const execAsync = promisify(exec);
 const cwd = new URL("..", import.meta.url);
 
-test.describe("using test containers", () => {
+test.describe.parallel("using test containers", () => {
   let container: StartedPostgreSqlContainer;
   let client: PrismaClient;
   let nextProcess: ChildProcess;
@@ -19,7 +19,7 @@ test.describe("using test containers", () => {
   let page: Page;
 
   // Set up the test container and database before all tests
-  test.beforeAll(async () => {
+  test.beforeAll(async ({ browser }) => {
     test.setTimeout(60000);
 
     try {
@@ -76,6 +76,8 @@ test.describe("using test containers", () => {
           setTimeout(() => reject(new Error("Browser launch timeout")), 30000),
         ),
       ]);
+
+      page = await browser.newPage();
 
       landingPage = new LandingPage(page, port as number, client);
     } catch (error) {
@@ -135,8 +137,25 @@ test.describe("using test containers", () => {
     expect(questions[0]?.questionText).toBe("What is your favorite color?");
   });
 
+  test("Ensure that a question can be assigned to multiple roles", async () => {
+    const surveyId = await landingPage.createSurvey("Survey");
+    const roleId1 = await landingPage.createRole("General");
+    const roleId2 = await landingPage.createRole("Data");
+    const questionId = await landingPage.createQuestion(
+      surveyId,
+      [roleId1, roleId2],
+      "What is your favorite color?",
+    );
+
+    // check the roles assigned to the question
+    const roles = await landingPage.getRolesAssignedToQuestion(questionId);
+    expect(roles).toHaveLength(2);
+    expect(roles.map((role) => role.role)).toContain("General");
+    expect(roles.map((role) => role.role)).toContain("Data");
+  });
+
   test("Ensure that answer options can be created", async () => {
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 4; i++) {
       await landingPage.createAnswerOption(i);
     }
 
@@ -145,7 +164,13 @@ test.describe("using test containers", () => {
     expect(answerOptions).toHaveLength(4);
   });
 
-  test("Ensure that question results can be created", async () => {
+  test("Ensure that a user can be created", async () => {
+    await landingPage.createUser("John Doe", "jd@abc.com");
+    const users = await landingPage.getUsers();
+    expect(users).toHaveLength(1);
+  });
+
+  test("Ensure that the survey can be answered", async () => {
     const surveyId = await landingPage.createSurvey("Survey");
     const roleId = await landingPage.createRole("General");
     const questionId = await landingPage.createQuestion(
@@ -153,34 +178,31 @@ test.describe("using test containers", () => {
       [roleId],
       "What is your favorite color?",
     );
+    for (let i = 0; i < 4; i++) {
+      await landingPage.createAnswerOption(i);
+    }
     const answerOptions = await landingPage.getAnswerOptions();
+    const userId = await landingPage.createUser("John Doe", "jd@abc.com");
 
-    // Create a user
-    const user = await client.user.create({
-      data: {
-        name: "John Doe",
-        email: "john@example.com",
-        // Add any other relevant user data
-      },
-    });
+    // Answer the question
+    await landingPage.createQuestionResult(
+      userId,
+      questionId,
+      answerOptions[0]!.id,
+    );
 
-    // Create a question result
-    await client.questionResult.create({
-      data: {
-        userId: user.id,
-        questionId: questionId,
-        answerId: answerOptions[0]?.id ?? "",
-      },
-    });
+    // Check if the answer is created
+    const answers = await landingPage.getQuestionResult();
+    expect(answers).toHaveLength(1);
+    expect(answers[0]?.userId).toBe(userId);
+    expect(answers[0]?.questionId).toBe(questionId);
+    expect(answers[0]?.answerId).toBe(answerOptions[0]!.id);
+  });
 
-    // Check if the question result is created
-    const userQuestionResults = await client.user
-      .findUnique({
-        where: { id: user.id },
-      })
-      .questionResults();
-    expect(userQuestionResults).toHaveLength(1);
-    expect(userQuestionResults[0]?.questionId).toBe(questionId);
-    expect(userQuestionResults[0]?.answerId).toBe(answerOptions[0]?.id);
+  test("Visit the home-page as a logged in user.", async () => {
+    test.setTimeout(300000);
+    // Override the behavior of requests to the /server/auth endpoint
+
+    await landingPage.navigateToLandingPage();
   });
 });

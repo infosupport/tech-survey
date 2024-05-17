@@ -2,6 +2,15 @@
 import { expect } from "@playwright/test";
 import { type Page } from "playwright";
 import { type PrismaClient } from "@prisma/client";
+import { getServerAuthSession } from "~/server/auth";
+import jwt from "next-auth/jwt";
+
+export interface DefaultJWT extends Record<string, unknown> {
+  name?: string | null;
+  email?: string | null;
+  picture?: string | null;
+  sub?: string;
+}
 
 export class LandingPage {
   private readonly page: Page;
@@ -15,7 +24,33 @@ export class LandingPage {
   }
 
   async navigateToLandingPage() {
-    await this.page.goto(`http://localhost:${this.port}/`);
+    const payload: DefaultJWT = {
+      name: "Test User",
+      email: "a@a.com",
+      picture: null,
+      sub: "1234567890",
+    };
+
+    const token = async () => {
+      return jwt.encode({
+        token: payload,
+        secret: process.env.NEXTAUTH_SECRET || "",
+      });
+    };
+
+    const sessionCookie = {
+      name: "next-auth.session-token",
+      value: await token(),
+      domain: "localhost",
+      path: "/",
+      httpOnly: true,
+      secure: false,
+      sameSite: "Lax" as const,
+    };
+
+    // Make sure we mock the /api/auth/session endpoint here
+    await this.page.context().addCookies([sessionCookie]);
+    await this.page.goto(`http://localhost:${this.port}`);
     await expect(
       this.page.getByRole("heading", { name: "Select Roles" }),
     ).toBeVisible();
@@ -62,6 +97,31 @@ export class LandingPage {
     return role.id;
   }
 
+  async createQuestionResult(
+    userId: string,
+    questionId: string,
+    answerId: string,
+  ) {
+    const questionResult = await this.client.questionResult.create({
+      data: {
+        userId: userId,
+        questionId: questionId,
+        answerId: answerId,
+      },
+    });
+    return questionResult.id;
+  }
+
+  async createUser(name: string, email: string) {
+    const user = await this.client.user.create({
+      data: {
+        name: name,
+        email: email,
+      },
+    });
+    return user.id;
+  }
+
   async getSurveys() {
     return this.client.survey.findMany();
   }
@@ -76,6 +136,14 @@ export class LandingPage {
 
   async getAnswerOptions() {
     return this.client.answerOption.findMany();
+  }
+
+  async getUsers() {
+    return this.client.user.findMany();
+  }
+
+  async getQuestionResult() {
+    return this.client.questionResult.findMany();
   }
 
   async getQuestionsCount() {
