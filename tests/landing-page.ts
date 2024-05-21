@@ -2,14 +2,6 @@
 import { expect } from "@playwright/test";
 import { type Page } from "playwright";
 import { type PrismaClient } from "@prisma/client";
-import jwt from "next-auth/jwt";
-
-export interface DefaultJWT extends Record<string, unknown> {
-  name?: string | null;
-  email?: string | null;
-  picture?: string | null;
-  sub?: string;
-}
 
 export class LandingPage {
   private readonly page: Page;
@@ -23,53 +15,40 @@ export class LandingPage {
   }
 
   async navigateToLandingPage() {
-    const userId = await this.createUser("Test User", "a@a.com");
+    await this.page.goto(`http://localhost:${this.port}`);
+    await this.page.waitForURL(`http://localhost:${this.port}`);
 
-    const payload: DefaultJWT = {
-      name: "Test User",
-      email: "a@a.com",
-      picture: null,
-      sub: userId,
-    };
-
-    const token = async () => {
-      return jwt.encode({
-        token: payload,
-        secret: "testB",
-      });
-    };
-
-    const tokenValue = await token();
-
-    if (tokenValue) {
-      const sessionCookie = {
-        name: "next-auth.session-token",
-        value: tokenValue,
-        domain: "localhost",
-        path: "/",
-        httpOnly: true,
-        secure: false,
-        sameSite: "Lax" as const,
-      };
-
-      await this.page.context().addCookies([sessionCookie]);
-      await this.page.goto(`http://localhost:${this.port}`);
-      await expect(
-        this.page.getByRole("heading", { name: "Select Roles" }),
-      ).toBeVisible();
-    }
+    await expect(
+      this.page.getByRole("heading", { name: "Select Roles" }),
+    ).toBeVisible();
+    await this.page.reload();
   }
 
   async checkUrl(path: string) {
     expect(this.page.url()).toBe(`http://localhost:${this.port}/${path}`);
   }
 
-  async selectRoles() {
-    const allRoles = this.page.locator("input[type=checkbox]");
+  async goToNextQuestionsForDifferentRole() {
+    await this.page.getByRole("button", { name: "Next", exact: true }).click();
+  }
 
-    // select the 2nd and 3rd roles
-    await allRoles.nth(1).check();
-    await allRoles.nth(2).check();
+  async submitAnswers() {
+    await this.page
+      .getByRole("button", { name: "Submit", exact: true })
+      .click();
+  }
+
+  async selectRoles(roleNames: string[]) {
+    for (const roleName of roleNames) {
+      const roleCheckbox = this.page
+        .locator(`li:has-text("${roleName}")`)
+        .first()
+        .locator('input[type="checkbox"]');
+      await roleCheckbox.check();
+    }
+
+    // wait for the roles to be selected
+    await this.page.waitForTimeout(1000);
   }
 
   async navigateToSurveyPage() {
@@ -84,6 +63,22 @@ export class LandingPage {
       await expect(this.page.getByText(role)).toBeVisible();
     }
   }
+
+  async checkRoleForQuestion(questionText: string[]) {
+    for (const text of questionText) {
+      await expect(this.page.getByText(text)).toBeVisible();
+    }
+  }
+
+  async selectAnswerOption(questionText: string, optionIndex: number) {
+    const optionLocator = this.page
+      .getByRole("row", { name: questionText })
+      .getByLabel("")
+      .nth(optionIndex);
+    await optionLocator.click();
+  }
+
+  // ---- db functions ----
 
   async createSurvey(surveyName: string): Promise<string> {
     const survey = await this.client.survey.create({

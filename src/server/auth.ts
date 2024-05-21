@@ -44,6 +44,9 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
   },
+  session: {
+    strategy: "jwt",
+  },
   adapter: PrismaAdapter(db) as Adapter,
   providers: [
     AzureADProvider({
@@ -52,7 +55,6 @@ export const authOptions: NextAuthOptions = {
       tenantId: env.AZURE_AD_TENANT_ID,
     }),
   ],
-  debug: true,
 };
 
 /**

@@ -87,16 +87,14 @@ export const surveyRouter = createTRPCRouter({
   //   }),
 
   setDefaultRole: protectedProcedure
-    .input(z.object({ userId: z.string() }))
+    .input(z.object({ userId: z.string(), roleIds: z.array(z.string()) }))
     .mutation(async ({ ctx, input }) => {
       const user = await ctx.db.user.findUnique({
         where: {
           id: input.userId,
         },
-        include: {
-          roles: true,
-        },
       });
+      let updatedRoles: Role[] = [];
 
       if (!user) {
         throw new TRPCClientError("User not found");
@@ -113,16 +111,26 @@ export const surveyRouter = createTRPCRouter({
       }
 
       // Check if the default role is already assigned to the user
-      const hasDefaultRole = user.roles.some(
-        (role) => role.id === defaultRole.id,
-      );
+      const hasDefaultRole = defaultRole.id in input.roleIds;
 
       if (!hasDefaultRole) {
-        // If the user doesn't have the default role, add it to their roles
-        const updatedRoles = [...user.roles, defaultRole];
+        // retrieve the user's roles, based on the role IDs
 
-        console.log("Setting default role for user", user.id);
-        console.log("Updated roles", updatedRoles);
+        if (input.roleIds) {
+          const userRoles = await ctx.db.role.findMany({
+            where: {
+              id: {
+                in: input.roleIds,
+              },
+            },
+          });
+          // If the user doesn't have the default role, add it to their roles
+          updatedRoles = [...userRoles, defaultRole];
+          console.log("Setting default role for user", user.id);
+          console.log("Updated roles", updatedRoles);
+        } else {
+          updatedRoles = [defaultRole];
+        }
 
         await ctx.db.user.update({
           where: {

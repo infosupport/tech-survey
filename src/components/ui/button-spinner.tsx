@@ -17,6 +17,7 @@ export const SpinnerButton = ({
     <Button
       className="w-24 border-2 border-[#bed62f]"
       variant={"outline"}
+      disabled={state}
       {...props}
     >
       {state ? (

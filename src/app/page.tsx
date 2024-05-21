@@ -6,7 +6,6 @@ import { type Session } from "next-auth";
 import { db } from "~/server/db";
 import RoleSelectionSkeleton from "~/components/loading/role-selection-loader";
 import Buttons from "~/components/additional-buttons-homepage";
-import Link from "next/link";
 
 const Home: React.FC = async () => {
   const session = await getServerAuthSession();
@@ -119,7 +118,6 @@ const Home: React.FC = async () => {
             )}
 
             <Buttons session={session} />
-
           </div>
         </div>
       </div>

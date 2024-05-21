@@ -79,12 +79,15 @@ export default function SelectRoles({
         userId: session.user.id,
         roleIds: updatedRoles,
       });
+    } else {
+      console.log("Role is default or there is an error");
     }
   };
 
   const handleSetGeneralRole = () => {
     setDefaultRoleMutate({
       userId: session.user.id,
+      roleIds: selectedRoles,
     });
   };
 
@@ -165,7 +168,7 @@ export default function SelectRoles({
             <SpinnerButton
               variant="outline"
               className="border-2 border-[#bed62f]"
-              name="Show anonymised results"
+              name="Show anonymized results"
               state={setRoleIsLoading || communicationMethodIsLoading}
             >
               <ArrowRightDarkModeFriendly />

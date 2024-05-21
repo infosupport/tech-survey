@@ -7,9 +7,17 @@ import { LandingPage } from "./landing-page";
 import { promisify } from "util";
 import { type ChildProcess, exec, spawn } from "child_process";
 import { PrismaClient } from "@prisma/client";
+import jwt from "next-auth/jwt";
 
 const execAsync = promisify(exec);
 const cwd = new URL("..", import.meta.url);
+
+export interface DefaultJWT extends Record<string, unknown> {
+  name?: string | null;
+  email?: string | null;
+  picture?: string | null;
+  sub?: string;
+}
 
 test.describe("using test containers", () => {
   let container: StartedPostgreSqlContainer;
@@ -96,11 +104,70 @@ test.describe("using test containers", () => {
 
   // Set up the landing page before each test
   test.beforeEach(async ({ browser }) => {
-    page = await browser.newPage();
+    const userId = await landingPage.createUser("Test User", "a@a.com");
+
+    // Only continue if the user was created
+    if (!userId) {
+      throw new Error("User was not created");
+    }
+
+    const payload: DefaultJWT = {
+      name: "Test User",
+      email: "a@a.com",
+      picture: null,
+      sub: userId,
+    };
+
+    const token = async () => {
+      return jwt.encode({
+        token: payload,
+        secret: "testB",
+      });
+    };
+
+    const tokenValue = await token();
+
+    if (tokenValue) {
+      const sessionCookie = {
+        name: "next-auth.session-token",
+        value: tokenValue,
+        domain: "localhost",
+        path: "/",
+        httpOnly: true,
+        secure: false,
+        sameSite: "Lax" as const,
+      };
+
+      await page.context().addCookies([sessionCookie]);
+
+      // Check if the cookie has been set correctly
+      const cookies = await page.context().cookies();
+      const sessionCookieSet = cookies.some(
+        (cookie) =>
+          cookie.name === "next-auth.session-token" &&
+          cookie.value === tokenValue,
+      );
+
+      if (!sessionCookieSet) {
+        throw new Error("Failed to set session cookie");
+      }
+      page = await browser.newPage();
+    } else {
+      throw new Error("Failed to create token");
+    }
   });
 
   // Clean up the landing page after each test
-  test.afterEach(async () => {
+  test.afterEach(async ({ page }) => {
+    const cookies = await page.context().cookies();
+    const sessionCookie = cookies.find(
+      (cookie) => cookie.name === "next-auth.session-token",
+    );
+
+    if (sessionCookie) {
+      await page.context().clearCookies();
+    }
+
     await page.close();
   });
 
@@ -203,9 +270,23 @@ test.describe("using test containers", () => {
     await landingPage.navigateToLandingPage();
   });
 
-  test("Create multiple questions and assign specific roles", async () => {
-    test.setTimeout(60000);
+  test("Check if the default role(s) are set", async () => {
+    await landingPage.createSurvey("Survey");
+    const roles = ["General"];
 
+    // Create roles and store their IDs
+    const roleIds: { [key: string]: string } = {};
+    for (let role of roles) {
+      roleIds[role] = await landingPage.createRole(role);
+    }
+
+    // Check if the questions are created
+    await landingPage.navigateToLandingPage();
+    await landingPage.navigateToSurveyPage();
+    await landingPage.checkProgressionBarForRoles(["General"]);
+  });
+
+  test("Create multiple questions and assign specific roles", async () => {
     const surveyId = await landingPage.createSurvey("Survey");
     const roles = ["General", "Role 1", "Role 2", "Role 3", "Role 4", "Role 5"];
     const questions = [
@@ -231,8 +312,154 @@ test.describe("using test containers", () => {
 
     // Check if the questions are created
     await landingPage.navigateToLandingPage();
-    await landingPage.selectRoles();
+    await landingPage.selectRoles(["Role 1", "Role 3", "Role 5"]);
     await landingPage.navigateToSurveyPage();
-    await landingPage.checkProgressionBarForRoles(["Role 1", "Role 2"]);
+    await landingPage.checkProgressionBarForRoles([
+      "Role 1",
+      "Role 3",
+      "Role 5",
+    ]);
   });
+
+  test("if questions are visible in roles", async () => {
+    const surveyId = await landingPage.createSurvey("Survey");
+    const roles = ["General"];
+    const questions = [
+      { question: "Kubernetes", roles: ["General"] },
+      { question: "Docker", roles: ["General"] },
+      { question: "C#", roles: ["General"] },
+    ];
+
+    // Create roles and store their IDs
+    const roleIds: { [key: string]: string } = {};
+    for (let role of roles) {
+      roleIds[role] = await landingPage.createRole(role);
+    }
+
+    // Create questions
+    for (let question of questions) {
+      await landingPage.createQuestion(
+        surveyId,
+        question.roles.map((roles) => roleIds[roles] || ""),
+        question.question,
+      );
+    }
+
+    // Check if the questions are created
+    await landingPage.navigateToLandingPage();
+    await landingPage.navigateToSurveyPage();
+    const questionsText = questions.map((question) => question.question);
+    await landingPage.checkRoleForQuestion(questionsText);
+  });
+
+  test("Answer questions of a single role", async () => {
+    const surveyId = await landingPage.createSurvey("Survey");
+    const roles = ["General"];
+    const questions = [
+      { question: "Kubernetes", roles: ["General"] },
+      { question: "Docker", roles: ["General"] },
+      { question: "C#", roles: ["General"] },
+    ];
+
+    for (let i = 0; i < 4; i++) {
+      await landingPage.createAnswerOption(i);
+    }
+
+    // Create roles and store their IDs
+    const roleIds: { [key: string]: string } = {};
+    for (let role of roles) {
+      roleIds[role] = await landingPage.createRole(role);
+    }
+
+    // Create questions
+    for (let question of questions) {
+      await landingPage.createQuestion(
+        surveyId,
+        question.roles.map((roles) => roleIds[roles] || ""),
+        question.question,
+      );
+    }
+
+    // Check if the questions are created
+    await landingPage.navigateToLandingPage();
+    await landingPage.navigateToSurveyPage();
+
+    // Answer the questions
+    const questionsText = questions.map((question) => question.question);
+    for (let i = 0; i < questionsText.length; i++) {
+      await landingPage.selectAnswerOption(questionsText[i] || "", i % 4);
+    }
+
+    await landingPage.submitAnswers();
+    await landingPage.checkUrl("thank-you");
+  });
+
+  test("Answer questions of multiple roles", async () => {
+    const surveyId = await landingPage.createSurvey("Survey");
+    const roles = ["General", "Role 1"];
+    const questions = [
+      { question: "Kubernetes", roles: ["General"] },
+      { question: "Docker", roles: ["General", "Role 1"] },
+      { question: "C#", roles: ["General", "Role 1"] },
+    ];
+
+    for (let i = 0; i < 4; i++) {
+      await landingPage.createAnswerOption(i);
+    }
+
+    // Create roles and store their IDs
+    const roleIds: { [key: string]: string } = {};
+    for (let role of roles) {
+      roleIds[role] = await landingPage.createRole(role);
+    }
+
+    // Create questions
+    for (let question of questions) {
+      await landingPage.createQuestion(
+        surveyId,
+        question.roles.map((roles) => roleIds[roles] || ""),
+        question.question,
+      );
+    }
+
+    // Check if the questions are created
+    await landingPage.navigateToLandingPage();
+    await landingPage.selectRoles(["Role 1"]);
+    await landingPage.navigateToSurveyPage();
+
+    // Answer the questions
+    const questionsText = questions.map((question) => question.question);
+
+    // Outer loop over the roles
+    for (let j = 0; j < roles.length; j++) {
+      // Inner loop over the questions
+      for (let i = 0; i < questionsText.length; i++) {
+        // Get the roles for the current question
+        const questionRoles = questions[i]?.roles;
+
+        // Check if the current role matches the roles of the current question
+        if (questionRoles?.includes(roles[j] || "")) {
+          await landingPage.selectAnswerOption(questionsText[i] || "", i % 4);
+        }
+      }
+
+      // Check if it's the last role
+      if (j === roles.length - 1) {
+        await landingPage.submitAnswers();
+      } else {
+        await landingPage.goToNextQuestionsForDifferentRole();
+      }
+    }
+
+    await landingPage.checkUrl("thank-you");
+  });
+
+  // tests to be written:
+  // - check if forgetting to fill in questions shows error
+  // - check if the percentage of the progressbar is updated
+  // - mobile
+  // - select communication preferences
+  // - anominous results
+  // - find the expert
+  // - trying to reach certain URLs when not logged in.
 });
