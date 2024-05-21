@@ -2,6 +2,7 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 import { type Role } from "~/models/types";
 import { TRPCClientError } from "@trpc/client";
+import { CommunicationMethod } from "@prisma/client";
 
 export const surveyRouter = createTRPCRouter({
   getQuestions: publicProcedure.query(async ({ ctx }) => {
@@ -131,6 +132,54 @@ export const surveyRouter = createTRPCRouter({
             roles: {
               set: updatedRoles,
             },
+          },
+        });
+      }
+    }),
+
+  setCommunicationMethods: protectedProcedure
+    .input(
+      z.object({
+        userId: z.string(),
+        methods: z.array(z.nativeEnum(CommunicationMethod)),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const user = await ctx.db.user.findUnique({
+        where: {
+          id: input.userId,
+        },
+        include: {
+          communicationPreferences: true,
+        },
+      });
+
+      if (!user) {
+        throw new TRPCClientError("User not found");
+      }
+
+      // Check if the user already has communication preferences
+      const hasCommunicationPreferences =
+        user.communicationPreferences.length > 0;
+
+      if (hasCommunicationPreferences) {
+        // If the user already has communication preferences, update them
+        const communicationPreferenceId = user.communicationPreferences[0]?.id;
+
+        await ctx.db.communicationPreference.update({
+          where: {
+            id: communicationPreferenceId,
+          },
+          data: {
+            methods: input.methods,
+          },
+        });
+      } else {
+        // If the user doesn't have communication preferences, create them
+        await ctx.db.communicationPreference.create({
+          data: {
+            userId: input.userId,
+            methods: input.methods,
           },
         });
       }

@@ -5,20 +5,23 @@ import { api } from "~/trpc/react";
 import { type Session } from "next-auth";
 import { type Role } from "~/models/types";
 import Link from "next/link";
-import { Button } from "~/components/ui/button";
 import { ArrowRight, ArrowRightDarkModeFriendly } from "./svg";
 import { toast } from "./ui/use-toast";
 import { ToastAction } from "./ui/toast";
+import SelectCommunicationMethod from "./select-communication-method";
+import { SpinnerButton } from "./ui/button-spinner";
 // import OptIn from "./opt-in";
 
 export default function SelectRoles({
   session,
   roles,
   userSelectedRoles,
+  methods,
 }: {
   session: Session;
   roles: Role[];
   userSelectedRoles: Role[];
+  methods: string[];
 }) {
   console.log("session", session);
 
@@ -85,6 +88,9 @@ export default function SelectRoles({
     });
   };
 
+  const [communicationMethodIsLoading, setCommunicationMethodIsLoading] =
+    useState(false);
+
   // Redirect to /survey/general after the default role mutation succeeds
   useEffect(() => {
     if (setDefaultRoleIsSuccess) {
@@ -97,7 +103,7 @@ export default function SelectRoles({
       <h2 id="select-roles" className="mb-4 text-2xl font-bold">
         Select Roles
       </h2>
-      <ul className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <ul className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
         {roles.map((role) => (
           <li
             key={role.id}
@@ -129,31 +135,51 @@ export default function SelectRoles({
       {/* Disabled until further notice. */}
       {/* <OptIn session={session} /> */}
 
+      <SelectCommunicationMethod
+        session={session}
+        methods={methods}
+        setCommunicationMethodIsLoading={setCommunicationMethodIsLoading}
+      />
+
+      <p></p>
+
       <div className="mt-5 flex justify-center">
         <div className="mt-5 flex flex-col items-center gap-6 md:flex-row">
           <div className="flex">
-            <Button
+            <SpinnerButton
               onClick={handleSetGeneralRole}
-              disabled={setRoleIsLoading || setRoleError !== null}
+              state={
+                communicationMethodIsLoading ||
+                setRoleIsLoading ||
+                setRoleError !== null
+              }
+              name="Go to survey"
               className="flex items-center justify-center bg-custom-buttonPrimary text-custom-secondary hover:bg-custom-buttonHover dark:bg-custom-buttonPrimary dark:hover:bg-custom-buttonHover"
             >
-              <span className="mr-2">Go to survey</span>
               <Link href="/survey/general" passHref>
                 <ArrowRight />
               </Link>
-            </Button>
+            </SpinnerButton>
           </div>
           <Link href="/result/general">
-            <Button variant="outline" className="border-2 border-[#bed62f]">
-              Show anonymised results
+            <SpinnerButton
+              variant="outline"
+              className="border-2 border-[#bed62f]"
+              name="Show anonymised results"
+              state={setRoleIsLoading || communicationMethodIsLoading}
+            >
               <ArrowRightDarkModeFriendly />
-            </Button>
+            </SpinnerButton>
           </Link>
           <Link href="/find-the-expert/general">
-            <Button variant="outline" className="border-2 border-[#bed62f]">
-              Find the Expert
+            <SpinnerButton
+              state={communicationMethodIsLoading}
+              variant="outline"
+              className="border-2 border-[#bed62f]"
+              name="Find the Expert"
+            >
               <ArrowRightDarkModeFriendly />
-            </Button>
+            </SpinnerButton>
           </Link>
         </div>
       </div>
