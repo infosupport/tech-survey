@@ -20,6 +20,8 @@ export default function SelectRoles({
   roles: Role[];
   userSelectedRoles: Role[];
 }) {
+  console.log("session", session);
+
   const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
   const {
     mutate: setRoleMutate,
@@ -68,6 +70,8 @@ export default function SelectRoles({
       }
 
       setSelectedRoles(updatedRoles);
+      console.log("selectedRoles", selectedRoles);
+      console.log("userIds", session.user.id);
       setRoleMutate({
         userId: session.user.id,
         roleIds: updatedRoles,

@@ -11,7 +11,7 @@ import { PrismaClient } from "@prisma/client";
 const execAsync = promisify(exec);
 const cwd = new URL("..", import.meta.url);
 
-test.describe.parallel("using test containers", () => {
+test.describe("using test containers", () => {
   let container: StartedPostgreSqlContainer;
   let client: PrismaClient;
   let nextProcess: ChildProcess;
@@ -200,9 +200,39 @@ test.describe.parallel("using test containers", () => {
   });
 
   test("Visit the home-page as a logged in user.", async () => {
-    test.setTimeout(300000);
-    // Override the behavior of requests to the /server/auth endpoint
-
     await landingPage.navigateToLandingPage();
+  });
+
+  test("Create multiple questions and assign specific roles", async () => {
+    test.setTimeout(60000);
+
+    const surveyId = await landingPage.createSurvey("Survey");
+    const roles = ["General", "Role 1", "Role 2", "Role 3", "Role 4", "Role 5"];
+    const questions = [
+      { text: "Kubernetes", roles: ["Role 1", "Role 2"] },
+      { text: "Docker", roles: ["Role 3"] },
+      { text: "C#", roles: ["Role 4", "Role 5"] },
+    ];
+
+    // Create roles and store their IDs
+    const roleIds: { [key: string]: string } = {};
+    for (let role of roles) {
+      roleIds[role] = await landingPage.createRole(role);
+    }
+
+    // Create questions
+    for (let question of questions) {
+      await landingPage.createQuestion(
+        surveyId,
+        question.roles.map((role) => roleIds[role] || ""),
+        question.text,
+      );
+    }
+
+    // Check if the questions are created
+    await landingPage.navigateToLandingPage();
+    await landingPage.selectRoles();
+    await landingPage.navigateToSurveyPage();
+    await landingPage.checkProgressionBarForRoles(["Role 1", "Role 2"]);
   });
 });
