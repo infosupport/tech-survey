@@ -189,7 +189,7 @@ test.describe("using test containers", () => {
     const token = async () => {
       return jwt.encode({
         token: payload,
-        secret: "testB",
+        secret: "dummy",
       });
     };
 
