@@ -45,15 +45,15 @@ export default defineConfig({
       },
     },
 
-    // // Mobile devices
+    // Mobile devices
 
-    // {
-    //   name: "android",
-    //   grep: /(Mobile)/,
-    //   use: {
-    //     ...devices["Pixel 5"],
-    //   },
-    // },
+    {
+      name: "android",
+      grep: /(Mobile)/,
+      use: {
+        ...devices["Pixel 5"],
+      },
+    },
   ],
 
   /* No webserver config, webserver is started within the tests */
