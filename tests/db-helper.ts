@@ -74,12 +74,9 @@ export class DbHelper {
   }
 
   async createRole(roleName: string) {
-    // Check if role already exists
-    const roleExists = await this.client.role.findFirst({
-      where: {
-        role: roleName,
-      },
-    });
+    // retrieve all existing roles
+    const roles = await this.client.role.findMany();
+    const roleExists = roles.find((role) => role.role === roleName);
 
     if (roleExists) {
       return roleExists.id;
@@ -103,6 +100,7 @@ export class DbHelper {
     });
 
     if (userExists) {
+      console.log(name, userExists.id);
       return userExists.id;
     }
 
@@ -113,6 +111,15 @@ export class DbHelper {
       },
     });
     return user.id;
+  }
+
+  async cleanDatabase() {
+    await this.client.questionResult.deleteMany();
+    await this.client.answerOption.deleteMany();
+    await this.client.question.deleteMany();
+    await this.client.survey.deleteMany();
+    await this.client.role.deleteMany();
+    await this.client.user.deleteMany();
   }
 
   async getSurveys() {
