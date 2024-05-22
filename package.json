@@ -13,7 +13,8 @@
     "dev": "next dev",
     "lint": "next lint",
     "start": "node ./node_modules/next/dist/bin/next start",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "playwright test"
   },
   "prisma": {
     "seed": "node prisma/seed.js"
@@ -21,7 +22,7 @@
   "dependencies": {
     "@auth/prisma-adapter": "^2.0.0",
     "@hookform/resolvers": "^3.3.4",
-    "@prisma/client": "^5.13.0",
+    "@prisma/client": "^5.14.0",
     "@radix-ui/react-accordion": "^1.1.2",
     "@radix-ui/react-avatar": "^1.0.4",
     "@radix-ui/react-dialog": "^1.0.5",
@@ -48,6 +49,7 @@
     "cmdk": "^1.0.0",
     "csv-parser": "^3.0.0",
     "dotenv": "^16.4.5",
+    "jsonwebtoken": "^9.0.2",
     "k6": "^0.0.0",
     "lucide-react": "^0.359.0",
     "next": "^14.1.0",
@@ -66,7 +68,9 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.43.0",
+    "@testcontainers/postgresql": "^10.9.0",
     "@types/eslint": "^8.56.2",
+    "@types/jsonwebtoken": "^9.0.6",
     "@types/k6": "^0.50.0",
     "@types/node": "^20.11.30",
     "@types/react": "^18.2.57",
@@ -75,10 +79,11 @@
     "@typescript-eslint/parser": "^7.0.2",
     "eslint": "^8.56.0",
     "eslint-config-next": "^14.1.0",
+    "jest": "^29.7.0",
     "postcss": "^8.4.34",
     "prettier": "^3.2.5",
     "prettier-plugin-tailwindcss": "^0.5.11",
-    "prisma": "^5.13.0",
+    "prisma": "^5.14.0",
     "tailwindcss": "^3.4.1",
     "ts-node": "^10.9.2",
     "tsx": "^4.7.1",

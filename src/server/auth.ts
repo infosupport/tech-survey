@@ -37,14 +37,15 @@ declare module "next-auth" {
  */
 export const authOptions: NextAuthOptions = {
   callbacks: {
-    session: ({ session, user }) => ({
-      ...session,
-      user: {
-        ...session.user,
-        id: user.id,
-        // findExpertOptIn: user.findExpertOptIn,
-      },
-    }),
+    session({ session, token }) {
+      if (session.user) {
+        session.user.id = token.sub ?? "userId";
+      }
+      return session;
+    },
+  },
+  session: {
+    strategy: "jwt",
   },
   adapter: PrismaAdapter(db) as Adapter,
   providers: [

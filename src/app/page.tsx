@@ -6,10 +6,10 @@ import { type Session } from "next-auth";
 import { db } from "~/server/db";
 import RoleSelectionSkeleton from "~/components/loading/role-selection-loader";
 import Buttons from "~/components/additional-buttons-homepage";
-import Link from "next/link";
 
 const Home: React.FC = async () => {
   const session = await getServerAuthSession();
+  console.log(session);
 
   if (process.env.FRESH_RUN === "true") {
     // Find users with the name 'e2eTestAccount'
@@ -118,7 +118,6 @@ const Home: React.FC = async () => {
             )}
 
             <Buttons session={session} />
-
           </div>
         </div>
       </div>

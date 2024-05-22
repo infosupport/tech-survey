@@ -1,3 +1,25 @@
 {
-  "eslint.rules.customizations": [{ "rule": "*", "severity": "warn" }]
+  "eslint.rules.customizations": [
+    {
+      "rule": "*",
+      "severity": "warn"
+    }
+  ],
+  "cSpell.words": [
+    "clsx",
+    "cmdk",
+    "cuid",
+    "datasource",
+    "datasources",
+    "hookform",
+    "ISKA",
+    "lucide",
+    "nextjs",
+    "Postgre",
+    "superjson",
+    "tailwindcss",
+    "tanstack",
+    "TRPC",
+    "typecheck"
+  ]
 }
