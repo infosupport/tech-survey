@@ -232,176 +232,176 @@ test.describe("using test containers", () => {
     await container.stop();
   });
 
-  // test("Visit the home-page as a logged in user.", async () => {
-  //   await createSingleRoleSurvey();
-  //   await landingPage.navigateToLandingPage();
-  // });
+  test("Visit the home-page as a logged in user.", async () => {
+    await createSingleRoleSurvey();
+    await landingPage.navigateToLandingPage();
+  });
 
-  // test("Check if the default role(s) are set", async () => {
-  //   await createSingleRoleSurvey();
+  test("Check if the default role(s) are set", async () => {
+    await createSingleRoleSurvey();
 
-  //   // Check if the questions are created
-  //   await landingPage.navigateToLandingPage();
-  //   await landingPage.navigateToSurveyPage();
-  //   await landingPage.checkProgressionBarForRoles(SINGLE_ROLE);
-  // });
+    // Check if the questions are created
+    await landingPage.navigateToLandingPage();
+    await landingPage.navigateToSurveyPage();
+    await landingPage.checkProgressionBarForRoles(SINGLE_ROLE);
+  });
 
-  // test("Create multiple questions and assign specific roles", async () => {
-  //   await createMultipleRoleSurvey();
+  test("Create multiple questions and assign specific roles", async () => {
+    await createMultipleRoleSurvey();
 
-  //   // Check if the questions are created
-  //   await landingPage.navigateToLandingPage();
-  //   await landingPage.selectRoles(MULTIPLE_ROLES);
-  //   await landingPage.navigateToSurveyPage();
-  //   await landingPage.checkProgressionBarForRoles(MULTIPLE_ROLES);
-  // });
+    // Check if the questions are created
+    await landingPage.navigateToLandingPage();
+    await landingPage.selectRoles(MULTIPLE_ROLES);
+    await landingPage.navigateToSurveyPage();
+    await landingPage.checkProgressionBarForRoles(MULTIPLE_ROLES);
+  });
 
-  // test("if questions are visible in roles", async () => {
-  //   await createMultipleRoleSurvey();
+  test("if questions are visible in roles", async () => {
+    await createMultipleRoleSurvey();
 
-  //   // Check if the questions are created
-  //   await landingPage.navigateToLandingPage();
-  //   await landingPage.navigateToSurveyPage();
-  //   const questionsText = QUESTIONS_WITH_MULTIPLE_ROLES.map(
-  //     (question) => question.question,
-  //   );
-  //   await landingPage.checkRoleForQuestion(questionsText);
-  // });
+    // Check if the questions are created
+    await landingPage.navigateToLandingPage();
+    await landingPage.navigateToSurveyPage();
+    const questionsText = QUESTIONS_WITH_MULTIPLE_ROLES.map(
+      (question) => question.question,
+    );
+    await landingPage.checkRoleForQuestion(questionsText);
+  });
 
-  // test("Answer questions of a single role", async () => {
-  //   await createSingleRoleSurvey();
+  test("Answer questions of a single role", async () => {
+    await createSingleRoleSurvey();
 
-  //   // Check if the questions are created
-  //   await landingPage.navigateToLandingPage();
-  //   await landingPage.navigateToSurveyPage();
+    // Check if the questions are created
+    await landingPage.navigateToLandingPage();
+    await landingPage.navigateToSurveyPage();
 
-  //   // Answer the questions
-  //   const questionsText = QUESTIONS_WITH_SINGLE_ROLE.map(
-  //     (question) => question.question,
-  //   );
-  //   for (let i = 0; i < questionsText.length; i++) {
-  //     await landingPage.selectAnswerOption(questionsText[i] || "", i % 4);
-  //   }
+    // Answer the questions
+    const questionsText = QUESTIONS_WITH_SINGLE_ROLE.map(
+      (question) => question.question,
+    );
+    for (let i = 0; i < questionsText.length; i++) {
+      await landingPage.selectAnswerOption(questionsText[i] || "", i % 4);
+    }
 
-  //   await landingPage.submitAnswers();
-  //   await landingPage.checkUrl("thank-you");
-  // });
+    await landingPage.submitAnswers();
+    await landingPage.checkUrl("thank-you");
+  });
 
-  // test("Answer questions of multiple roles", async () => {
-  //   await createMultipleRoleSurvey();
+  test("Answer questions of multiple roles", async () => {
+    await createMultipleRoleSurvey();
 
-  //   // Check if the questions are created
-  //   await landingPage.navigateToLandingPage();
-  //   await landingPage.selectRoles(["Role 1"]);
-  //   await landingPage.navigateToSurveyPage();
+    // Check if the questions are created
+    await landingPage.navigateToLandingPage();
+    await landingPage.selectRoles(["Role 1"]);
+    await landingPage.navigateToSurveyPage();
 
-  //   // Answer the questions
-  //   const questionsText = QUESTIONS_WITH_MULTIPLE_ROLES.map(
-  //     (question) => question.question,
-  //   );
+    // Answer the questions
+    const questionsText = QUESTIONS_WITH_MULTIPLE_ROLES.map(
+      (question) => question.question,
+    );
 
-  //   // Outer loop over the roles
-  //   for (let j = 0; j < MULTIPLE_ROLES.length; j++) {
-  //     // Inner loop over the questions
-  //     for (let i = 0; i < questionsText.length; i++) {
-  //       // Get the roles for the current question
-  //       const questionRoles = QUESTIONS_WITH_MULTIPLE_ROLES[i]?.roles;
+    // Outer loop over the roles
+    for (let j = 0; j < MULTIPLE_ROLES.length; j++) {
+      // Inner loop over the questions
+      for (let i = 0; i < questionsText.length; i++) {
+        // Get the roles for the current question
+        const questionRoles = QUESTIONS_WITH_MULTIPLE_ROLES[i]?.roles;
 
-  //       // Check if the current role matches the roles of the current question
-  //       if (questionRoles?.includes(MULTIPLE_ROLES[j] || "")) {
-  //         await landingPage.selectAnswerOption(questionsText[i] || "", i % 4);
-  //       }
-  //     }
+        // Check if the current role matches the roles of the current question
+        if (questionRoles?.includes(MULTIPLE_ROLES[j] || "")) {
+          await landingPage.selectAnswerOption(questionsText[i] || "", i % 4);
+        }
+      }
 
-  //     // Check if it's the last role
-  //     if (j === MULTIPLE_ROLES.length - 1) {
-  //       await landingPage.submitAnswers();
-  //     } else {
-  //       await landingPage.goToNextQuestionsForDifferentRole();
-  //     }
-  //   }
+      // Check if it's the last role
+      if (j === MULTIPLE_ROLES.length - 1) {
+        await landingPage.submitAnswers();
+      } else {
+        await landingPage.goToNextQuestionsForDifferentRole();
+      }
+    }
 
-  //   await landingPage.checkUrl("thank-you");
-  // });
+    await landingPage.checkUrl("thank-you");
+  });
 
-  // test("Forget to fill in a question", async () => {
-  //   await createSingleRoleSurvey();
+  test("Forget to fill in a question", async () => {
+    await createSingleRoleSurvey();
 
-  //   // Check if the questions are created
-  //   await landingPage.navigateToLandingPage();
-  //   await landingPage.navigateToSurveyPage();
+    // Check if the questions are created
+    await landingPage.navigateToLandingPage();
+    await landingPage.navigateToSurveyPage();
 
-  //   // Answer the questions, but forget the first
-  //   const questionsText = QUESTIONS_WITH_SINGLE_ROLE.map(
-  //     (question) => question.question,
-  //   );
-  //   for (let i = 1; i < questionsText.length; i++) {
-  //     await landingPage.selectAnswerOption(questionsText[i] || "", i % 4);
-  //   }
+    // Answer the questions, but forget the first
+    const questionsText = QUESTIONS_WITH_SINGLE_ROLE.map(
+      (question) => question.question,
+    );
+    for (let i = 1; i < questionsText.length; i++) {
+      await landingPage.selectAnswerOption(questionsText[i] || "", i % 4);
+    }
 
-  //   await landingPage.submitAnswers();
-  //   await landingPage.checkForValidationError(slugify("General"));
+    await landingPage.submitAnswers();
+    await landingPage.checkForValidationError(slugify("General"));
 
-  //   // fill in the first question
-  //   await landingPage.selectAnswerOption(questionsText[0] || "", 0);
+    // fill in the first question
+    await landingPage.selectAnswerOption(questionsText[0] || "", 0);
 
-  //   await landingPage.submitAnswers();
-  //   await landingPage.checkUrl("thank-you");
-  // });
+    await landingPage.submitAnswers();
+    await landingPage.checkUrl("thank-you");
+  });
 
-  // test("Fill in the survey and show you are present on the anonymous results", async () => {
-  //   await createSingleRoleSurvey();
+  test("Fill in the survey and show you are present on the anonymous results", async () => {
+    await createSingleRoleSurvey();
 
-  //   // Check if the questions are created
-  //   await landingPage.navigateToLandingPage();
-  //   await landingPage.navigateToSurveyPage();
+    // Check if the questions are created
+    await landingPage.navigateToLandingPage();
+    await landingPage.navigateToSurveyPage();
 
-  //   // Answer the questions
-  //   const questionsText = QUESTIONS_WITH_SINGLE_ROLE.map(
-  //     (question) => question.question,
-  //   );
-  //   for (let i = 0; i < questionsText.length; i++) {
-  //     await landingPage.selectAnswerOption(questionsText[i] || "", i % 4);
-  //   }
+    // Answer the questions
+    const questionsText = QUESTIONS_WITH_SINGLE_ROLE.map(
+      (question) => question.question,
+    );
+    for (let i = 0; i < questionsText.length; i++) {
+      await landingPage.selectAnswerOption(questionsText[i] || "", i % 4);
+    }
 
-  //   await landingPage.submitAnswers();
-  //   await landingPage.checkUrl("thank-you");
+    await landingPage.submitAnswers();
+    await landingPage.checkUrl("thank-you");
 
-  //   // Check if the user is present in the anonymous results
-  //   await landingPage.navigateToAnonymousResults(slugify(SINGLE_ROLE[0] || ""));
-  //   await landingPage.checkAnonymousResultsIsNotEmpty();
-  // });
+    // Check if the user is present in the anonymous results
+    await landingPage.navigateToAnonymousResults(slugify(SINGLE_ROLE[0] || ""));
+    await landingPage.checkAnonymousResultsIsNotEmpty();
+  });
 
-  // test("Fill in the survey and show you are present on the find-the-expert page", async () => {
-  //   await createSingleRoleSurvey();
+  test("Fill in the survey and show you are present on the find-the-expert page", async () => {
+    await createSingleRoleSurvey();
 
-  //   // Check if the questions are created
-  //   await landingPage.navigateToLandingPage();
-  //   await landingPage.navigateToSurveyPage();
+    // Check if the questions are created
+    await landingPage.navigateToLandingPage();
+    await landingPage.navigateToSurveyPage();
 
-  //   // Answer the questions
-  //   const questionsText = QUESTIONS_WITH_SINGLE_ROLE.map(
-  //     (question) => question.question,
-  //   );
-  //   for (let i = 0; i < questionsText.length; i++) {
-  //     await landingPage.selectAnswerOption(questionsText[i] || "", i % 4);
-  //   }
+    // Answer the questions
+    const questionsText = QUESTIONS_WITH_SINGLE_ROLE.map(
+      (question) => question.question,
+    );
+    for (let i = 0; i < questionsText.length; i++) {
+      await landingPage.selectAnswerOption(questionsText[i] || "", i % 4);
+    }
 
-  //   await landingPage.submitAnswers();
-  //   await landingPage.checkUrl("thank-you");
+    await landingPage.submitAnswers();
+    await landingPage.checkUrl("thank-you");
 
-  //   // Check if the user is present in the find-the-expert page, with the "do not contact" option
-  //   await landingPage.navigateToFindTheExpert(slugify(SINGLE_ROLE[0] || ""));
-  //   await landingPage.checkUserIsPresentInFindTheExpertPage(USER_NAME, false);
+    // Check if the user is present in the find-the-expert page, with the "do not contact" option
+    await landingPage.navigateToFindTheExpert(slugify(SINGLE_ROLE[0] || ""));
+    await landingPage.checkUserIsPresentInFindTheExpertPage(USER_NAME, false);
 
-  //   // Change the communication preferences
-  //   await landingPage.navigateToLandingPage();
-  //   await landingPage.selectCommunicationPreferences(COMMUNICATION_PREFERENCES);
+    // Change the communication preferences
+    await landingPage.navigateToLandingPage();
+    await landingPage.selectCommunicationPreferences(COMMUNICATION_PREFERENCES);
 
-  //   // Check if the user is present in the find-the-expert page, with the communication preferences
-  //   await landingPage.navigateToFindTheExpert(slugify(SINGLE_ROLE[0] || ""));
-  //   await landingPage.checkUserIsPresentInFindTheExpertPage(USER_NAME, true);
-  // });
+    // Check if the user is present in the find-the-expert page, with the communication preferences
+    await landingPage.navigateToFindTheExpert(slugify(SINGLE_ROLE[0] || ""));
+    await landingPage.checkUserIsPresentInFindTheExpertPage(USER_NAME, true);
+  });
 
   // // --- Mobile tests ---
   test("(Mobile) visit the home-page as a logged in user.", async () => {
@@ -409,172 +409,172 @@ test.describe("using test containers", () => {
     await landingPage.navigateToLandingPage();
   });
 
-  // test("(Mobile) Check if the default role(s) are set", async () => {
-  //   await createSingleRoleSurvey();
+  test("(Mobile) Check if the default role(s) are set", async () => {
+    await createSingleRoleSurvey();
 
-  //   // Check if the questions are created
-  //   await landingPage.navigateToLandingPage();
-  //   await landingPage.navigateToSurveyPage();
-  //   await landingPage.mobileCheckProgressionBarForRoles(SINGLE_ROLE);
-  // });
+    // Check if the questions are created
+    await landingPage.navigateToLandingPage();
+    await landingPage.navigateToSurveyPage();
+    await landingPage.mobileCheckProgressionBarForRoles(SINGLE_ROLE);
+  });
 
-  // test("(Mobile) Create multiple questions and assign specific roles", async () => {
-  //   await createMultipleRoleSurvey();
+  test("(Mobile) Create multiple questions and assign specific roles", async () => {
+    await createMultipleRoleSurvey();
 
-  //   // Check if the questions are created
-  //   await landingPage.navigateToLandingPage();
-  //   await landingPage.selectRoles(MULTIPLE_ROLES);
-  //   await landingPage.navigateToSurveyPage();
-  //   await landingPage.mobileCheckProgressionBarForRoles(MULTIPLE_ROLES);
-  // });
+    // Check if the questions are created
+    await landingPage.navigateToLandingPage();
+    await landingPage.selectRoles(MULTIPLE_ROLES);
+    await landingPage.navigateToSurveyPage();
+    await landingPage.mobileCheckProgressionBarForRoles(MULTIPLE_ROLES);
+  });
 
-  // test("(Mobile) if questions are visible in roles", async () => {
-  //   await createMultipleRoleSurvey();
+  test("(Mobile) if questions are visible in roles", async () => {
+    await createMultipleRoleSurvey();
 
-  //   // Check if the questions are created
-  //   await landingPage.navigateToLandingPage();
-  //   await landingPage.navigateToSurveyPage();
-  //   const questionsText = QUESTIONS_WITH_MULTIPLE_ROLES.map(
-  //     (question) => question.question,
-  //   );
-  //   await landingPage.checkRoleForQuestion(questionsText);
-  // });
+    // Check if the questions are created
+    await landingPage.navigateToLandingPage();
+    await landingPage.navigateToSurveyPage();
+    const questionsText = QUESTIONS_WITH_MULTIPLE_ROLES.map(
+      (question) => question.question,
+    );
+    await landingPage.checkRoleForQuestion(questionsText);
+  });
 
-  // test("(Mobile) Answer questions of a single role", async () => {
-  //   await createSingleRoleSurvey();
+  test("(Mobile) Answer questions of a single role", async () => {
+    await createSingleRoleSurvey();
 
-  //   // Check if the questions are created
-  //   await landingPage.navigateToLandingPage();
-  //   await landingPage.navigateToSurveyPage();
+    // Check if the questions are created
+    await landingPage.navigateToLandingPage();
+    await landingPage.navigateToSurveyPage();
 
-  //   // Answer the questions
-  //   const questionsText = QUESTIONS_WITH_SINGLE_ROLE.map(
-  //     (question) => question.question,
-  //   );
-  //   for (let i = 0; i < questionsText.length; i++) {
-  //     await landingPage.MobileSelectAnswerOption(questionsText[i] || "", i % 4);
-  //   }
+    // Answer the questions
+    const questionsText = QUESTIONS_WITH_SINGLE_ROLE.map(
+      (question) => question.question,
+    );
+    for (let i = 0; i < questionsText.length; i++) {
+      await landingPage.MobileSelectAnswerOption(questionsText[i] || "", i % 4);
+    }
 
-  //   await landingPage.submitAnswers();
-  //   await landingPage.checkUrl("thank-you");
-  // });
+    await landingPage.submitAnswers();
+    await landingPage.checkUrl("thank-you");
+  });
 
-  // test("(Mobile) Answer questions of multiple roles", async () => {
-  //   await createMultipleRoleSurvey();
+  test("(Mobile) Answer questions of multiple roles", async () => {
+    await createMultipleRoleSurvey();
 
-  //   // Check if the questions are created
-  //   await landingPage.navigateToLandingPage();
-  //   await landingPage.selectRoles(["Role 1"]);
-  //   await landingPage.navigateToSurveyPage();
+    // Check if the questions are created
+    await landingPage.navigateToLandingPage();
+    await landingPage.selectRoles(["Role 1"]);
+    await landingPage.navigateToSurveyPage();
 
-  //   // Answer the questions
-  //   const questionsText = QUESTIONS_WITH_MULTIPLE_ROLES.map(
-  //     (question) => question.question,
-  //   );
+    // Answer the questions
+    const questionsText = QUESTIONS_WITH_MULTIPLE_ROLES.map(
+      (question) => question.question,
+    );
 
-  //   // Outer loop over the roles
-  //   for (let j = 0; j < MULTIPLE_ROLES.length; j++) {
-  //     // Inner loop over the questions
-  //     for (let i = 0; i < questionsText.length; i++) {
-  //       // Get the roles for the current question
-  //       const questionRoles = QUESTIONS_WITH_MULTIPLE_ROLES[i]?.roles;
+    // Outer loop over the roles
+    for (let j = 0; j < MULTIPLE_ROLES.length; j++) {
+      // Inner loop over the questions
+      for (let i = 0; i < questionsText.length; i++) {
+        // Get the roles for the current question
+        const questionRoles = QUESTIONS_WITH_MULTIPLE_ROLES[i]?.roles;
 
-  //       // Check if the current role matches the roles of the current question
-  //       if (questionRoles?.includes(MULTIPLE_ROLES[j] || "")) {
-  //         await landingPage.MobileSelectAnswerOption(
-  //           questionsText[i] || "",
-  //           i % 4,
-  //         );
-  //       }
-  //     }
+        // Check if the current role matches the roles of the current question
+        if (questionRoles?.includes(MULTIPLE_ROLES[j] || "")) {
+          await landingPage.MobileSelectAnswerOption(
+            questionsText[i] || "",
+            i % 4,
+          );
+        }
+      }
 
-  //     // Check if it's the last role
-  //     if (j === MULTIPLE_ROLES.length - 1) {
-  //       await landingPage.submitAnswers();
-  //     } else {
-  //       await landingPage.goToNextQuestionsForDifferentRole();
-  //     }
-  //   }
+      // Check if it's the last role
+      if (j === MULTIPLE_ROLES.length - 1) {
+        await landingPage.submitAnswers();
+      } else {
+        await landingPage.goToNextQuestionsForDifferentRole();
+      }
+    }
 
-  //   await landingPage.checkUrl("thank-you");
-  // });
+    await landingPage.checkUrl("thank-you");
+  });
 
-  // test("(Mobile) Forget to fill in a question", async () => {
-  //   await createSingleRoleSurvey();
+  test("(Mobile) Forget to fill in a question", async () => {
+    await createSingleRoleSurvey();
 
-  //   // Check if the questions are created
-  //   await landingPage.navigateToLandingPage();
-  //   await landingPage.navigateToSurveyPage();
+    // Check if the questions are created
+    await landingPage.navigateToLandingPage();
+    await landingPage.navigateToSurveyPage();
 
-  //   // Answer the questions, but forget the first
-  //   const questionsText = QUESTIONS_WITH_SINGLE_ROLE.map(
-  //     (question) => question.question,
-  //   );
-  //   for (let i = 1; i < questionsText.length; i++) {
-  //     await landingPage.MobileSelectAnswerOption(questionsText[i] || "", i % 4);
-  //   }
+    // Answer the questions, but forget the first
+    const questionsText = QUESTIONS_WITH_SINGLE_ROLE.map(
+      (question) => question.question,
+    );
+    for (let i = 1; i < questionsText.length; i++) {
+      await landingPage.MobileSelectAnswerOption(questionsText[i] || "", i % 4);
+    }
 
-  //   await landingPage.submitAnswers();
-  //   await landingPage.checkForValidationError(slugify("General"));
+    await landingPage.submitAnswers();
+    await landingPage.checkForValidationError(slugify("General"));
 
-  //   // fill in the first question
-  //   await landingPage.MobileSelectAnswerOption(questionsText[0] || "", 0);
+    // fill in the first question
+    await landingPage.MobileSelectAnswerOption(questionsText[0] || "", 0);
 
-  //   await landingPage.submitAnswers();
-  //   await landingPage.checkUrl("thank-you");
-  // });
+    await landingPage.submitAnswers();
+    await landingPage.checkUrl("thank-you");
+  });
 
-  // test("(Mobile) Fill in the survey and show you are present on the anonymous results", async () => {
-  //   await createSingleRoleSurvey();
+  test("(Mobile) Fill in the survey and show you are present on the anonymous results", async () => {
+    await createSingleRoleSurvey();
 
-  //   // Check if the questions are created
-  //   await landingPage.navigateToLandingPage();
-  //   await landingPage.navigateToSurveyPage();
+    // Check if the questions are created
+    await landingPage.navigateToLandingPage();
+    await landingPage.navigateToSurveyPage();
 
-  //   // Answer the questions
-  //   const questionsText = QUESTIONS_WITH_SINGLE_ROLE.map(
-  //     (question) => question.question,
-  //   );
-  //   for (let i = 0; i < questionsText.length; i++) {
-  //     await landingPage.MobileSelectAnswerOption(questionsText[i] || "", i % 4);
-  //   }
+    // Answer the questions
+    const questionsText = QUESTIONS_WITH_SINGLE_ROLE.map(
+      (question) => question.question,
+    );
+    for (let i = 0; i < questionsText.length; i++) {
+      await landingPage.MobileSelectAnswerOption(questionsText[i] || "", i % 4);
+    }
 
-  //   await landingPage.submitAnswers();
-  //   await landingPage.checkUrl("thank-you");
+    await landingPage.submitAnswers();
+    await landingPage.checkUrl("thank-you");
 
-  //   // Check if the user is present in the anonymous results
-  //   await landingPage.navigateToAnonymousResults(slugify(SINGLE_ROLE[0] || ""));
-  //   await landingPage.checkAnonymousResultsIsNotEmpty();
-  // });
+    // Check if the user is present in the anonymous results
+    await landingPage.navigateToAnonymousResults(slugify(SINGLE_ROLE[0] || ""));
+    await landingPage.checkAnonymousResultsIsNotEmpty();
+  });
 
-  // test("(Mobile) Fill in the survey and show you are present on the find-the-expert page", async () => {
-  //   await createSingleRoleSurvey();
+  test("(Mobile) Fill in the survey and show you are present on the find-the-expert page", async () => {
+    await createSingleRoleSurvey();
 
-  //   // Check if the questions are created
-  //   await landingPage.navigateToLandingPage();
-  //   await landingPage.navigateToSurveyPage();
+    // Check if the questions are created
+    await landingPage.navigateToLandingPage();
+    await landingPage.navigateToSurveyPage();
 
-  //   // Answer the questions
-  //   const questionsText = QUESTIONS_WITH_SINGLE_ROLE.map(
-  //     (question) => question.question,
-  //   );
-  //   for (let i = 0; i < questionsText.length; i++) {
-  //     await landingPage.MobileSelectAnswerOption(questionsText[i] || "", i % 4);
-  //   }
+    // Answer the questions
+    const questionsText = QUESTIONS_WITH_SINGLE_ROLE.map(
+      (question) => question.question,
+    );
+    for (let i = 0; i < questionsText.length; i++) {
+      await landingPage.MobileSelectAnswerOption(questionsText[i] || "", i % 4);
+    }
 
-  //   await landingPage.submitAnswers();
-  //   await landingPage.checkUrl("thank-you");
+    await landingPage.submitAnswers();
+    await landingPage.checkUrl("thank-you");
 
-  //   // Check if the user is present in the find-the-expert page, with the "do not contact" option
-  //   await landingPage.navigateToFindTheExpert(slugify(SINGLE_ROLE[0] || ""));
-  //   await landingPage.checkUserIsPresentInFindTheExpertPage(USER_NAME, false);
+    // Check if the user is present in the find-the-expert page, with the "do not contact" option
+    await landingPage.navigateToFindTheExpert(slugify(SINGLE_ROLE[0] || ""));
+    await landingPage.checkUserIsPresentInFindTheExpertPage(USER_NAME, false);
 
-  //   // Change the communication preferences
-  //   await landingPage.navigateToLandingPage();
-  //   await landingPage.selectCommunicationPreferences(COMMUNICATION_PREFERENCES);
+    // Change the communication preferences
+    await landingPage.navigateToLandingPage();
+    await landingPage.selectCommunicationPreferences(COMMUNICATION_PREFERENCES);
 
-  //   // Check if the user is present in the find-the-expert page, with the communication preferences
-  //   await landingPage.navigateToFindTheExpert(slugify(SINGLE_ROLE[0] || ""));
-  //   await landingPage.checkUserIsPresentInFindTheExpertPage(USER_NAME, true);
-  // });
+    // Check if the user is present in the find-the-expert page, with the communication preferences
+    await landingPage.navigateToFindTheExpert(slugify(SINGLE_ROLE[0] || ""));
+    await landingPage.checkUserIsPresentInFindTheExpertPage(USER_NAME, true);
+  });
 });
