@@ -1,4 +1,11 @@
+import type { ColumnDef } from "@tanstack/react-table";
 import Link from "next/link";
+import {
+  aggregateColumns,
+  columns,
+  type AggregatedSurveyResult,
+} from "~/components/columns";
+import { DataTable } from "~/components/data-table";
 import {
   Accordion,
   AccordionContent,
@@ -7,6 +14,61 @@ import {
 } from "~/components/ui/accordion";
 
 const PrivacyPage = () => {
+  const aggregatedDataByRole: Record<
+    string,
+    Record<
+      string,
+      {
+        name: string;
+        communicationPreferences: string[];
+        counts: number[];
+      }
+    >
+  > = {
+    role1: {
+      question1: {
+        name: "John Doe",
+        communicationPreferences: ["SLACK", "EMAIL", "WHATSAPP"],
+        counts: [1, 2, 3, 4],
+      },
+      question2: {
+        name: "Jane Doe",
+        communicationPreferences: ["SIGNAL", "PHONE", "TEAMS"],
+        counts: [2, 3, 4, 5],
+      },
+    },
+  };
+
+  const dataByRoleAndQuestion: Record<
+    string,
+    Record<
+      string,
+      {
+        name: string;
+        email: string;
+        communicationPreferences: string[];
+        answer: string;
+      }[]
+    >
+  > = {
+    role1: {
+      question1: [
+        {
+          name: "Jane Doe",
+          email: "jane.doe@example.com",
+          communicationPreferences: ["SIGNAL", "PHONE", "TEAMS"],
+          answer: "0",
+        },
+        {
+          name: "John Doe",
+          email: "john.doe@example.com",
+          communicationPreferences: ["SLACK", "EMAIL", "WHATSAPP"],
+          answer: "3",
+        },
+      ],
+    },
+  };
+
   return (
     <div className="container mx-auto py-16 sm:px-4 sm:py-16 md:px-8 lg:px-16">
       <h1 className="text-center text-5xl font-extrabold tracking-tight">
@@ -109,16 +171,81 @@ const PrivacyPage = () => {
               </AccordionContent>
             </AccordionItem>
           </Accordion>
-          <h3 className="mt-10 text-3xl font-extrabold tracking-tight">
+          <h3 className="mb-5 mt-10 text-3xl font-extrabold tracking-tight">
+            Example of how your data is presented in this Tech Survey
+          </h3>
+          <p>
+            In the 'find the expert' feature, we display an aggregate table
+            sorted by how many times a person indicated 'expert' for a
+            technique. This is to help you find the right person to ask for help
+          </p>
+          {Object.keys(aggregatedDataByRole).map((role) => {
+            return (
+              <div key={role}>
+                <h3 className="mb-3 mt-3 text-lg font-semibold">
+                  Aggregated Results
+                </h3>
+                <DataTable<AggregatedSurveyResult, unknown>
+                  columns={aggregateColumns}
+                  data={Object.keys(aggregatedDataByRole[role] ?? {}).map(
+                    (question) => {
+                      const rowData = aggregatedDataByRole[role]?.[question];
+                      return {
+                        name: rowData?.name ?? "",
+                        email: question,
+                        communicationPreferences:
+                          rowData?.communicationPreferences ?? [],
+                        "0": rowData?.counts[0] ?? 0,
+                        "1": rowData?.counts[1] ?? 0,
+                        "2": rowData?.counts[2] ?? 0,
+                        "3": rowData?.counts[3] ?? 0,
+                      };
+                    },
+                  )}
+                />
+              </div>
+            );
+          })}
+
+          <p>
+            Furthermore, we list who is an expert in that technique. If several
+            participants have indicated for a technique that they are an expert
+            in that field, the order in which this table is sorted along will be
+            random.
+          </p>
+          {Object.keys(dataByRoleAndQuestion).map((role) => {
+            return Object.keys(dataByRoleAndQuestion[role] ?? {}).map(
+              (question) => (
+                <div key={question}>
+                  <h3 className="mb-3 mt-3 text-lg font-semibold">
+                    {question}
+                  </h3>
+                  <div className="mb-15">
+                    <DataTable
+                      columns={
+                        columns as ColumnDef<
+                          { name: string; email: string; answer: string },
+                          unknown
+                        >[]
+                      }
+                      data={dataByRoleAndQuestion[role]?.[question] ?? []}
+                    />
+                    <hr className="my-10" />
+                  </div>
+                </div>
+              ),
+            );
+          })}
+
+          <h3 className="mb-5 mt-10 text-3xl font-extrabold tracking-tight">
             Contact
           </h3>
           <p>
-            For questions regarding this privacy statement, please refer to the
+            For questions regarding this privacy statement, please refer to the{" "}
             <Link
               className="underline"
               href={"https://infosupport.com/privacyverklaring/#contact"}
             >
-              {" "}
               infosupport.com contact page
             </Link>
             . Here you will also find information who our data protection
