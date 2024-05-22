@@ -95,8 +95,6 @@ export function SurveyQuestions({
   ]);
 
   const focusCell = () => {
-    console.log(currentRowIndex.current, currentCellIndex.current);
-
     if (tableRef.current) {
       const rows = tableRef.current.querySelectorAll("tr");
       const cells = rows[currentRowIndex.current]?.querySelectorAll("td");

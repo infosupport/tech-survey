@@ -93,8 +93,8 @@ test.describe("using test containers", () => {
     }
   }
 
-  // Set up the test container and database before all tests
-  test.beforeAll(async ({ browser }) => {
+  // Set up the landing page before each test
+  test.beforeEach(async ({ browser }) => {
     test.setTimeout(60000);
 
     try {
@@ -160,18 +160,7 @@ test.describe("using test containers", () => {
       console.error("Error during beforeAll:", error);
       throw error; // Rethrow the error to fail the test suite
     }
-  });
 
-  // Clean up the test container and database after all tests
-  test.afterAll(async () => {
-    if (nextProcess) {
-      nextProcess.kill();
-    }
-    await container.stop();
-  });
-
-  // Set up the landing page before each test
-  test.beforeEach(async ({ browser }) => {
     const userId = await dbHelper.createUser("Test User", "a@a.com");
 
     // Only continue if the user was created
@@ -189,7 +178,7 @@ test.describe("using test containers", () => {
     const token = async () => {
       return jwt.encode({
         token: payload,
-        secret: "testB",
+        secret: "dummy",
       });
     };
 
@@ -235,8 +224,12 @@ test.describe("using test containers", () => {
     if (sessionCookie) {
       await page.context().clearCookies();
     }
-
     await page.close();
+
+    if (nextProcess) {
+      nextProcess.kill();
+    }
+    await container.stop();
   });
 
   test("Visit the home-page as a logged in user.", async () => {
@@ -410,7 +403,7 @@ test.describe("using test containers", () => {
     await landingPage.checkUserIsPresentInFindTheExpertPage(USER_NAME, true);
   });
 
-  // --- Mobile tests ---
+  // // --- Mobile tests ---
   test("(Mobile) visit the home-page as a logged in user.", async () => {
     await createSingleRoleSurvey();
     await landingPage.navigateToLandingPage();

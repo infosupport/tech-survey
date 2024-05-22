@@ -9,6 +9,17 @@ export class DbHelper {
   }
 
   async createSurvey(surveyName: string): Promise<string> {
+    // check if survey already exists
+    const surveyExists = await this.client.survey.findUnique({
+      where: {
+        surveyName: surveyName,
+      },
+    });
+
+    if (surveyExists) {
+      return surveyExists.id;
+    }
+
     const survey = await this.client.survey.create({
       data: {
         surveyName: surveyName,
@@ -22,6 +33,17 @@ export class DbHelper {
     roleIds: string[],
     questionText: string,
   ): Promise<string> {
+    // check if question already exists
+    const questionExists = await this.client.question.findFirst({
+      where: {
+        questionText: questionText,
+      },
+    });
+
+    if (questionExists) {
+      return questionExists.id;
+    }
+
     const question = await this.client.question.create({
       data: {
         questionText: questionText,
@@ -33,6 +55,17 @@ export class DbHelper {
   }
 
   async createAnswerOption(option: number) {
+    // check if answer option already exists
+    const answerOptionExists = await this.client.answerOption.findFirst({
+      where: {
+        option: option,
+      },
+    });
+
+    if (answerOptionExists) {
+      return answerOptionExists.id;
+    }
+
     await this.client.answerOption.create({
       data: {
         option: option,
@@ -41,6 +74,14 @@ export class DbHelper {
   }
 
   async createRole(roleName: string) {
+    // retrieve all existing roles
+    const roles = await this.client.role.findMany();
+    const roleExists = roles.find((role) => role.role === roleName);
+
+    if (roleExists) {
+      return roleExists.id;
+    }
+
     const role = await this.client.role.create({
       data: {
         role: roleName,
@@ -50,22 +91,18 @@ export class DbHelper {
     return role.id;
   }
 
-  async createQuestionResult(
-    userId: string,
-    questionId: string,
-    answerId: string,
-  ) {
-    const questionResult = await this.client.questionResult.create({
-      data: {
-        userId: userId,
-        questionId: questionId,
-        answerId: answerId,
+  async createUser(name: string, email: string) {
+    // Check if user already exists
+    const userExists = await this.client.user.findUnique({
+      where: {
+        email: email,
       },
     });
-    return questionResult.id;
-  }
 
-  async createUser(name: string, email: string) {
+    if (userExists) {
+      return userExists.id;
+    }
+
     const user = await this.client.user.create({
       data: {
         name: name,
@@ -73,6 +110,15 @@ export class DbHelper {
       },
     });
     return user.id;
+  }
+
+  async cleanDatabase() {
+    await this.client.questionResult.deleteMany();
+    await this.client.answerOption.deleteMany();
+    await this.client.question.deleteMany();
+    await this.client.survey.deleteMany();
+    await this.client.role.deleteMany();
+    await this.client.user.deleteMany();
   }
 
   async getSurveys() {

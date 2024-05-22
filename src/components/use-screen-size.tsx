@@ -22,9 +22,6 @@ const useScreenSize = () => {
       const storedWidth = localStorage.getItem("screenWidth");
       const storedHeight = localStorage.getItem("screenHeight");
 
-      console.log("storedWidth", storedWidth);
-      console.log("storedHeight", storedHeight);
-
       setScreenSize({
         width: storedWidth ? parseInt(storedWidth) : window.innerWidth,
         height: storedHeight ? parseInt(storedHeight) : window.innerHeight,
