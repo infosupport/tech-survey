@@ -175,9 +175,10 @@ const PrivacyPage = () => {
             Example of how your data is presented in this Tech Survey
           </h3>
           <p>
-            In the 'find the expert' feature, we display an aggregate table
-            sorted by how many times a person indicated 'expert' for a
-            technique. This is to help you find the right person to ask for help
+            In the &apos;find the expert&apos; feature, we display an aggregate
+            table sorted by how many times a person indicated &apos;expert&apos;
+            for a technique. This is to help you find the right person to ask
+            for help
           </p>
           {Object.keys(aggregatedDataByRole).map((role) => {
             return (
@@ -207,7 +208,7 @@ const PrivacyPage = () => {
             );
           })}
 
-          <p>
+          <p className="mt-5">
             Furthermore, we list who is an expert in that technique. If several
             participants have indicated for a technique that they are an expert
             in that field, the order in which this table is sorted along will be
