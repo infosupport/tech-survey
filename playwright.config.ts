@@ -37,13 +37,13 @@ export default defineConfig({
       },
     },
 
-    // {
-    //   name: "firefox",
-    //   grepInvert: /(Mobile)/,
-    //   use: {
-    //     ...devices["Desktop Firefox"],
-    //   },
-    // },
+    {
+      name: "firefox",
+      grepInvert: /(Mobile)/,
+      use: {
+        ...devices["Desktop Firefox"],
+      },
+    },
 
     // // Mobile devices
 
