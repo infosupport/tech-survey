@@ -1,107 +1,170 @@
-import { type Page, type Locator } from "playwright";
+// @ts-check
 import { expect } from "@playwright/test";
+import { type Page } from "playwright";
 
-export class SurveyPage {
-  constructor(private page: Page) {}
+export class LandingPage {
+  private readonly page: Page;
+  private readonly port;
 
-  async getCurrentURL() {
-    expect(this.page.url()).toBe("http://localhost:3000/survey/general");
+  constructor(page: Page, port: number) {
+    this.page = page;
+    this.port = port;
   }
 
-  async isProgressionBarUpdated(roles: string[]) {
-    for (const role of roles) {
-      await expect(this.page.getByText(role, { exact: true })).toBeVisible();
-    }
+  async navigateToLandingPage() {
+    await this.page.goto(`http://localhost:${this.port}`);
+    await this.page.waitForURL(`http://localhost:${this.port}`);
 
-    // return the roles sorted by the order they appear on the page
-    // look for classes: absolute -rotate-45 whitespace-nowrap text-xs font-semibold
-    const navItem = this.page.locator(
-      ".absolute.-rotate-45.whitespace-nowrap.text-xs.font-semibold",
+    await expect(
+      this.page.getByRole("heading", { name: "Select Roles" }),
+    ).toBeVisible();
+    await this.page.reload();
+  }
+
+  async checkUrl(path: string) {
+    expect(this.page.url()).toBe(`http://localhost:${this.port}/${path}`);
+  }
+
+  async navigateToAnonymousResults(role: string) {
+    await this.page.goto(`http://localhost:${this.port}/result/${role}`);
+    await this.page.waitForURL(`http://localhost:${this.port}/result/${role}`);
+
+    // We expect to see the text "View Results" on the page
+    await expect(
+      this.page.getByText(`Viewing results for role: ${role}`),
+    ).toBeVisible();
+  }
+
+  async navigateToFindTheExpert(role: string) {
+    await this.page.goto(
+      `http://localhost:${this.port}/find-the-expert/${role}`,
     );
-    const roleTexts = [];
-    const elementsCount = await navItem.count();
-    for (let i = 0; i < elementsCount; i++) {
-      const roleText = await navItem.nth(i).innerText();
-      roleTexts.push(roleText);
-    }
+    await this.page.waitForURL(
+      `http://localhost:${this.port}/find-the-expert/${role}`,
+    );
 
-    return roleTexts;
+    // We expect to see the text "View Results" on the page
+    await expect(
+      this.page.getByText(`Viewing results for role: ${role}`),
+    ).toBeVisible();
   }
 
-  async fillInQuestions(
-    nextPageUrl: string,
-    skipQuestions?: boolean,
-    isLastRole?: boolean,
+  async checkAnonymousResultsIsNotEmpty() {
+    // we should not see '404 Not Found' on the page
+    await expect(this.page.isHidden("text=404")).resolves.toBe(true);
+  }
+
+  async checkUserIsPresentInFindTheExpertPage(
+    name: string,
+    shouldShowContactOptions: boolean,
   ) {
-    const rows = this.page.getByRole("row");
-    const elementsCount = await rows.count();
+    const doNotContact = "Do not contact";
 
-    await this.fillRandomRadioButtons(rows, elementsCount, skipQuestions);
-    await this.clickNextButton(isLastRole);
+    await expect(
+      this.page.getByRole("cell", { name: name }).first(),
+    ).toBeVisible();
 
-    if (skipQuestions) {
-      await this.handleSkippedQuestions(rows, elementsCount);
-    }
-
-    await this.page.waitForURL(nextPageUrl);
-  }
-
-  private async fillRandomRadioButtons(
-    rows: Locator,
-    elementsCount: number,
-    skipQuestions?: boolean,
-  ) {
-    for (let i = 1; i < elementsCount; i++) {
-      const row = rows.nth(i);
-      const radioButtons = row.locator("button");
-
-      const isChecked = await this.isRadioButtonChecked(radioButtons);
-
-      if (isChecked || (skipQuestions && i % 3 === 0)) {
-        continue;
-      }
-
-      await this.clickRandomRadioButton(radioButtons);
+    if (shouldShowContactOptions) {
+      await expect(
+        this.page.getByRole("cell", { name: doNotContact }).first(),
+      ).toBeHidden();
+    } else {
+      await expect(
+        this.page.getByRole("cell", { name: doNotContact }).first(),
+      ).toBeVisible();
     }
   }
 
-  private async clickNextButton(isLastRole?: boolean) {
-    const buttonText = isLastRole ? "Submit" : "Next";
+  async goToNextQuestionsForDifferentRole() {
+    await this.page.getByRole("button", { name: "Next", exact: true }).click();
+  }
+
+  async submitAnswers() {
     await this.page
-      .getByRole("button", { name: buttonText, exact: true })
+      .getByRole("button", { name: "Submit", exact: true })
       .click();
   }
 
-  private async handleSkippedQuestions(rows: Locator, elementsCount: number) {
-    const errorMessage = await this.page.isVisible(
-      "text=You need to select an answer",
-    );
-    expect(errorMessage).toBe(true);
+  async selectRoles(roleNames: string[]) {
+    for (const roleName of roleNames) {
+      const roleCheckbox = this.page
+        .locator(`li:has-text("${roleName}")`)
+        .first()
+        .locator('input[type="checkbox"]');
+      await roleCheckbox.check();
+    }
 
-    for (
-      let skippedQuestionIndex = 3;
-      skippedQuestionIndex < elementsCount;
-      skippedQuestionIndex += 3
-    ) {
-      const skippedRow = rows.nth(skippedQuestionIndex);
-      const skippedRadioButtons = skippedRow.locator("button");
-      await this.clickRandomRadioButton(skippedRadioButtons);
+    // wait for the roles to be selected
+    await this.page.waitForTimeout(1000);
+  }
+
+  async selectCommunicationPreferences(preferences: string[]) {
+    for (const preference of preferences) {
+      const preferenceCheckbox = this.page
+        .locator(`li:has-text("${preference}")`)
+        .first()
+        .locator('input[type="checkbox"]');
+      await preferenceCheckbox.check();
+    }
+
+    // wait for the roles to be selected
+    await this.page.waitForTimeout(1000);
+  }
+
+  async navigateToSurveyPage() {
+    await this.page
+      .getByRole("button", { name: "Go to survey", exact: true })
+      .click();
+    await this.page.waitForURL(`http://localhost:${this.port}/survey/general`);
+  }
+
+  async checkProgressionBarForRoles(roles: string[]) {
+    for (const role of roles) {
+      await expect(this.page.getByText(role, { exact: true })).toBeVisible();
     }
   }
 
-  private async isRadioButtonChecked(radioButtons: Locator) {
-    for (let j = 0; j < 4; j++) {
-      const radioButton = radioButtons.nth(j);
-      const checked = await radioButton.getAttribute("aria-checked");
-      if (checked === "true") {
-        return true;
-      }
+  async mobileCheckProgressionBarForRoles(roles: string[]) {
+    await this.page
+      .getByRole("button", {
+        name: `${roles[0]} - 0/${roles.length} 0.00% Completed`,
+      })
+      .click();
+    for (const role of roles) {
+      await expect(this.page.getByText(role, { exact: true })).toBeVisible();
     }
-    return false;
   }
 
-  private async clickRandomRadioButton(radioButtons: Locator) {
-    const randomIndex = Math.floor(Math.random() * 4);
-    await radioButtons.nth(randomIndex).click();
+  async checkRoleForQuestion(questionText: string[]) {
+    for (const text of questionText) {
+      await expect(this.page.getByText(text)).toBeVisible();
+    }
+  }
+
+  async selectAnswerOption(questionText: string, optionIndex: number) {
+    const optionLocator = this.page
+      .getByRole("row", { name: questionText })
+      .getByLabel("")
+      .nth(optionIndex);
+    await optionLocator.click();
+  }
+
+  async MobileSelectAnswerOption(questionText: string, optionIndex: number) {
+    const question = this.page.getByRole("heading", { name: questionText });
+    const questionContainer = question.locator("xpath=../..");
+    const radioGroups = questionContainer.locator('[role="radiogroup"]');
+    const selectedRadioGroup = radioGroups.nth(0);
+    const radioButtons = selectedRadioGroup.locator('button[role="radio"]');
+    await radioButtons.click();
+  }
+
+  async checkForValidationError(role: string) {
+    // Ensure we are still on the same page
+    await this.checkUrl(`survey/${role}`);
+
+    // Check if the text "You need to select an answer" is visible
+    await expect(
+      this.page.getByText("You need to select an answer"),
+    ).toBeVisible();
   }
 }

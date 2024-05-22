@@ -31,24 +31,29 @@ export default defineConfig({
   projects: [
     {
       name: "chromium",
+      grepInvert: /(Mobile)/,
       use: {
         ...devices["Desktop Chrome"],
       },
     },
 
-    // {
-    //   name: "firefox",
-    //   use: {
-    //     ...devices["Desktop Firefox"],
-    //   },
-    // },
+    {
+      name: "firefox",
+      grepInvert: /(Mobile)/,
+      use: {
+        ...devices["Desktop Firefox"],
+      },
+    },
 
-    // {
-    //   name: "webkit",
-    //   use: {
-    //     ...devices["Desktop Safari"],
-    //   },
-    // },
+    // Mobile devices
+
+    {
+      name: "android",
+      grep: /(Mobile)/,
+      use: {
+        ...devices["Pixel 5"],
+      },
+    },
   ],
 
   /* No webserver config, webserver is started within the tests */
