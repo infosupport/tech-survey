@@ -9,6 +9,7 @@ import { defineConfig, devices } from "@playwright/test";
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
+
 export default defineConfig({
   testDir: "./tests",
   /* Run tests in files in parallel */
@@ -20,7 +21,7 @@ export default defineConfig({
   /* Opt out of parallel tests on CI. */
   workers: 1,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: [["list", { printSteps: true }]],
+  reporter: [["list", { printSteps: true }], ["html"]],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
@@ -37,13 +38,13 @@ export default defineConfig({
       },
     },
 
-    // {
-    //   name: "firefox",
-    //   grepInvert: /(Mobile)/,
-    //   use: {
-    //     ...devices["Desktop Firefox"],
-    //   },
-    // },
+    {
+      name: "firefox",
+      grepInvert: /(Mobile)/,
+      use: {
+        ...devices["Desktop Firefox"],
+      },
+    },
 
     // Mobile devices
 
