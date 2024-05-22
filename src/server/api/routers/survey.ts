@@ -112,8 +112,6 @@ export const surveyRouter = createTRPCRouter({
         throw new TRPCClientError("Default role not found");
       }
 
-      console.log("Default role", defaultRole);
-
       let hasDefaultRole = false;
       // Check if the default role is already assigned to the user
       for (const roleIds of input.roleIds) {
@@ -121,9 +119,6 @@ export const surveyRouter = createTRPCRouter({
           hasDefaultRole = true;
         }
       }
-
-      console.log("Has default role", hasDefaultRole);
-      console.log("input roleIds", input.roleIds);
 
       if (!hasDefaultRole) {
         // retrieve the user's roles, based on the role IDs
@@ -138,8 +133,6 @@ export const surveyRouter = createTRPCRouter({
           });
           // If the user doesn't have the default role, add it to their roles
           updatedRoles = [...userRoles, defaultRole];
-          console.log("Setting default role for user", user.id);
-          console.log("Updated roles", updatedRoles);
         } else {
           updatedRoles = [defaultRole];
         }
@@ -340,9 +333,6 @@ export const surveyRouter = createTRPCRouter({
                   answerId,
                 },
               });
-              console.log(
-                `Updated answer for user ${userId} and question ${questionId}`,
-              );
             } else {
               // create a new answer
               await ctx.db.questionResult.create({
@@ -352,13 +342,9 @@ export const surveyRouter = createTRPCRouter({
                   answerId,
                 },
               });
-              console.log(
-                `Created answer for user ${userId} and question ${questionId}`,
-              );
             }
           }),
         );
-        console.log("All answers processed successfully");
       } catch (error) {
         console.error("Error processing answers:", error);
         throw new TRPCClientError("Failed to process all answers");

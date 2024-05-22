@@ -100,7 +100,6 @@ export class DbHelper {
     });
 
     if (userExists) {
-      console.log(name, userExists.id);
       return userExists.id;
     }
 

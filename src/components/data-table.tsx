@@ -95,7 +95,6 @@ export function DataTable<TData, TValue>({
                     if (header === "Answer") {
                       content = idToTextMap[cellContent as number];
                     } else if (header === "Top choice for communication") {
-                      console.log(cellContent);
                       if (typeof cellContent === "string") {
                         if (cellContent === "Do not contact") {
                           content = cellContent;
