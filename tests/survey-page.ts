@@ -1,8 +1,7 @@
 // @ts-check
-import { expect } from "@playwright/test";
 import { type Page } from "playwright";
 
-export class LandingPage {
+export class SurveyPage {
   private readonly page: Page;
   private readonly port;
 
@@ -14,25 +13,24 @@ export class LandingPage {
   async navigateToLandingPage() {
     await this.page.goto(`http://localhost:${this.port}`);
     await this.page.waitForURL(`http://localhost:${this.port}`);
-
-    await expect(
-      this.page.getByRole("heading", { name: "Select Roles" }),
-    ).toBeVisible();
+    const headingElement = this.page.getByRole("heading", {
+      name: "Select Roles",
+    });
     await this.page.reload();
+    return headingElement;
   }
 
   async checkUrl(path: string) {
-    expect(this.page.url()).toBe(`http://localhost:${this.port}/${path}`);
+    return this.page.url() === `http://localhost:${this.port}/${path}`;
   }
 
   async navigateToAnonymousResults(role: string) {
     await this.page.goto(`http://localhost:${this.port}/result/${role}`);
     await this.page.waitForURL(`http://localhost:${this.port}/result/${role}`);
-
-    // We expect to see the text "View Results" on the page
-    await expect(
-      this.page.getByText(`Viewing results for role: ${role}`),
-    ).toBeVisible();
+    const isTextVisible = await this.page
+      .getByText(`Viewing results for role: ${role}`)
+      .isVisible();
+    return isTextVisible;
   }
 
   async navigateToFindTheExpert(role: string) {
@@ -42,37 +40,42 @@ export class LandingPage {
     await this.page.waitForURL(
       `http://localhost:${this.port}/find-the-expert/${role}`,
     );
-
-    // We expect to see the text "View Results" on the page
-    await expect(
-      this.page.getByText(`Viewing results for role: ${role}`),
-    ).toBeVisible();
+    const isTextVisible = await this.page
+      .getByText(`Viewing results for role: ${role}`)
+      .isVisible();
+    return isTextVisible;
   }
 
   async checkAnonymousResultsIsNotEmpty() {
     // we should not see '404 Not Found' on the page
-    await expect(this.page.isHidden("text=404")).resolves.toBe(true);
+    return this.page.isHidden("text=404");
   }
 
   async checkUserIsPresentInFindTheExpertPage(
     name: string,
     shouldShowContactOptions: boolean,
-  ) {
+  ): Promise<{ isUserVisible: boolean; isDoNotContactVisible: boolean }> {
     const doNotContact = "Do not contact";
 
-    await expect(
-      this.page.getByRole("cell", { name: name }).first(),
-    ).toBeVisible();
+    const isUserVisible = await this.page
+      .getByRole("cell", { name: name })
+      .first()
+      .isVisible();
 
+    let isDoNotContactVisible = false;
     if (shouldShowContactOptions) {
-      await expect(
-        this.page.getByRole("cell", { name: doNotContact }).first(),
-      ).toBeHidden();
+      isDoNotContactVisible = await this.page
+        .getByRole("cell", { name: doNotContact })
+        .first()
+        .isHidden();
     } else {
-      await expect(
-        this.page.getByRole("cell", { name: doNotContact }).first(),
-      ).toBeVisible();
+      isDoNotContactVisible = await this.page
+        .getByRole("cell", { name: doNotContact })
+        .first()
+        .isVisible();
     }
+
+    return { isUserVisible, isDoNotContactVisible };
   }
 
   async goToNextQuestionsForDifferentRole() {
@@ -85,7 +88,7 @@ export class LandingPage {
       .click();
   }
 
-  async selectRoles(roleNames: string[]) {
+  async selectRoles(roleNames: readonly string[]) {
     for (const roleName of roleNames) {
       const roleCheckbox = this.page
         .locator(`li:has-text("${roleName}")`)
@@ -98,7 +101,7 @@ export class LandingPage {
     await this.page.waitForTimeout(1000);
   }
 
-  async selectCommunicationPreferences(preferences: string[]) {
+  async selectCommunicationPreferences(preferences: readonly string[]) {
     for (const preference of preferences) {
       const preferenceCheckbox = this.page
         .locator(`li:has-text("${preference}")`)
@@ -118,27 +121,37 @@ export class LandingPage {
     await this.page.waitForURL(`http://localhost:${this.port}/survey/general`);
   }
 
-  async checkProgressionBarForRoles(roles: string[]) {
+  async checkProgressionBarForRoles(roles: readonly string[]) {
+    const roleElements = [];
     for (const role of roles) {
-      await expect(this.page.getByText(role, { exact: true })).toBeVisible();
+      const roleElement = this.page.getByText(role, { exact: true });
+      roleElements.push(roleElement);
     }
+    return roleElements;
   }
 
-  async mobileCheckProgressionBarForRoles(roles: string[]) {
+  async mobileCheckProgressionBarForRoles(roles: readonly string[]) {
+    const roleElements = [];
     await this.page
       .getByRole("button", {
         name: `${roles[0]} - 0/${roles.length} 0.00% Completed`,
       })
       .click();
     for (const role of roles) {
-      await expect(this.page.getByText(role, { exact: true })).toBeVisible();
+      const roleElement = this.page.getByText(role, { exact: true });
+      roleElements.push(roleElement);
     }
+
+    return roleElements;
   }
 
   async checkRoleForQuestion(questionText: string[]) {
+    const questionElements = [];
     for (const text of questionText) {
-      await expect(this.page.getByText(text)).toBeVisible();
+      const questionElement = this.page.getByText(text);
+      questionElements.push(questionElement);
     }
+    return questionElements;
   }
 
   async selectAnswerOption(questionText: string, optionIndex: number) {
@@ -149,7 +162,7 @@ export class LandingPage {
     await optionLocator.click();
   }
 
-  async MobileSelectAnswerOption(questionText: string, optionIndex: number) {
+  async mobileSelectAnswerOption(questionText: string) {
     const question = this.page.getByRole("heading", { name: questionText });
     const questionContainer = question.locator("xpath=../..");
     const radioGroups = questionContainer.locator('[role="radiogroup"]');
@@ -159,12 +172,7 @@ export class LandingPage {
   }
 
   async checkForValidationError(role: string) {
-    // Ensure we are still on the same page
     await this.checkUrl(`survey/${role}`);
-
-    // Check if the text "You need to select an answer" is visible
-    await expect(
-      this.page.getByText("You need to select an answer"),
-    ).toBeVisible();
+    return this.page.getByText("You need to select an answer");
   }
 }

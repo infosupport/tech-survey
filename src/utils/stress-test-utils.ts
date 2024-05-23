@@ -4,8 +4,6 @@ import { db } from "~/server/db";
 export async function createNewUserAndSession(): Promise<Session | null> {
   if (process.env.STRESS_TEST !== "true") return null;
 
-  console.log("Creating a new user for testing purposes.");
-
   // select all users with email starting with 'test-'
   const users = await db.user.findMany({
     where: {

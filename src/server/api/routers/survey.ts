@@ -346,6 +346,7 @@ export const surveyRouter = createTRPCRouter({
           }),
         );
       } catch (error) {
+        // eslint-disable-next-line no-console
         console.error("Error processing answers:", error);
         throw new TRPCClientError("Failed to process all answers");
       }

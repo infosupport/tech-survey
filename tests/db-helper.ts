@@ -1,16 +1,66 @@
 // @ts-check
-import { type PrismaClient } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
+import {
+  PostgreSqlContainer,
+  type StartedPostgreSqlContainer,
+} from "@testcontainers/postgresql";
+import { exec } from "child_process";
+import { promisify } from "util";
 
 export class DbHelper {
-  private readonly client: PrismaClient;
+  private client: PrismaClient | null = null;
+  private container: StartedPostgreSqlContainer | null = null;
+  private readonly execAsync = promisify(exec);
+  private readonly cwd = new URL("..", import.meta.url);
 
-  constructor(client: PrismaClient) {
-    this.client = client;
+  static async create(): Promise<DbHelper> {
+    const dbHelper = new DbHelper();
+    dbHelper.container = await new PostgreSqlContainer().start();
+    dbHelper.client = await dbHelper.setupDatabase();
+    return dbHelper;
+  }
+
+  private getClient(): PrismaClient {
+    if (!this.client) {
+      throw new Error("PrismaClient has not been initialized");
+    }
+    return this.client;
+  }
+
+  getContainer(): StartedPostgreSqlContainer {
+    if (!this.container) {
+      throw new Error("Container has not been initialized");
+    }
+    return this.container;
+  }
+
+  async setupDatabase(): Promise<PrismaClient> {
+    await this.execAsync("npm run db:push", {
+      env: {
+        ...process.env,
+        DATABASE_URL: this.container!.getConnectionUri(),
+      },
+      cwd: this.cwd,
+      encoding: "utf-8",
+    });
+    const client = new PrismaClient({
+      datasources: {
+        db: {
+          url: this.container!.getConnectionUri(),
+        },
+      },
+      log: [
+        {
+          emit: "event",
+          level: "query",
+        },
+      ],
+    });
+    return client;
   }
 
   async createSurvey(surveyName: string): Promise<string> {
-    // check if survey already exists
-    const surveyExists = await this.client.survey.findUnique({
+    const surveyExists = await this.getClient().survey.findUnique({
       where: {
         surveyName: surveyName,
       },
@@ -20,7 +70,7 @@ export class DbHelper {
       return surveyExists.id;
     }
 
-    const survey = await this.client.survey.create({
+    const survey = await this.getClient().survey.create({
       data: {
         surveyName: surveyName,
       },
@@ -34,7 +84,7 @@ export class DbHelper {
     questionText: string,
   ): Promise<string> {
     // check if question already exists
-    const questionExists = await this.client.question.findFirst({
+    const questionExists = await this.getClient().question.findFirst({
       where: {
         questionText: questionText,
       },
@@ -44,7 +94,7 @@ export class DbHelper {
       return questionExists.id;
     }
 
-    const question = await this.client.question.create({
+    const question = await this.getClient().question.create({
       data: {
         questionText: questionText,
         surveyId: surveyId,
@@ -56,7 +106,7 @@ export class DbHelper {
 
   async createAnswerOption(option: number) {
     // check if answer option already exists
-    const answerOptionExists = await this.client.answerOption.findFirst({
+    const answerOptionExists = await this.getClient().answerOption.findFirst({
       where: {
         option: option,
       },
@@ -66,7 +116,7 @@ export class DbHelper {
       return answerOptionExists.id;
     }
 
-    await this.client.answerOption.create({
+    await this.getClient().answerOption.create({
       data: {
         option: option,
       },
@@ -75,14 +125,14 @@ export class DbHelper {
 
   async createRole(roleName: string) {
     // retrieve all existing roles
-    const roles = await this.client.role.findMany();
+    const roles = await this.getClient().role.findMany();
     const roleExists = roles.find((role) => role.role === roleName);
 
     if (roleExists) {
       return roleExists.id;
     }
 
-    const role = await this.client.role.create({
+    const role = await this.getClient().role.create({
       data: {
         role: roleName,
         default: roleName === "General" ? true : false,
@@ -93,7 +143,7 @@ export class DbHelper {
 
   async createUser(name: string, email: string) {
     // Check if user already exists
-    const userExists = await this.client.user.findUnique({
+    const userExists = await this.getClient().user.findUnique({
       where: {
         email: email,
       },
@@ -103,7 +153,7 @@ export class DbHelper {
       return userExists.id;
     }
 
-    const user = await this.client.user.create({
+    const user = await this.getClient().user.create({
       data: {
         name: name,
         email: email,
@@ -113,44 +163,44 @@ export class DbHelper {
   }
 
   async cleanDatabase() {
-    await this.client.questionResult.deleteMany();
-    await this.client.answerOption.deleteMany();
-    await this.client.question.deleteMany();
-    await this.client.survey.deleteMany();
-    await this.client.role.deleteMany();
-    await this.client.user.deleteMany();
+    await this.getClient().questionResult.deleteMany();
+    await this.getClient().answerOption.deleteMany();
+    await this.getClient().question.deleteMany();
+    await this.getClient().survey.deleteMany();
+    await this.getClient().role.deleteMany();
+    await this.getClient().user.deleteMany();
   }
 
   async getSurveys() {
-    return this.client.survey.findMany();
+    return this.getClient().survey.findMany();
   }
 
   async getRoles() {
-    return this.client.role.findMany();
+    return this.getClient().role.findMany();
   }
 
   async getQuestions() {
-    return this.client.question.findMany();
+    return this.getClient().question.findMany();
   }
 
   async getAnswerOptions() {
-    return this.client.answerOption.findMany();
+    return this.getClient().answerOption.findMany();
   }
 
   async getUsers() {
-    return this.client.user.findMany();
+    return this.getClient().user.findMany();
   }
 
   async getQuestionResult() {
-    return this.client.questionResult.findMany();
+    return this.getClient().questionResult.findMany();
   }
 
   async getQuestionsCount() {
-    return this.client.question.count();
+    return this.getClient().question.count();
   }
 
   async getNumberOfQuestionsForSurvey(surveyId: string) {
-    return this.client.question.count({
+    return this.getClient().question.count({
       where: {
         surveyId: surveyId,
       },
@@ -158,7 +208,7 @@ export class DbHelper {
   }
 
   async getRolesAssignedToQuestion(questionId: string) {
-    const question = await this.client.question.findUnique({
+    const question = await this.getClient().question.findUnique({
       where: {
         id: questionId,
       },
