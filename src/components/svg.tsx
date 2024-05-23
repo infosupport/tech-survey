@@ -273,7 +273,7 @@ export function Download() {
 export function ArrowLeftDarkModeFriendly() {
   return (
     <svg
-      className="arrow-left mr-2 fill-[#003865] dark:fill-white"
+      className="arrow-left mr-2 mt-1 fill-[#003865] dark:fill-white"
       width="10"
       height="10"
       viewBox="0 0 4 6"
