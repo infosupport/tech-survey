@@ -169,7 +169,7 @@ export function InfoSupportLogo() {
 export function ArrowRightDarkModeFriendly() {
   return (
     <svg
-      className="arrow-right ml-2 fill-[#003865] dark:fill-white "
+      className="arrow-right ml-2 mt-1 fill-[#003865] dark:fill-white "
       width="10"
       height="10"
       viewBox="0 0 4 6"
