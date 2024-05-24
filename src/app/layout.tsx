@@ -16,6 +16,8 @@ import { Button } from "~/components/ui/button";
 import { ArrowLeftDarkModeFriendly } from "~/components/svg";
 import Link from "next/link";
 import { headers } from "next/headers";
+import { Github } from "lucide-react";
+import GithubLink from "~/components/github-link";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -66,7 +68,7 @@ export default async function RootLayout({
                   <Link href="/" passHref>
                     <Button variant="outline">
                       <ArrowLeftDarkModeFriendly />
-                      Back to home
+                      Home
                     </Button>
                   </Link>
                 )}
@@ -78,6 +80,7 @@ export default async function RootLayout({
                   </Suspense>
                 )}
                 <ModeToggle />
+                <GithubLink />
               </div>
               {children}
               <div className="text-center">
