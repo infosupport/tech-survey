@@ -20,7 +20,7 @@ const Buttons = ({ session }: { session: Session | null }) => {
               variant="outline"
               className="border-2 border-[#bed62f]"
             >
-              Show anonymised results
+              Show anonymized results
               <ArrowRightDarkModeFriendly />
             </Button>
             <Button

@@ -10,7 +10,6 @@ import { toast } from "./ui/use-toast";
 import { ToastAction } from "./ui/toast";
 import SelectCommunicationMethod from "./select-communication-method";
 import { SpinnerButton } from "./ui/button-spinner";
-// import OptIn from "./opt-in";
 
 export default function SelectRoles({
   session,
@@ -32,6 +31,7 @@ export default function SelectRoles({
   const { mutate: setDefaultRoleMutate, isSuccess: setDefaultRoleIsSuccess } =
     api.survey.setDefaultRole.useMutation();
 
+  // Show a toast notification on role mutation error
   useEffect(() => {
     if (setRoleError) {
       toast({
@@ -55,6 +55,7 @@ export default function SelectRoles({
     }
   }, [setRoleError, selectedRoles, session.user.id, setRoleMutate]);
 
+  // Initialize selected roles from userSelectedRoles prop
   useEffect(() => {
     setSelectedRoles(userSelectedRoles.map((role) => role.id));
   }, [userSelectedRoles]);
@@ -128,9 +129,6 @@ export default function SelectRoles({
           </li>
         ))}
       </ul>
-
-      {/* Disabled until further notice. */}
-      {/* <OptIn session={session} /> */}
 
       <SelectCommunicationMethod
         session={session}

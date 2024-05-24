@@ -29,7 +29,9 @@ export default function SelectCommunicationMethod({
   const { mutate: setMethodMutate, isLoading: setMethodIsLoading } =
     api.survey.setCommunicationMethods.useMutation();
 
-  setCommunicationMethodIsLoading(setMethodIsLoading);
+  useEffect(() => {
+    setCommunicationMethodIsLoading(setMethodIsLoading);
+  }, [setCommunicationMethodIsLoading, setMethodIsLoading]);
 
   // If we have multiple selected role, we get `"SLACK,SIGNAL,TEAMS"` as a string
   // We need to split this string into an array of strings
@@ -94,7 +96,7 @@ export default function SelectCommunicationMethod({
             />
             <label className={"flex cursor-pointer items-center"}>
               {communicationMethodToIcon[method]}
-              {/* Only capitalise the first letter */}
+              {/* Only capitalize the first letter */}
               {method.charAt(0) + method.slice(1).toLowerCase()}
             </label>
           </li>
