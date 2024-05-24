@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 "use client";
 
 import React from "react";
@@ -153,7 +151,6 @@ const PDFDocument = ({
 };
 
 // Styles for PDF
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
 const styles = StyleSheet.create({
   page: {
     flexDirection: "column",
@@ -192,36 +189,30 @@ const styles = StyleSheet.create({
     flexBasis: "30%",
   },
   sectionFirstPage: {
-    // Styles for the section/container
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
   },
   centered: {
-    // Styles for centering content vertically
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
   },
   title: {
-    // Styles for the title
-    fontSize: 32, // Adjust size as needed
+    fontSize: 32,
     fontWeight: "bold",
     textAlign: "center",
-    marginBottom: 10, // Adjust spacing between title and subtitle
+    marginBottom: 10,
   },
   subtitle: {
-    // Styles for the subtitle
-    fontSize: 20, // Adjust size as needed
+    fontSize: 20,
     textAlign: "center",
   },
   subsubtitle: {
-    // Styles for the subtitle
-    fontSize: 14, // Adjust size as needed
+    fontSize: 14,
     textAlign: "center",
   },
   infoSupport: {
-    // Styles for the "Info Support" text
     color: "rgb(0, 163, 224)",
   },
 });

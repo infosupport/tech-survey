@@ -1,19 +1,48 @@
 import type { Metadata } from "next";
+import type { Session } from "next-auth";
 import { Suspense } from "react";
 import { ShowRolesWrapper } from "~/app/result/[role]/page";
 import ButtonSkeleton from "~/components/loading/button-loader";
 import { Login } from "~/components/login";
 import ShowDataTable from "~/components/show-data-table";
-import type { DataByRoleAndQuestion, QuestionResult } from "~/models/types";
 import { getServerAuthSession } from "~/server/auth";
-import { db } from "~/server/db";
+import {
+  aggregateDataByRole,
+  createUserAndAnswerMaps,
+  extractUniqueIds,
+  fetchUserAnswersForRole,
+  fetchUsersAndAnswerOptions,
+  groupDataByRoleAndQuestion,
+  sortResults,
+} from "~/utils/data-manipulation";
 
 export const metadata: Metadata = {
   title: "Find the expert",
 };
 
+const LoginSection = ({ session }: { session: Session | null }) => (
+  <>
+    <p className="text-center text-lg">
+      Unable to find experts without logging in.
+    </p>
+    <Login session={session} text={"Log in"} />
+  </>
+);
+
+const ContentSection = () => (
+  <>
+    <Suspense fallback={<ButtonSkeleton />}>
+      <ShowRolesWrapper path="/find-the-expert" />
+    </Suspense>
+    <Suspense fallback={<ButtonSkeleton />}>
+      <ShowTableWrapper />
+    </Suspense>
+  </>
+);
+
 const FindTheExpertPage = async () => {
   const session = await getServerAuthSession();
+
   return (
     <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
       <h1 className="text-center text-5xl font-extrabold tracking-tight">
@@ -22,212 +51,33 @@ const FindTheExpertPage = async () => {
         </span>
         <span className="block sm:inline"> Tech Survey - Find the expert</span>
       </h1>
-      {!session && (
-        <>
-          <p className="text-center text-lg">
-            Unable to find experts without logging in.
-          </p>
-          <Login session={session} text={"Log in"} />
-        </>
-      )}
-      {session && (
-        <>
-          <Suspense fallback={<ButtonSkeleton />}>
-            <ShowRolesWrapper path="/find-the-expert" />
-          </Suspense>
-          <Suspense fallback={<ButtonSkeleton />}>
-            <ShowTableWrapper />
-          </Suspense>
-        </>
-      )}
+      {session ? <ContentSection /> : <LoginSection session={session} />}
     </div>
   );
 };
 
 const ShowTableWrapper = async () => {
-  const userAnswersForRole: QuestionResult[] = await db.questionResult.findMany(
-    {
-      include: {
-        question: {
-          include: {
-            roles: true,
-          },
-        },
-      },
-    },
+  const userAnswersForRole = await fetchUserAnswersForRole();
+  const { userIds, answerIds } = extractUniqueIds(userAnswersForRole);
+  const [users, answerOptions] = await fetchUsersAndAnswerOptions(
+    userIds,
+    answerIds,
   );
-
-  // Extract all unique user IDs and answer IDs
-  const userIds = Array.from(
-    new Set(userAnswersForRole.map((entry) => entry.userId)),
+  const { userMap, answerOptionMap } = createUserAndAnswerMaps(
+    users,
+    answerOptions,
   );
-  const answerIds = Array.from(
-    new Set(userAnswersForRole.map((entry) => entry.answerId)),
+  const dataByRoleAndQuestion = groupDataByRoleAndQuestion(
+    userAnswersForRole,
+    userMap,
+    answerOptionMap,
   );
-
-  // Fetch all users and answer options in a single query
-  const [users, answerOptions] = await Promise.all([
-    db.user.findMany({
-      where: { id: { in: userIds } },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        communicationPreferences: true,
-      },
-    }),
-    db.answerOption.findMany({
-      where: { id: { in: answerIds } },
-      select: { id: true, option: true },
-    }),
-  ]);
-
-  // Create a map of user IDs to user objects for easy lookup
-  const userMap: Record<
-    string,
-    {
-      name: string;
-      email: string;
-      communicationPreferences: string[];
-    }
-  > = {};
-  for (const user of users) {
-    userMap[user.id] = {
-      name: user.name ?? "Unknown User",
-      email: user.email ?? "Unknown Email",
-      communicationPreferences: user.communicationPreferences.map((method) =>
-        method.methods.toString(),
-      ),
-    };
-  }
-
-  // Create a map of answer IDs to answer option objects for easy lookup
-  const answerOptionMap: Record<string, string> = {};
-  for (const answerOption of answerOptions) {
-    answerOptionMap[answerOption.id] =
-      answerOption.option.toString() ?? "Unknown Answer";
-  }
-
-  // Group the data by roles and questions
-  const dataByRoleAndQuestion: DataByRoleAndQuestion = {};
-
-  for (const entry of userAnswersForRole) {
-    for (const role of entry.question.roles ?? []) {
-      const roleName = role.role || "Unknown Role";
-      const questionText = entry.question.questionText || "Unknown Question";
-
-      if (!dataByRoleAndQuestion[roleName]) {
-        dataByRoleAndQuestion[roleName] = {};
-      }
-      if (!dataByRoleAndQuestion[roleName]![questionText]) {
-        dataByRoleAndQuestion[roleName]![questionText] = [];
-      }
-
-      dataByRoleAndQuestion[roleName]?.[questionText]?.push({
-        name: userMap[entry.userId]?.name ?? "Unknown User",
-        email: userMap[entry.userId]?.email ?? "Unknown Email",
-        communicationPreferences:
-          userMap[entry.userId]!.communicationPreferences?.length > 0
-            ? userMap[entry.userId]?.communicationPreferences
-            : ["Do not contact"],
-        answer: answerOptionMap[entry.answerId] ?? "Unknown Answer",
-      });
-
-      // Sort the answers based on the answer value (0, 1, 2, or 3)
-      dataByRoleAndQuestion[roleName]?.[questionText]?.sort((a, b) => {
-        const answerValueA = parseInt(a.answer);
-        const answerValueB = parseInt(b.answer);
-
-        if (answerValueA === answerValueB) {
-          // Returns a random value between -0.5 and 0.5
-          return Math.random() - 0.5;
-        } else {
-          // Sort based on answer value
-          return answerValueA - answerValueB;
-        }
-      });
-    }
-  }
-
-  const aggregatedDataByRole: Record<
-    string,
-    Record<
-      string,
-      {
-        name: string;
-        communicationPreferences: string[];
-        counts: number[];
-      }
-    >
-  > = {};
-
-  for (const entry of userAnswersForRole) {
-    for (const role of entry.question.roles ?? []) {
-      const roleName = role.role || "Unknown Role";
-
-      if (!aggregatedDataByRole[roleName]) {
-        aggregatedDataByRole[roleName] = {};
-      }
-
-      if (userMap[entry.userId]) {
-        const answerValue = parseInt(answerOptionMap[entry.answerId] ?? "", 10);
-        const userName = userMap[entry.userId]?.name ?? "Unknown User";
-        const userEmail = userMap[entry.userId]?.email ?? "Unknown Email";
-        let userCommunicationPreferences =
-          userMap[entry.userId]?.communicationPreferences;
-        // Check if communicationPreferences is empty
-        userCommunicationPreferences =
-          userCommunicationPreferences?.length ?? 0 > 0
-            ? userCommunicationPreferences
-            : ["Do not contact"] ?? [];
-        if (!isNaN(answerValue)) {
-          if (!aggregatedDataByRole[roleName]?.[userEmail]) {
-            aggregatedDataByRole[roleName]![userEmail] = {
-              name: userName,
-              communicationPreferences: userCommunicationPreferences ?? [],
-              counts: [0, 0, 0, 0],
-            };
-          }
-
-          if (
-            !aggregatedDataByRole[roleName]?.[userEmail]?.counts[answerValue]
-          ) {
-            aggregatedDataByRole[roleName]![userEmail]!.counts[answerValue] = 0;
-          }
-
-          aggregatedDataByRole[roleName]![userEmail]!.counts[answerValue] =
-            (aggregatedDataByRole[roleName]![userEmail]?.counts[answerValue] ??
-              0) + 1;
-        }
-      }
-    }
-  }
-
-  // Sorting the results based on the counts of each answer
-  for (const role in aggregatedDataByRole) {
-    for (const user in aggregatedDataByRole[role]) {
-      const counts = aggregatedDataByRole[role]![user]?.counts ?? [0, 0, 0, 0];
-      aggregatedDataByRole[role]![user]!.counts = counts;
-    }
-  }
-
-  // Sorting users based on the total count of 0 answers, then 1, 2, and 3
-  for (const role in aggregatedDataByRole) {
-    const sortedEntries = Object.entries(aggregatedDataByRole[role] ?? {}).sort(
-      (a, b) => {
-        const countsA = a[1].counts;
-        const countsB = b[1].counts;
-        for (let i = 0; i < countsA.length; i++) {
-          const diff = (countsB[i] ?? 0) - (countsA[i] ?? 0);
-          if (diff !== 0) {
-            return diff;
-          }
-        }
-        return 0;
-      },
-    );
-    aggregatedDataByRole[role] = Object.fromEntries(sortedEntries);
-  }
+  const aggregatedDataByRole = aggregateDataByRole(
+    userAnswersForRole,
+    userMap,
+    answerOptionMap,
+  );
+  sortResults(aggregatedDataByRole);
 
   return (
     <ShowDataTable

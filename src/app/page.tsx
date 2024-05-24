@@ -78,7 +78,6 @@ const Home: React.FC = async () => {
                 </Link>
               </p>
             </div>
-            {/* If the user is logged in, show the SelectRole component */}
             {session && (
               <div>
                 <Suspense fallback={<RoleSelectionSkeleton />}>

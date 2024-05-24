@@ -33,9 +33,9 @@ const ShowDataTable: React.FC<ShowDataTableProps> = ({
   dataByRoleAndQuestion,
   aggregatedDataByRole,
 }) => {
-  const pathname = usePathname() || "";
+  const pathname = usePathname();
 
-  const currentRole = pathname.split("/").pop() ?? "";
+  const currentRole = pathname.split("/").pop();
   return (
     <>
       {Object.keys(dataByRoleAndQuestion).length === 0 ? (
@@ -92,7 +92,8 @@ const ShowDataTable: React.FC<ShowDataTableProps> = ({
               </div>
             );
           } else {
-            return null; // Return null if role doesn't match currentRole
+            // Return null if role doesn't match currentRole
+            return null;
           }
         })
       )}

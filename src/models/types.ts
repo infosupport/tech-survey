@@ -47,7 +47,9 @@ export interface PdfTransformedData {
 
 export interface User {
   id: string;
-  // findExpertOptIn: boolean;
+  name: string;
+  email: string;
+  communicationPreferences: string[];
 }
 
 export interface Section {
@@ -80,11 +82,25 @@ export type SetQuestionResultMutation = ReturnType<
   typeof api.survey.setQuestionResult.useMutation
 >;
 
+export interface Entry {
+  userId: string;
+  question: {
+    roles?: { role?: string }[];
+    questionText?: string;
+  };
+  answerId: string;
+}
+
 export interface UserAnswer {
   question: {
     id: string;
     roles?: Role[];
   };
+  answerId: string;
+}
+
+export interface UserIdAndAnswerId {
+  userId: string;
   answerId: string;
 }
 
@@ -113,3 +129,42 @@ export type DataByRoleAndQuestion = Record<
     }[]
   >
 >;
+
+export type UserMap = Record<
+  string,
+  {
+    name: string;
+    email: string;
+    communicationPreferences: string[];
+  }
+>;
+
+export type AnswerOptionMap = Record<string, string>;
+
+interface UserInformation {
+  name: string;
+  communicationPreferences: string[];
+  counts: number[];
+}
+
+export type AggregatedDataByRole = Record<
+  string,
+  Record<string, UserInformation>
+>;
+
+export interface GroupDataQuestion {
+  roles?: Role[];
+  id: string;
+  surveyId: string;
+  questionText: string;
+}
+
+export interface UserAnswersForRole {
+  question: GroupDataQuestion;
+  id: string;
+  userId: string;
+  questionId: string;
+  answerId: string;
+}
+
+export type UserAnswersForRoleArray = UserAnswersForRole[];

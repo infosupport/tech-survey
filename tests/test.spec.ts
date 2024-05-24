@@ -1,216 +1,222 @@
-import { expect, test, type Page } from "@playwright/test";
-import {
-  PostgreSqlContainer,
-  type StartedPostgreSqlContainer,
-} from "@testcontainers/postgresql";
-import { LandingPage } from "./survey-page";
+import { expect, test } from "@playwright/test";
+import { type SurveyPage } from "./survey-page";
 import { DbHelper } from "./db-helper";
-import { promisify } from "util";
-import { type ChildProcess, exec, spawn } from "child_process";
-import { PrismaClient } from "@prisma/client";
-import jwt from "next-auth/jwt";
+import { type ChildProcess } from "child_process";
+
 import { slugify } from "~/utils/slugify";
+import {
+  ANSWER_OPTIONS_COUNT,
+  COMMUNICATION_PREFERENCES,
+  MULTIPLE_ROLES,
+  QUESTIONS_WITH_MULTIPLE_ROLES,
+  QUESTIONS_WITH_SINGLE_ROLE,
+  SINGLE_ROLE,
+  TestSetup,
+  USER_NAME,
+} from "./test-setup";
 
-const execAsync = promisify(exec);
-const cwd = new URL("..", import.meta.url);
-
-export interface DefaultJWT extends Record<string, unknown> {
-  name?: string | null;
-  email?: string | null;
-  picture?: string | null;
-  sub?: string;
-}
-
-test.describe("using test containers", () => {
-  let container: StartedPostgreSqlContainer;
-  let client: PrismaClient;
+test.describe("Desktop tests using a single role", () => {
   let nextProcess: ChildProcess;
-  let landingPage: LandingPage;
+  let surveyPage: SurveyPage;
   let dbHelper: DbHelper;
-  let page: Page;
-
-  // constants used in multiple tests
-  const SURVEY_NAME = "Survey";
-  const SINGLE_ROLE = ["General"];
-  const COMMUNICATION_PREFERENCES = ["Email", "Slack", "Phone"];
-  const USER_NAME = "Test User";
-  const QUESTIONS_WITH_SINGLE_ROLE = [
-    { question: "Kubernetes", roles: SINGLE_ROLE },
-    { question: "Docker", roles: SINGLE_ROLE },
-    { question: "C#", roles: SINGLE_ROLE },
-  ];
-  const MULTIPLE_ROLES = ["General", "Role 1"];
-  const QUESTIONS_WITH_MULTIPLE_ROLES = [
-    { question: "Kubernetes", roles: SINGLE_ROLE },
-    { question: "Docker", roles: MULTIPLE_ROLES },
-    { question: "C#", roles: MULTIPLE_ROLES },
-  ];
-  const ANSWER_OPTIONS_COUNT = 4;
-
-  async function createSingleRoleSurvey() {
-    for (let i = 0; i < ANSWER_OPTIONS_COUNT; i++) {
-      await dbHelper.createAnswerOption(i);
-    }
-
-    const surveyId = await dbHelper.createSurvey(SURVEY_NAME);
-    expect(surveyId).toBeTruthy();
-    const roleId = await dbHelper.createRole(SINGLE_ROLE[0] || "");
-    expect(roleId).toBeTruthy();
-
-    // Create questions
-    for (let question of QUESTIONS_WITH_SINGLE_ROLE) {
-      const newQuestions = await dbHelper.createQuestion(
-        surveyId,
-        [roleId],
-        question.question,
-      );
-      expect(newQuestions).toBeTruthy();
-    }
-  }
-
-  async function createMultipleRoleSurvey() {
-    const surveyId = await dbHelper.createSurvey(SURVEY_NAME);
-    expect(surveyId).toBeTruthy();
-
-    for (let i = 0; i < ANSWER_OPTIONS_COUNT; i++) {
-      await dbHelper.createAnswerOption(i);
-    }
-
-    // Create roles and store their IDs
-    const roleIds: { [key: string]: string } = {};
-    for (let role of MULTIPLE_ROLES) {
-      roleIds[role] = await dbHelper.createRole(role);
-      expect(roleIds[role]).toBeTruthy();
-    }
-
-    for (let question of QUESTIONS_WITH_MULTIPLE_ROLES) {
-      const newQuestion = await dbHelper.createQuestion(
-        surveyId,
-        question.roles.map((role) => roleIds[role] || ""),
-        question.question,
-      );
-      expect(newQuestion).toBeTruthy();
-    }
-  }
+  let testSetup: TestSetup;
 
   // Set up the landing page before each test
-  test.beforeEach(async ({ browser }) => {
-    test.setTimeout(60000);
-
+  test.beforeEach(async ({ page }) => {
     try {
-      container = await new PostgreSqlContainer().start();
-      await execAsync("npm run db:push", {
-        env: {
-          ...process.env,
-          DATABASE_URL: container.getConnectionUri(),
-        },
-        cwd,
-      });
-      client = new PrismaClient({
-        datasources: {
-          db: {
-            url: container.getConnectionUri(),
-          },
-        },
-        log: [
-          {
-            emit: "event",
-            level: "query",
-          },
-        ],
-      });
+      dbHelper = await DbHelper.create();
+      testSetup = new TestSetup(dbHelper.getContainer());
+      const port = await testSetup.setupNextProcess();
+      surveyPage = await testSetup.setupSurveyPage(page, port);
+      await testSetup.setupUserAndSession(page, dbHelper);
 
-      // Launch browser in parallel
-      const portPromise = new Promise<number>((res, rej) => {
-        nextProcess = spawn("npm", ["run", "dev", "--", "--port", "0"], {
-          cwd,
-          stdio: "pipe",
-          env: {
-            ...process.env,
-            DATABASE_URL: container.getConnectionUri(),
-          },
-        });
-        nextProcess.stdout!.on("data", (chunk: Buffer) => {
-          const str = chunk.toString();
-          process.stdout.write(str);
-          const portMatch = /local:\s*http:\/\/.+:(\d+)/gim.exec(str);
-          if (portMatch) {
-            res(parseInt(portMatch[1]!));
-          }
-        });
-        nextProcess.stderr!.on("data", (chunk: Buffer) => {
-          process.stderr.write(chunk);
-        });
-        nextProcess.on("error", (err) => rej(err));
-      });
+      // Fill the database with what we need for the tests with a single role.
+      await testSetup.createSingleRoleSurvey(dbHelper);
 
-      // Set a timeout for the browser launch
-      const port = await Promise.race([
-        portPromise,
-        new Promise((_, reject) =>
-          setTimeout(() => reject(new Error("Browser launch timeout")), 30000),
-        ),
-      ]);
-
-      page = await browser.newPage();
-
-      landingPage = new LandingPage(page, port as number);
-      dbHelper = new DbHelper(client);
+      // Navigate to the landing page and check to see if we are logged in correctly
+      const headingElement = await surveyPage.navigateToLandingPage();
+      await expect(headingElement).toBeVisible();
     } catch (error) {
-      console.error("Error during beforeAll:", error);
-      throw error; // Rethrow the error to fail the test suite
+      throw error;
     }
+  });
 
-    const userId = await dbHelper.createUser("Test User", "a@a.com");
-
-    // Only continue if the user was created
-    if (!userId) {
-      throw new Error("User was not created");
-    }
-
-    const payload: DefaultJWT = {
-      name: "Test User",
-      email: "a@a.com",
-      picture: null,
-      sub: userId,
-    };
-
-    const token = async () => {
-      return jwt.encode({
-        token: payload,
-        secret: "dummy",
-      });
-    };
-
-    const tokenValue = await token();
-
-    if (tokenValue) {
-      const sessionCookie = {
-        name: "next-auth.session-token",
-        value: tokenValue,
-        domain: "localhost",
-        path: "/",
-        httpOnly: true,
-        secure: false,
-        sameSite: "Lax" as const,
-      };
-
-      await page.context().addCookies([sessionCookie]);
-
-      // Check if the cookie has been set correctly
+  test.afterEach(async ({ page }) => {
+    try {
       const cookies = await page.context().cookies();
-      const sessionCookieSet = cookies.some(
-        (cookie) =>
-          cookie.name === "next-auth.session-token" &&
-          cookie.value === tokenValue,
+      const sessionCookie = cookies.find(
+        (cookie) => cookie.name === "next-auth.session-token",
       );
 
-      if (!sessionCookieSet) {
-        throw new Error("Failed to set session cookie");
+      if (sessionCookie) {
+        await page.context().clearCookies();
       }
-      page = await browser.newPage({ ignoreHTTPSErrors: true });
-    } else {
-      throw new Error("Failed to create token");
+
+      if (nextProcess) {
+        nextProcess.kill();
+      }
+    } finally {
+      await dbHelper.getContainer().stop();
+      await page.close();
+    }
+  });
+
+  test("Check if the default role(s) are set", async () => {
+    await surveyPage.navigateToSurveyPage();
+    const roleElements =
+      await surveyPage.checkProgressionBarForRoles(SINGLE_ROLE);
+    await Promise.all(
+      roleElements.map((roleElement) => expect(roleElement).toBeVisible()),
+    );
+  });
+
+  test("Answer questions of a single role", async () => {
+    await surveyPage.navigateToSurveyPage();
+
+    const questionsText = QUESTIONS_WITH_SINGLE_ROLE.map(
+      (question) => question.question,
+    );
+    for (const [index, question] of questionsText.entries()) {
+      await surveyPage.selectAnswerOption(
+        question,
+        index % ANSWER_OPTIONS_COUNT,
+      );
+    }
+
+    await surveyPage.submitAnswers();
+    const isUrlCorrect = await surveyPage.checkUrl("thank-you");
+    expect(isUrlCorrect).toBe(true);
+  });
+
+  test("Forget to fill in a question", async () => {
+    await surveyPage.navigateToSurveyPage();
+
+    // Answer the questions, but forget the first
+    const questionsText = QUESTIONS_WITH_SINGLE_ROLE.map(
+      (question) => question.question,
+    );
+
+    for (const [index, question] of questionsText.slice(1).entries()) {
+      await surveyPage.selectAnswerOption(
+        question,
+        (index + 1) % ANSWER_OPTIONS_COUNT,
+      );
+    }
+
+    await surveyPage.submitAnswers();
+    const validationErrorElement =
+      await surveyPage.checkForValidationError("yourRole");
+    await expect(validationErrorElement).toBeVisible();
+
+    // fill in the first question
+    await surveyPage.selectAnswerOption(questionsText[0]!, 0);
+
+    await surveyPage.submitAnswers();
+    const isUrlCorrect = await surveyPage.checkUrl("thank-you");
+    expect(isUrlCorrect).toBe(true);
+  });
+
+  test("Fill in the survey and show you are present on the anonymous results", async () => {
+    await surveyPage.navigateToSurveyPage();
+
+    // Answer the questions
+    const questionsText = QUESTIONS_WITH_SINGLE_ROLE.map(
+      (question) => question.question,
+    );
+    for (const [index, question] of questionsText.entries()) {
+      await surveyPage.selectAnswerOption(
+        question,
+        index % ANSWER_OPTIONS_COUNT,
+      );
+    }
+
+    await surveyPage.submitAnswers();
+    const isUrlCorrect = await surveyPage.checkUrl("thank-you");
+    expect(isUrlCorrect).toBe(true);
+
+    // Check if the user is present in the anonymous results
+    const isTextVisible = await surveyPage.navigateToAnonymousResults(
+      slugify(SINGLE_ROLE[0]!),
+    );
+    expect(isTextVisible).toBe(true);
+    const is404Hidden = await surveyPage.checkAnonymousResultsIsNotEmpty();
+    expect(is404Hidden).toBe(true);
+  });
+
+  test("Fill in the survey and show you are present on the find-the-expert page", async () => {
+    await surveyPage.navigateToSurveyPage();
+
+    // Answer the questions
+    const questionsText = QUESTIONS_WITH_SINGLE_ROLE.map(
+      (question) => question.question,
+    );
+    for (const [index, question] of questionsText.entries()) {
+      await surveyPage.selectAnswerOption(
+        question,
+        index % ANSWER_OPTIONS_COUNT,
+      );
+    }
+
+    await surveyPage.submitAnswers();
+    const isUrlCorrect = await surveyPage.checkUrl("thank-you");
+    expect(isUrlCorrect).toBe(true);
+
+    // Check if the user is present in the find-the-expert page, with the "do not contact" option
+    const isTextVisible = await surveyPage.navigateToFindTheExpert(
+      slugify(SINGLE_ROLE[0]!),
+    );
+    expect(isTextVisible).toBe(true);
+
+    const {
+      isUserVisible: userShouldNotBeVisible,
+      isDoNotContactVisible: doNotContactShouldBeVisible,
+    } = await surveyPage.checkUserIsPresentInFindTheExpertPage(
+      USER_NAME,
+      false,
+    );
+    expect(userShouldNotBeVisible).toBe(true);
+    expect(doNotContactShouldBeVisible).toBe(true);
+
+    // Change the communication preferences
+    const headingElement = await surveyPage.navigateToLandingPage();
+    await expect(headingElement).toBeVisible();
+    await surveyPage.selectCommunicationPreferences(COMMUNICATION_PREFERENCES);
+
+    // Check if the user is present in the find-the-expert page, with the communication preferences
+    const isTextVisibleAgain = await surveyPage.navigateToFindTheExpert(
+      slugify(SINGLE_ROLE[0]!),
+    );
+    expect(isTextVisibleAgain).toBe(true);
+
+    const {
+      isUserVisible: userShouldBeVisible,
+      isDoNotContactVisible: doNotContactShouldNotBeVisible,
+    } = await surveyPage.checkUserIsPresentInFindTheExpertPage(USER_NAME, true);
+    expect(userShouldBeVisible).toBe(true);
+    expect(doNotContactShouldNotBeVisible).toBe(true);
+  });
+});
+
+test.describe("Desktop tests using a multiple roles", () => {
+  let nextProcess: ChildProcess;
+  let surveyPage: SurveyPage;
+  let dbHelper: DbHelper;
+  let testSetup: TestSetup;
+
+  // Set up the landing page before each test
+  test.beforeEach(async ({ page }) => {
+    try {
+      dbHelper = await DbHelper.create();
+      testSetup = new TestSetup(dbHelper.getContainer());
+      const port = await testSetup.setupNextProcess();
+      surveyPage = await testSetup.setupSurveyPage(page, port);
+      await testSetup.setupUserAndSession(page, dbHelper);
+
+      await testSetup.createMultipleRoleSurvey(dbHelper);
+      const headingElement = await surveyPage.navigateToLandingPage();
+      await expect(headingElement).toBeVisible();
+    } catch (error) {
+      throw error;
     }
   });
 
@@ -220,361 +226,331 @@ test.describe("using test containers", () => {
     const sessionCookie = cookies.find(
       (cookie) => cookie.name === "next-auth.session-token",
     );
-
     if (sessionCookie) {
       await page.context().clearCookies();
     }
     await page.close();
-
     if (nextProcess) {
       nextProcess.kill();
     }
-    await container.stop();
-  });
-
-  test("Visit the home-page as a logged in user.", async () => {
-    await createSingleRoleSurvey();
-    await landingPage.navigateToLandingPage();
-  });
-
-  test("Check if the default role(s) are set", async () => {
-    await createSingleRoleSurvey();
-
-    // Check if the questions are created
-    await landingPage.navigateToLandingPage();
-    await landingPage.navigateToSurveyPage();
-    await landingPage.checkProgressionBarForRoles(SINGLE_ROLE);
+    await dbHelper.getContainer().stop();
   });
 
   test("Create multiple questions and assign specific roles", async () => {
-    await createMultipleRoleSurvey();
+    await surveyPage.selectRoles(MULTIPLE_ROLES);
+    await surveyPage.navigateToSurveyPage();
 
-    // Check if the questions are created
-    await landingPage.navigateToLandingPage();
-    await landingPage.selectRoles(MULTIPLE_ROLES);
-    await landingPage.navigateToSurveyPage();
-    await landingPage.checkProgressionBarForRoles(MULTIPLE_ROLES);
+    const roleElements =
+      await surveyPage.checkProgressionBarForRoles(MULTIPLE_ROLES);
+    await Promise.all(
+      roleElements.map((roleElement) => expect(roleElement).toBeVisible()),
+    );
   });
 
   test("if questions are visible in roles", async () => {
-    await createMultipleRoleSurvey();
-
-    // Check if the questions are created
-    await landingPage.navigateToLandingPage();
-    await landingPage.navigateToSurveyPage();
+    await surveyPage.selectRoles(MULTIPLE_ROLES);
+    await surveyPage.navigateToSurveyPage();
     const questionsText = QUESTIONS_WITH_MULTIPLE_ROLES.map(
       (question) => question.question,
     );
-    await landingPage.checkRoleForQuestion(questionsText);
-  });
+    const questionElements =
+      await surveyPage.checkRoleForQuestion(questionsText);
 
-  test("Answer questions of a single role", async () => {
-    await createSingleRoleSurvey();
-
-    // Check if the questions are created
-    await landingPage.navigateToLandingPage();
-    await landingPage.navigateToSurveyPage();
-
-    // Answer the questions
-    const questionsText = QUESTIONS_WITH_SINGLE_ROLE.map(
-      (question) => question.question,
+    await Promise.all(
+      questionElements.map((questionElement) =>
+        expect(questionElement).toBeVisible(),
+      ),
     );
-    for (let i = 0; i < questionsText.length; i++) {
-      await landingPage.selectAnswerOption(questionsText[i] || "", i % 4);
-    }
-
-    await landingPage.submitAnswers();
-    await landingPage.checkUrl("thank-you");
   });
 
   test("Answer questions of multiple roles", async () => {
-    await createMultipleRoleSurvey();
+    await surveyPage.selectRoles(["Role 1"]);
+    await surveyPage.navigateToSurveyPage();
 
-    // Check if the questions are created
-    await landingPage.navigateToLandingPage();
-    await landingPage.selectRoles(["Role 1"]);
-    await landingPage.navigateToSurveyPage();
-
-    // Answer the questions
     const questionsText = QUESTIONS_WITH_MULTIPLE_ROLES.map(
       (question) => question.question,
     );
 
-    // Outer loop over the roles
-    for (let j = 0; j < MULTIPLE_ROLES.length; j++) {
-      // Inner loop over the questions
-      for (let i = 0; i < questionsText.length; i++) {
-        // Get the roles for the current question
-        const questionRoles = QUESTIONS_WITH_MULTIPLE_ROLES[i]?.roles;
+    for (const role of MULTIPLE_ROLES) {
+      for (const [index, questionText] of questionsText.entries()) {
+        const questionRoles = QUESTIONS_WITH_MULTIPLE_ROLES[index]?.roles;
 
-        // Check if the current role matches the roles of the current question
-        if (questionRoles?.includes(MULTIPLE_ROLES[j] || "")) {
-          await landingPage.selectAnswerOption(questionsText[i] || "", i % 4);
+        if (!questionRoles?.includes(role)) {
+          continue;
         }
+
+        await surveyPage.selectAnswerOption(
+          questionText,
+          index % ANSWER_OPTIONS_COUNT,
+        );
       }
 
-      // Check if it's the last role
-      if (j === MULTIPLE_ROLES.length - 1) {
-        await landingPage.submitAnswers();
+      if (role === MULTIPLE_ROLES[MULTIPLE_ROLES.length - 1]) {
+        await surveyPage.submitAnswers();
       } else {
-        await landingPage.goToNextQuestionsForDifferentRole();
+        await surveyPage.goToNextQuestionsForDifferentRole();
       }
     }
 
-    await landingPage.checkUrl("thank-you");
+    await surveyPage.checkUrl("thank-you");
   });
+});
 
-  test("Forget to fill in a question", async () => {
-    await createSingleRoleSurvey();
+test.describe("Mobile tests using a single role", () => {
+  let nextProcess: ChildProcess;
+  let surveyPage: SurveyPage;
+  let dbHelper: DbHelper;
+  let testSetup: TestSetup;
 
-    // Check if the questions are created
-    await landingPage.navigateToLandingPage();
-    await landingPage.navigateToSurveyPage();
+  // Set up the landing page before each test
+  test.beforeEach(async ({ page }) => {
+    try {
+      dbHelper = await DbHelper.create();
+      testSetup = new TestSetup(dbHelper.getContainer());
+      const port = await testSetup.setupNextProcess();
+      surveyPage = await testSetup.setupSurveyPage(page, port);
+      await testSetup.setupUserAndSession(page, dbHelper);
 
-    // Answer the questions, but forget the first
-    const questionsText = QUESTIONS_WITH_SINGLE_ROLE.map(
-      (question) => question.question,
-    );
-    for (let i = 1; i < questionsText.length; i++) {
-      await landingPage.selectAnswerOption(questionsText[i] || "", i % 4);
+      // Fill the database with what we need for the tests with a single role.
+      await testSetup.createSingleRoleSurvey(dbHelper);
+
+      // Navigate to the landing page and check to see if we are logged in correctly
+      const headingElement = await surveyPage.navigateToLandingPage();
+      await expect(headingElement).toBeVisible();
+    } catch (error) {
+      throw error;
     }
-
-    await landingPage.submitAnswers();
-    await landingPage.checkForValidationError(slugify("General"));
-
-    // fill in the first question
-    await landingPage.selectAnswerOption(questionsText[0] || "", 0);
-
-    await landingPage.submitAnswers();
-    await landingPage.checkUrl("thank-you");
   });
 
-  test("Fill in the survey and show you are present on the anonymous results", async () => {
-    await createSingleRoleSurvey();
+  test.afterEach(async ({ page }) => {
+    try {
+      const cookies = await page.context().cookies();
+      const sessionCookie = cookies.find(
+        (cookie) => cookie.name === "next-auth.session-token",
+      );
 
-    // Check if the questions are created
-    await landingPage.navigateToLandingPage();
-    await landingPage.navigateToSurveyPage();
+      if (sessionCookie) {
+        await page.context().clearCookies();
+      }
 
-    // Answer the questions
-    const questionsText = QUESTIONS_WITH_SINGLE_ROLE.map(
-      (question) => question.question,
-    );
-    for (let i = 0; i < questionsText.length; i++) {
-      await landingPage.selectAnswerOption(questionsText[i] || "", i % 4);
+      if (nextProcess) {
+        nextProcess.kill();
+      }
+    } finally {
+      await dbHelper.getContainer().stop();
+      await page.close();
     }
-
-    await landingPage.submitAnswers();
-    await landingPage.checkUrl("thank-you");
-
-    // Check if the user is present in the anonymous results
-    await landingPage.navigateToAnonymousResults(slugify(SINGLE_ROLE[0] || ""));
-    await landingPage.checkAnonymousResultsIsNotEmpty();
-  });
-
-  test("Fill in the survey and show you are present on the find-the-expert page", async () => {
-    await createSingleRoleSurvey();
-
-    // Check if the questions are created
-    await landingPage.navigateToLandingPage();
-    await landingPage.navigateToSurveyPage();
-
-    // Answer the questions
-    const questionsText = QUESTIONS_WITH_SINGLE_ROLE.map(
-      (question) => question.question,
-    );
-    for (let i = 0; i < questionsText.length; i++) {
-      await landingPage.selectAnswerOption(questionsText[i] || "", i % 4);
-    }
-
-    await landingPage.submitAnswers();
-    await landingPage.checkUrl("thank-you");
-
-    // Check if the user is present in the find-the-expert page, with the "do not contact" option
-    await landingPage.navigateToFindTheExpert(slugify(SINGLE_ROLE[0] || ""));
-    await landingPage.checkUserIsPresentInFindTheExpertPage(USER_NAME, false);
-
-    // Change the communication preferences
-    await landingPage.navigateToLandingPage();
-    await landingPage.selectCommunicationPreferences(COMMUNICATION_PREFERENCES);
-
-    // Check if the user is present in the find-the-expert page, with the communication preferences
-    await landingPage.navigateToFindTheExpert(slugify(SINGLE_ROLE[0] || ""));
-    await landingPage.checkUserIsPresentInFindTheExpertPage(USER_NAME, true);
-  });
-
-  // // --- Mobile tests ---
-  test("(Mobile) visit the home-page as a logged in user.", async () => {
-    await createSingleRoleSurvey();
-    await landingPage.navigateToLandingPage();
   });
 
   test("(Mobile) Check if the default role(s) are set", async () => {
-    await createSingleRoleSurvey();
-
-    // Check if the questions are created
-    await landingPage.navigateToLandingPage();
-    await landingPage.navigateToSurveyPage();
-    await landingPage.mobileCheckProgressionBarForRoles(SINGLE_ROLE);
-  });
-
-  test("(Mobile) Create multiple questions and assign specific roles", async () => {
-    await createMultipleRoleSurvey();
-
-    // Check if the questions are created
-    await landingPage.navigateToLandingPage();
-    await landingPage.selectRoles(MULTIPLE_ROLES);
-    await landingPage.navigateToSurveyPage();
-    await landingPage.mobileCheckProgressionBarForRoles(MULTIPLE_ROLES);
-  });
-
-  test("(Mobile) if questions are visible in roles", async () => {
-    await createMultipleRoleSurvey();
-
-    // Check if the questions are created
-    await landingPage.navigateToLandingPage();
-    await landingPage.navigateToSurveyPage();
-    const questionsText = QUESTIONS_WITH_MULTIPLE_ROLES.map(
-      (question) => question.question,
+    await surveyPage.navigateToSurveyPage();
+    const roleElements =
+      await surveyPage.mobileCheckProgressionBarForRoles(SINGLE_ROLE);
+    await Promise.all(
+      roleElements.map((roleElement) => expect(roleElement).toBeVisible()),
     );
-    await landingPage.checkRoleForQuestion(questionsText);
   });
 
   test("(Mobile) Answer questions of a single role", async () => {
-    await createSingleRoleSurvey();
+    await surveyPage.navigateToSurveyPage();
 
-    // Check if the questions are created
-    await landingPage.navigateToLandingPage();
-    await landingPage.navigateToSurveyPage();
-
-    // Answer the questions
     const questionsText = QUESTIONS_WITH_SINGLE_ROLE.map(
       (question) => question.question,
     );
-    for (let i = 0; i < questionsText.length; i++) {
-      await landingPage.MobileSelectAnswerOption(questionsText[i] || "", i % 4);
+    for (const question of questionsText) {
+      await surveyPage.mobileSelectAnswerOption(question);
     }
 
-    await landingPage.submitAnswers();
-    await landingPage.checkUrl("thank-you");
-  });
-
-  test("(Mobile) Answer questions of multiple roles", async () => {
-    await createMultipleRoleSurvey();
-
-    // Check if the questions are created
-    await landingPage.navigateToLandingPage();
-    await landingPage.selectRoles(["Role 1"]);
-    await landingPage.navigateToSurveyPage();
-
-    // Answer the questions
-    const questionsText = QUESTIONS_WITH_MULTIPLE_ROLES.map(
-      (question) => question.question,
-    );
-
-    // Outer loop over the roles
-    for (let j = 0; j < MULTIPLE_ROLES.length; j++) {
-      // Inner loop over the questions
-      for (let i = 0; i < questionsText.length; i++) {
-        // Get the roles for the current question
-        const questionRoles = QUESTIONS_WITH_MULTIPLE_ROLES[i]?.roles;
-
-        // Check if the current role matches the roles of the current question
-        if (questionRoles?.includes(MULTIPLE_ROLES[j] || "")) {
-          await landingPage.MobileSelectAnswerOption(
-            questionsText[i] || "",
-            i % 4,
-          );
-        }
-      }
-
-      // Check if it's the last role
-      if (j === MULTIPLE_ROLES.length - 1) {
-        await landingPage.submitAnswers();
-      } else {
-        await landingPage.goToNextQuestionsForDifferentRole();
-      }
-    }
-
-    await landingPage.checkUrl("thank-you");
+    await surveyPage.submitAnswers();
+    await surveyPage.checkUrl("thank-you");
   });
 
   test("(Mobile) Forget to fill in a question", async () => {
-    await createSingleRoleSurvey();
-
-    // Check if the questions are created
-    await landingPage.navigateToLandingPage();
-    await landingPage.navigateToSurveyPage();
+    await surveyPage.navigateToSurveyPage();
 
     // Answer the questions, but forget the first
     const questionsText = QUESTIONS_WITH_SINGLE_ROLE.map(
       (question) => question.question,
     );
-    for (let i = 1; i < questionsText.length; i++) {
-      await landingPage.MobileSelectAnswerOption(questionsText[i] || "", i % 4);
+
+    for (const question of questionsText.slice(1)) {
+      await surveyPage.mobileSelectAnswerOption(question);
     }
 
-    await landingPage.submitAnswers();
-    await landingPage.checkForValidationError(slugify("General"));
+    await surveyPage.submitAnswers();
+    const validationErrorElement =
+      await surveyPage.checkForValidationError("yourRole");
+    await expect(validationErrorElement).toBeVisible();
 
     // fill in the first question
-    await landingPage.MobileSelectAnswerOption(questionsText[0] || "", 0);
+    await surveyPage.mobileSelectAnswerOption(questionsText[0]!);
 
-    await landingPage.submitAnswers();
-    await landingPage.checkUrl("thank-you");
-  });
-
-  test("(Mobile) Fill in the survey and show you are present on the anonymous results", async () => {
-    await createSingleRoleSurvey();
-
-    // Check if the questions are created
-    await landingPage.navigateToLandingPage();
-    await landingPage.navigateToSurveyPage();
-
-    // Answer the questions
-    const questionsText = QUESTIONS_WITH_SINGLE_ROLE.map(
-      (question) => question.question,
-    );
-    for (let i = 0; i < questionsText.length; i++) {
-      await landingPage.MobileSelectAnswerOption(questionsText[i] || "", i % 4);
-    }
-
-    await landingPage.submitAnswers();
-    await landingPage.checkUrl("thank-you");
-
-    // Check if the user is present in the anonymous results
-    await landingPage.navigateToAnonymousResults(slugify(SINGLE_ROLE[0] || ""));
-    await landingPage.checkAnonymousResultsIsNotEmpty();
+    await surveyPage.submitAnswers();
+    const isUrlCorrect = await surveyPage.checkUrl("thank-you");
+    expect(isUrlCorrect).toBe(true);
   });
 
   test("(Mobile) Fill in the survey and show you are present on the find-the-expert page", async () => {
-    await createSingleRoleSurvey();
+    await surveyPage.navigateToSurveyPage();
 
-    // Check if the questions are created
-    await landingPage.navigateToLandingPage();
-    await landingPage.navigateToSurveyPage();
-
-    // Answer the questions
     const questionsText = QUESTIONS_WITH_SINGLE_ROLE.map(
       (question) => question.question,
     );
-    for (let i = 0; i < questionsText.length; i++) {
-      await landingPage.MobileSelectAnswerOption(questionsText[i] || "", i % 4);
+    for (const question of questionsText) {
+      await surveyPage.mobileSelectAnswerOption(question);
     }
 
-    await landingPage.submitAnswers();
-    await landingPage.checkUrl("thank-you");
+    await surveyPage.submitAnswers();
+    const isUrlCorrect = await surveyPage.checkUrl("thank-you");
+    expect(isUrlCorrect).toBe(true);
 
     // Check if the user is present in the find-the-expert page, with the "do not contact" option
-    await landingPage.navigateToFindTheExpert(slugify(SINGLE_ROLE[0] || ""));
-    await landingPage.checkUserIsPresentInFindTheExpertPage(USER_NAME, false);
+    const isTextVisible = await surveyPage.navigateToFindTheExpert(
+      slugify(SINGLE_ROLE[0]!),
+    );
+    expect(isTextVisible).toBe(true);
+
+    const {
+      isUserVisible: userShouldNotBeVisible,
+      isDoNotContactVisible: doNotContactShouldBeVisible,
+    } = await surveyPage.checkUserIsPresentInFindTheExpertPage(
+      USER_NAME,
+      false,
+    );
+    expect(userShouldNotBeVisible).toBe(true);
+    expect(doNotContactShouldBeVisible).toBe(true);
 
     // Change the communication preferences
-    await landingPage.navigateToLandingPage();
-    await landingPage.selectCommunicationPreferences(COMMUNICATION_PREFERENCES);
+    const headingElement = await surveyPage.navigateToLandingPage();
+    await expect(headingElement).toBeVisible();
+    await surveyPage.selectCommunicationPreferences(COMMUNICATION_PREFERENCES);
 
     // Check if the user is present in the find-the-expert page, with the communication preferences
-    await landingPage.navigateToFindTheExpert(slugify(SINGLE_ROLE[0] || ""));
-    await landingPage.checkUserIsPresentInFindTheExpertPage(USER_NAME, true);
+    const isTextVisibleAgain = await surveyPage.navigateToFindTheExpert(
+      slugify(SINGLE_ROLE[0]!),
+    );
+    expect(isTextVisibleAgain).toBe(true);
+
+    const {
+      isUserVisible: userShouldBeVisible,
+      isDoNotContactVisible: doNotContactShouldNotBeVisible,
+    } = await surveyPage.checkUserIsPresentInFindTheExpertPage(USER_NAME, true);
+    expect(userShouldBeVisible).toBe(true);
+    expect(doNotContactShouldNotBeVisible).toBe(true);
+  });
+
+  test("(Mobile) Fill in the survey and show you are present on the anonymous results", async () => {
+    await surveyPage.navigateToSurveyPage();
+
+    const questionsText = QUESTIONS_WITH_SINGLE_ROLE.map(
+      (question) => question.question,
+    );
+    for (const question of questionsText) {
+      await surveyPage.mobileSelectAnswerOption(question);
+    }
+    await surveyPage.submitAnswers();
+    const isUrlCorrect = await surveyPage.checkUrl("thank-you");
+    expect(isUrlCorrect).toBe(true);
+
+    // Check if the user is present in the anonymous results
+    const isTextVisible = await surveyPage.navigateToAnonymousResults(
+      slugify(SINGLE_ROLE[0]!),
+    );
+    expect(isTextVisible).toBe(true);
+    const is404Hidden = await surveyPage.checkAnonymousResultsIsNotEmpty();
+    expect(is404Hidden).toBe(true);
+  });
+});
+
+test.describe("Mobile tests using multiple roles", () => {
+  let nextProcess: ChildProcess;
+  let surveyPage: SurveyPage;
+  let dbHelper: DbHelper;
+  let testSetup: TestSetup;
+
+  // Set up the landing page before each test
+  test.beforeEach(async ({ page }) => {
+    try {
+      dbHelper = await DbHelper.create();
+      testSetup = new TestSetup(dbHelper.getContainer());
+      const port = await testSetup.setupNextProcess();
+      surveyPage = await testSetup.setupSurveyPage(page, port);
+      await testSetup.setupUserAndSession(page, dbHelper);
+
+      // Fill the database with what we need for the tests with a single role.
+      await testSetup.createMultipleRoleSurvey(dbHelper);
+
+      // Navigate to the landing page and check to see if we are logged in correctly
+      const headingElement = await surveyPage.navigateToLandingPage();
+      await expect(headingElement).toBeVisible();
+    } catch (error) {
+      throw error;
+    }
+  });
+
+  test.afterEach(async ({ page }) => {
+    try {
+      const cookies = await page.context().cookies();
+      const sessionCookie = cookies.find(
+        (cookie) => cookie.name === "next-auth.session-token",
+      );
+
+      if (sessionCookie) {
+        await page.context().clearCookies();
+      }
+
+      if (nextProcess) {
+        nextProcess.kill();
+      }
+    } finally {
+      await dbHelper.getContainer().stop();
+      await page.close();
+    }
+  });
+
+  test("(Mobile) Create multiple questions and assign specific roles", async () => {
+    await surveyPage.selectRoles(MULTIPLE_ROLES);
+    await surveyPage.navigateToSurveyPage();
+
+    const roleElements =
+      await surveyPage.mobileCheckProgressionBarForRoles(MULTIPLE_ROLES);
+    await Promise.all(
+      roleElements.map((roleElement) => expect(roleElement).toBeVisible()),
+    );
+  });
+
+  test("(Mobile) if questions are visible in roles", async () => {
+    await surveyPage.navigateToSurveyPage();
+    const questionsText = QUESTIONS_WITH_MULTIPLE_ROLES.map(
+      (question) => question.question,
+    );
+    await surveyPage.checkRoleForQuestion(questionsText);
+  });
+
+  test("(Mobile) Answer questions of multiple roles", async () => {
+    await surveyPage.selectRoles(["Role 1"]);
+    await surveyPage.navigateToSurveyPage();
+
+    const questionsText = QUESTIONS_WITH_MULTIPLE_ROLES.map(
+      (question) => question.question,
+    );
+    for (const role of MULTIPLE_ROLES) {
+      for (const [index, questionText] of questionsText.entries()) {
+        const questionRoles = QUESTIONS_WITH_MULTIPLE_ROLES[index]?.roles;
+
+        if (!questionRoles?.includes(role)) {
+          continue;
+        }
+        await surveyPage.mobileSelectAnswerOption(questionText);
+      }
+
+      if (role === MULTIPLE_ROLES[MULTIPLE_ROLES.length - 1]) {
+        await surveyPage.submitAnswers();
+      } else {
+        await surveyPage.goToNextQuestionsForDifferentRole();
+      }
+    }
+
+    await surveyPage.checkUrl("thank-you");
   });
 });

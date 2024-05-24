@@ -32,7 +32,7 @@ const Results: React.FC = async () => {
       {!session && (
         <>
           <p className="text-center text-lg">
-            Unable to view anonymised results without logging in.
+            Unable to view anonymized results without logging in.
           </p>
           <Login session={session} text={"Log in"} />
         </>
@@ -59,7 +59,6 @@ export const ShowRolesWrapper = async ({ path }: { path: string }) => {
 };
 
 const ShowResultsWrapper = async () => {
-  // retrieve all questions and answers for all users
   const userAnswersForRole: QuestionResult[] = await db.questionResult.findMany(
     {
       include: {
@@ -76,29 +75,19 @@ const ShowResultsWrapper = async () => {
 
   const transformedData: TransformedData = {};
 
-  userAnswersForRole.forEach((userAnswer) => {
-    const { question, answerId } = userAnswer;
-    const questionText: string = question?.questionText ?? "";
-    const roles: Role[] = question.roles ?? [];
+  userAnswersForRole.forEach(({ question, answerId }) => {
+    const questionText = question?.questionText ?? "";
+    const roles = question?.roles ?? [];
 
-    roles.forEach((role) => {
-      const roleName = role?.role ?? "";
+    roles.forEach(({ role: roleName = "" }) => {
       if (roleName && questionText) {
-        // Check for existence of roleName and questionText
         transformedData[roleName] ??= {};
         transformedData[roleName]![questionText] ??= {};
 
         const answerString =
-          answerOptions.find((option) => option.id === answerId)?.option ?? "";
-        let roleData = transformedData[roleName]?.[questionText];
-
-        // Ensure roleData is properly initialized
-        if (!roleData) {
-          roleData = {};
-          transformedData[roleName]![questionText] = roleData;
-        }
-
-        roleData[answerString] = (roleData[answerString] ?? 0) + 1;
+          answerOptions.find(({ id }) => id === answerId)?.option ?? "";
+        transformedData[roleName]![questionText]![answerString] =
+          (transformedData[roleName]![questionText]![answerString] ?? 0) + 1;
       }
     });
   });
