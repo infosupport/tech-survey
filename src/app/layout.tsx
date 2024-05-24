@@ -34,7 +34,6 @@ export const metadata = {
 function getNextUrl() {
   const headersList = headers();
   const nextUrl = headersList.get("next-url");
-
   return nextUrl;
 }
 
