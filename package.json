@@ -9,6 +9,7 @@
     "db:studio": "prisma studio",
     "db:format": "prisma format",
     "db:generate": "prisma generate",
+    "db:deploy": "prisma migrate deploy",
     "db:seed": "node prisma/seed.js",
     "dev": "next dev",
     "lint": "next lint",
@@ -21,9 +22,6 @@
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.1.0",
-    "@fortawesome/fontawesome-svg-core": "^6.5.2",
-    "@fortawesome/free-brands-svg-icons": "^6.5.2",
-    "@fortawesome/react-fontawesome": "^0.2.2",
     "@hookform/resolvers": "^3.4.2",
     "@prisma/client": "^5.14.0",
     "@radix-ui/react-accordion": "^1.1.2",

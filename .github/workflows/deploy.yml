@@ -4,13 +4,13 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        description: 'Choose environment'
+        description: "Choose environment"
         required: true
-        default: 'acceptance'
+        default: "acceptance"
         type: choice
         options:
-          - 'acceptance'
-          - 'production'
+          - "acceptance"
+          - "production"
 
 jobs:
   build:
@@ -20,25 +20,26 @@ jobs:
       - name: Set up Node.js version
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
-          cache: 'npm'
-      - name: '📩 npm install'
+          node-version: "20.x"
+          cache: "npm"
+      - name: "📩 npm install"
         run: npm ci
-      - name: '🏗 npm build'
+      - name: "🏗 npm build"
         run: |
           npm ci
           cp .env.example .env # an env file is needed for `build`
           npm run db:generate
+          npm run db:deploy
           npm run build
           npm ci --prod
           rm .env
-      - name: '📦 Package artifact'
+      - name: "📦 Package artifact"
         # `./*`: the current directory
-        # `.next`: explicitly also zip this hidden directory. 
+        # `.next`: explicitly also zip this hidden directory.
         # `-r`: recursive
         # `-y`: preserve symlinks
-        run: zip -y release.zip ./* .next -r 
-      - name: '📤 Upload artifact'
+        run: zip -y release.zip ./* .next -r
+      - name: "📤 Upload artifact"
         uses: actions/upload-artifact@v4
         with:
           name: node-app
@@ -53,22 +54,22 @@ jobs:
     permissions:
       id-token: write #This is required for requesting the JWT
     steps:
-      - name: '📩 Download artifact'
+      - name: "📩 Download artifact"
         uses: actions/download-artifact@v4
         with:
           name: node-app
-      - name: '💤 Unzip artifact'
+      - name: "💤 Unzip artifact"
         run: unzip release.zip
-      - name: '🙌 Prepare'
+      - name: "🙌 Prepare"
         run: az storage file download --share-name import --path survey.csv --account-name $AZURE_STORAGE_ACCOUNT --account-key $AZURE_STORAGE_KEY --dest import/survey.csv
         env:
           AZURE_STORAGE_ACCOUNT: ${{ secrets.AZURE_STORAGE_ACCOUNT }}
           AZURE_STORAGE_KEY: ${{ secrets.AZURE_STORAGE_KEY }}
-      - name: '🚀 Deploy'
+      - name: "🚀 Deploy"
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v2
         with:
           app-name: ${{ secrets.APP_SERVICE_NAME }}
-          slot-name: 'production'
+          slot-name: "production"
           package: .
           publish-profile: ${{ secrets.AZURE_APP_SERVICE_PUBLISH_PROFILE }}
