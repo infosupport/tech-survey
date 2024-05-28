@@ -63,29 +63,6 @@ export const surveyRouter = createTRPCRouter({
       return userAnswers;
     }),
 
-  // setOptIn: protectedProcedure
-  //   .input(z.object({ userId: z.string() }))
-  //   .mutation(async ({ ctx, input }) => {
-  //     const user = await ctx.db.user.findUnique({
-  //       where: {
-  //         id: input.userId,
-  //       },
-  //     });
-
-  //     if (!user) {
-  //       throw new TRPCClientError("User not found");
-  //     }
-
-  //     await ctx.db.user.update({
-  //       where: {
-  //         id: input.userId,
-  //       },
-  //       data: {
-  //         findExpertOptIn: !user.findExpertOptIn,
-  //       },
-  //     });
-  //   }),
-
   setDefaultRole: protectedProcedure
     .input(z.object({ userId: z.string(), roleIds: z.array(z.string()) }))
     .mutation(async ({ ctx, input }) => {
@@ -324,25 +301,22 @@ export const surveyRouter = createTRPCRouter({
             });
 
             if (existingAnswer) {
-              // update the existing answer
-              await ctx.db.questionResult.update({
+              // delete the existing answer
+              await ctx.db.questionResult.delete({
                 where: {
                   id: existingAnswer.id,
                 },
-                data: {
-                  answerId,
-                },
-              });
-            } else {
-              // create a new answer
-              await ctx.db.questionResult.create({
-                data: {
-                  userId,
-                  questionId,
-                  answerId,
-                },
               });
             }
+
+            // create a new answer
+            await ctx.db.questionResult.create({
+              data: {
+                userId,
+                questionId,
+                answerId,
+              },
+            });
           }),
         );
       } catch (error) {

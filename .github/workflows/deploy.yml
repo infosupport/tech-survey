@@ -29,7 +29,6 @@ jobs:
           npm ci
           cp .env.example .env # an env file is needed for `build`
           npm run db:generate
-          npm run db:deploy
           npm run build
           npm ci --prod
           rm .env
