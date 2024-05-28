@@ -16,7 +16,6 @@ import { Button } from "~/components/ui/button";
 import { ArrowLeftDarkModeFriendly } from "~/components/svg";
 import Link from "next/link";
 import { headers } from "next/headers";
-import { Github } from "lucide-react";
 import GithubLink from "~/components/github-link";
 
 const inter = Inter({

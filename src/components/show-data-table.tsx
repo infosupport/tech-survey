@@ -1,5 +1,5 @@
 "use client";
-
+import type { $Enums } from "@prisma/client";
 import React from "react";
 import { slugify } from "~/utils/slugify";
 import {
@@ -10,32 +10,63 @@ import {
 import type { ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "./data-table";
 import { usePathname } from "next/navigation";
+import {
+  aggregateDataByRole,
+  createUserAndAnswerMaps,
+  groupDataByRoleAndQuestion,
+  sortResults,
+} from "~/utils/client-data-manipulation";
+import type { UserAnswersForRoleArray } from "~/models/types";
 
-type ShowDataTableProps = {
-  dataByRoleAndQuestion: Record<
-    string,
-    Record<string, { name: string; email: string; answer: string }[]>
-  >;
-  aggregatedDataByRole: Record<
-    string,
-    Record<
-      string,
-      {
-        name: string;
-        communicationPreferences: string[];
-        counts: number[];
-      }
-    >
-  >;
-};
-
-const ShowDataTable: React.FC<ShowDataTableProps> = ({
-  dataByRoleAndQuestion,
-  aggregatedDataByRole,
+const ShowDataTable = ({
+  userAnswersForRole,
+  users,
+  answerOptions,
+}: {
+  userAnswersForRole: UserAnswersForRoleArray;
+  users: {
+    name: string | null;
+    id: string;
+    roles: {
+      id: string;
+      role: string;
+      default: boolean;
+    }[];
+    email: string | null;
+    communicationPreferences: {
+      id: string;
+      userId: string;
+      methods: $Enums.CommunicationMethod[];
+    }[];
+  }[];
+  answerOptions: { id: string; option: number }[];
 }) => {
   const pathname = usePathname();
 
   const currentRole = pathname.split("/").pop();
+
+  const usersForRole: typeof users = users.filter((user) =>
+    user.roles.some((role) => slugify(role.role) === currentRole),
+  );
+
+  const { userMap, answerOptionMap } = createUserAndAnswerMaps(
+    usersForRole,
+    answerOptions,
+  );
+
+  const dataByRoleAndQuestion = groupDataByRoleAndQuestion(
+    userAnswersForRole,
+    userMap,
+    answerOptionMap,
+  );
+
+  const aggregatedDataByRole = aggregateDataByRole(
+    userAnswersForRole,
+    userMap,
+    answerOptionMap,
+  );
+  sortResults(aggregatedDataByRole);
+
   return (
     <>
       {Object.keys(dataByRoleAndQuestion).length === 0 ? (

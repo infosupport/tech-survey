@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import type { Session } from "next-auth";
+
 import { Suspense } from "react";
 import { ShowRolesWrapper } from "~/app/result/[role]/page";
 import ButtonSkeleton from "~/components/loading/button-loader";
@@ -7,13 +8,9 @@ import { Login } from "~/components/login";
 import ShowDataTable from "~/components/show-data-table";
 import { getServerAuthSession } from "~/server/auth";
 import {
-  aggregateDataByRole,
-  createUserAndAnswerMaps,
   extractUniqueIds,
   fetchUserAnswersForRole,
   fetchUsersAndAnswerOptions,
-  groupDataByRoleAndQuestion,
-  sortResults,
 } from "~/utils/data-manipulation";
 
 export const metadata: Metadata = {
@@ -63,26 +60,12 @@ const ShowTableWrapper = async () => {
     userIds,
     answerIds,
   );
-  const { userMap, answerOptionMap } = createUserAndAnswerMaps(
-    users,
-    answerOptions,
-  );
-  const dataByRoleAndQuestion = groupDataByRoleAndQuestion(
-    userAnswersForRole,
-    userMap,
-    answerOptionMap,
-  );
-  const aggregatedDataByRole = aggregateDataByRole(
-    userAnswersForRole,
-    userMap,
-    answerOptionMap,
-  );
-  sortResults(aggregatedDataByRole);
 
   return (
     <ShowDataTable
-      dataByRoleAndQuestion={dataByRoleAndQuestion}
-      aggregatedDataByRole={aggregatedDataByRole}
+      userAnswersForRole={userAnswersForRole}
+      users={users}
+      answerOptions={answerOptions}
     />
   );
 };
