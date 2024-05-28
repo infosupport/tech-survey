@@ -122,9 +122,7 @@ const pushUserData = (
       userMap[entry.userId]!.communicationPreferences?.length > 0
         ? userMap[entry.userId]?.communicationPreferences
         : ["Do not contact"],
-    answer:
-      (answerOptionMap[entry.answerId] as { answer?: string })?.answer ??
-      "Unknown Answer",
+    answer: answerOptionMap[entry.answerId] ?? "Unknown Answer",
   });
 };
 
