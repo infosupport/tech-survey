@@ -43,17 +43,27 @@ export default function SelectCommunicationMethod({
   }, [methods]);
 
   const handleMethodChange = (method: CommunicationMethod) => {
-    let updatedSelection;
+    let updatedSelection: string[];
 
     if (!selectedMethods.includes(method)) {
       updatedSelection = [...selectedMethods, method];
     } else {
       updatedSelection = selectedMethods.filter((m) => m !== method);
     }
-    setSelectedMethods(updatedSelection);
+
+    // remove empty strings
+    updatedSelection = updatedSelection.filter((m) => m !== "");
+
+    // remove duplicates
+    updatedSelection = [...new Set(updatedSelection)];
+
+    const updatedSelectionCommunication =
+      updatedSelection as CommunicationMethod[];
+
+    setSelectedMethods(updatedSelectionCommunication);
     setMethodMutate({
       userId: session.user.id,
-      methods: updatedSelection,
+      methods: updatedSelectionCommunication,
     });
   };
 
@@ -90,7 +100,11 @@ export default function SelectCommunicationMethod({
           >
             <input
               type="checkbox"
-              checked={selectedMethods.includes(method)}
+              checked={
+                selectedMethods.length > 0
+                  ? selectedMethods.includes(method)
+                  : methods.includes(method)
+              }
               onChange={() => handleMethodChange(method)}
               className={`mr-2 accent-custom-primary`}
             />

@@ -77,10 +77,11 @@ const pushUserData = (
   dataByRoleAndQuestion[roleName]![questionText]!.push({
     name: userMap[entry.userId]?.name ?? "Unknown User",
     email: userMap[entry.userId]?.email ?? "Unknown Email",
-    communicationPreferences:
-      userMap[entry.userId]!.communicationPreferences?.length > 0
-        ? userMap[entry.userId]?.communicationPreferences
-        : ["Do not contact"],
+    communicationPreferences: userMap[
+      entry.userId
+    ]!.communicationPreferences?.some((pref) => pref.trim().length > 0)
+      ? userMap[entry.userId]?.communicationPreferences
+      : ["Do not contact"],
     answer: answerOptionMap[entry.answerId] ?? "Unknown Answer",
     roles: userMap[entry.userId]?.roles ?? [],
   });
@@ -148,10 +149,11 @@ const getUserDetails = (userMap: UserMap, entry: Entry) => {
   const userEmail = userMap[entry.userId]?.email ?? "Unknown Email";
   let userCommunicationPreferences =
     userMap[entry.userId]?.communicationPreferences;
-  userCommunicationPreferences =
-    userCommunicationPreferences?.length ?? 0 > 0
-      ? userCommunicationPreferences
-      : ["Do not contact"] ?? [];
+  userCommunicationPreferences = userCommunicationPreferences?.some(
+    (pref) => pref.trim().length > 0,
+  )
+    ? userCommunicationPreferences
+    : ["Do not contact"];
   return { userName, userEmail, userCommunicationPreferences };
 };
 
@@ -205,7 +207,7 @@ export const aggregateDataByRole = (
           roleName,
           userEmail,
           userName,
-          userCommunicationPreferences!,
+          userCommunicationPreferences,
         );
 
         if (!isNaN(answerValue)) {
