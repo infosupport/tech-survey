@@ -191,16 +191,11 @@ const PrivacyPage = () => {
             Contact
           </h3>
           <p>
-            For questions regarding this privacy statement, please refer to the{" "}
-            <Link
-              className="underline"
-              href={"https://infosupport.com/privacyverklaring/#contact"}
-            >
-              infosupport.com contact page
-            </Link>
-            . Here you will also find information who our data protection
-            officer, who advises us on this and ensures that we comply with
-            privacy laws and regulations.
+            For questions regarding this privacy statement, please contact our
+            data protection officer at{" "}
+            <a className="underline" href="mailto:FG@infosupport.com">
+              FG@infosupport.com
+            </a>
           </p>
         </div>
       </div>
