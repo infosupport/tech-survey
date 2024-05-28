@@ -126,6 +126,7 @@ export type DataByRoleAndQuestion = Record<
       email: string;
       communicationPreferences: string[] | undefined;
       answer: string;
+      roles: string[];
     }[]
   >
 >;
@@ -136,6 +137,7 @@ export type UserMap = Record<
     name: string;
     email: string;
     communicationPreferences: string[];
+    roles: string[];
   }
 >;
 
