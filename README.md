@@ -10,14 +10,14 @@
 docker run --name tech-survey -e "POSTGRES_USER=dummyusr" -e "POSTGRES_PASSWORD=dummypw" -e "POSTGRES_DB=tech-survey" -d -p 5432:5432 docker.io/postgres
 ```
 3. Make sure to also use that username and password inside of the `.env` file:
-`DATABASE_URL="postgresql://jarne:dummyusr@dummypw/tech-survey`
-4. Run the following commands to setup your db locally. For the `npm run db:seed` command you need a CSV file to populate the database. You can ask your co-worker for this CSV file, or skip this if you don't want any data.
+`DATABASE_URL="postgresql://dummyusr:dummypw@localhost/tech-survey`
+4. Run the following commands to setup your db locally. For the `npm run db:seed` command you need a CSV file in the root of your project inside an 'import' folder to populate the database. You can ask your co-worker for this CSV file, or skip this if you don't want any data. Also important to note here is that you don't want to execture the `npm run db:seed` command multiple times, this will initiate the seed again and duplicate all of the data. If you want to run the seed again, you'll need to start with an empty database.
 ```bash
 npm run db:generate
 npm run db:push
 npm run db:seed
 ```
-5. Now you should be ready to go! 🎉 You can check your local database by opening the studio of Primsa:
+5. Now you should be ready to go! 🎉 You can check your local database by opening the studio of Primsa. Here you should see that the database populated with questions, roles, etc.
 ```bash
 npm run db:studio
 ```
