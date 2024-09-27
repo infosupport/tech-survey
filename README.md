@@ -10,7 +10,7 @@
 docker run --name tech-survey -e "POSTGRES_USER=dummyusr" -e "POSTGRES_PASSWORD=dummypw" -e "POSTGRES_DB=tech-survey" -d -p 5432:5432 docker.io/postgres
 ```
 3. Make sure to also use that username and password inside of the `.env` file:
-`DATABASE_URL="postgresql://dummyusr:pas$word@localhost:dummypw/tech-survey`
+`DATABASE_URL="postgresql://jarne:dummyusr@dummypw/tech-survey`
 4. Run the following commands to setup your db locally. For the `npm run db:seed` command you need a CSV file to populate the database. You can ask your co-worker for this CSV file, or skip this if you don't want any data.
 ```bash
 npm run db:generate
