@@ -7,6 +7,7 @@ import ButtonSkeleton from "~/components/loading/button-loader";
 import { Login } from "~/components/login";
 import ShowDataTable from "~/components/show-data-table";
 import { getServerAuthSession } from "~/server/auth";
+import { logUsageMetric } from "~/server/log";
 import {
   extractUniqueIds,
   fetchUserAnswersForRole,
@@ -37,9 +38,10 @@ const ContentSection = () => (
   </>
 );
 
-const FindTheExpertPage = async () => {
+const FindTheExpertPage = async (context: { params: { role: any; }; }) => {
   const session = await getServerAuthSession();
-
+  await logUsageMetric("Find The Expert Page Accessed For Role: " + context.params.role);
+  
   return (
     <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
       <h1 className="text-center text-5xl font-extrabold tracking-tight">
