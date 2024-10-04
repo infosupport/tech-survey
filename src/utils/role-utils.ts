@@ -20,7 +20,7 @@ export function generateRolesWithHref(
       })
       .map((role) => ({
         id: role.id,
-        href: `${resultHref}/${slugify(role.role)}`,
+        href: `${resultHref}?role=${role.role}`,
         label: role.role,
         current: false,
         completed: false,

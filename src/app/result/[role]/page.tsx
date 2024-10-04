@@ -1,11 +1,10 @@
 import React, { Suspense } from "react";
 import { db } from "~/server/db";
 import {
-  type Role,
+  type Section,
   type QuestionResult,
   type TransformedData,
 } from "~/models/types";
-import { SelectRoleResults } from "../../../components/select-role-results";
 import ResultsWrapper from "~/components/results";
 
 import { type Metadata } from "next";
@@ -14,6 +13,7 @@ import LegendSkeleton from "~/components/loading/results-loader";
 import { generateRolesWithHref } from "~/utils/role-utils";
 import { getServerAuthSession } from "~/server/auth";
 import { Login } from "~/components/login";
+import ShowTechSearchWrapper from "~/components/ui/search-expert";
 
 export const metadata: Metadata = {
   title: "Results",
@@ -54,8 +54,19 @@ const Results: React.FC = async () => {
 
 export const ShowRolesWrapper = async ({ path }: { path: string }) => {
   const availableRoles = await generateRolesWithHref(path)();
-
-  return <SelectRoleResults roles={availableRoles} />;
+  const def = {
+    id: "",
+    href: path,
+    label: "No role",
+    current: false,
+    completed: false,
+    started: false,
+    currentCompleted: false
+  };
+  availableRoles.unshift(def as Section);
+  return (
+      <ShowTechSearchWrapper roles={availableRoles} />
+  );
 };
 
 const ShowResultsWrapper = async () => {

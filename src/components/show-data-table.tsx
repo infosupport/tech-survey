@@ -9,7 +9,7 @@ import {
 } from "./columns";
 import type { ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "./data-table";
-import { usePathname } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import {
   aggregateDataByRole,
   createUserAndAnswerMaps,
@@ -41,13 +41,13 @@ const ShowDataTable = ({
   }[];
   answerOptions: { id: string; option: number }[];
 }) => {
-  const pathname = usePathname();
+  const searchParams=useSearchParams();
+  const currentRole = searchParams.get("role");
+  const currentTech = searchParams.get("tech");
 
-  const currentRole = pathname.split("/").pop();
-
-  const usersForRole: typeof users = users.filter((user) =>
-    user.roles.some((role) => slugify(role.role) === currentRole),
-  );
+  const usersForRole: typeof users = currentRole !== null ? users.filter((user) =>
+    user.roles.some((role) => slugify(role.role) === slugify(currentRole)),
+  ) : users;
 
   const { userMap, answerOptionMap } = createUserAndAnswerMaps(
     usersForRole,
@@ -73,7 +73,7 @@ const ShowDataTable = ({
         <p>There are no non-anonymous results yet. Please check back later.</p>
       ) : (
         Object.keys(dataByRoleAndQuestion).map((role) => {
-          if (slugify(role) === currentRole) {
+          if (currentRole == null || slugify(role) === slugify(currentRole)) {
             return (
               <div key={role}>
                 <h2 className="mb-4 text-2xl font-bold">{role}</h2>
@@ -102,23 +102,47 @@ const ShowDataTable = ({
                 <hr className="my-10" />
 
                 {Object.keys(dataByRoleAndQuestion[role] ?? {}).map(
-                  (question) => (
-                    <div key={question}>
-                      <h3 className="mb-3 text-lg font-semibold">{question}</h3>
-                      <div className="mb-15">
-                        <DataTable
-                          columns={
-                            columns as ColumnDef<
-                              { name: string; email: string; answer: string },
-                              unknown
-                            >[]
-                          }
-                          data={dataByRoleAndQuestion[role]?.[question] ?? []}
-                        />
-                        <hr className="my-10" />
-                      </div>
-                    </div>
-                  ),
+                  (question) => {
+                    if (currentTech == null) {
+                      return (
+                        <div key={question}>
+                          <h3 className="mb-3 text-lg font-semibold">{question}</h3>
+                          <div className="mb-15">
+                            <DataTable
+                              columns={
+                                columns as ColumnDef<
+                                  { name: string; email: string; answer: string },
+                                  unknown
+                                >[]
+                              }
+                              data={dataByRoleAndQuestion[role]?.[question] ?? []}
+                            />
+                            <hr className="my-10" />
+                          </div>
+                        </div>
+                      )
+                    }
+                    if (slugify(question) === slugify(currentTech)) {
+                      return (
+                        <div key={question}>
+                          <h3 className="mb-3 text-lg font-semibold">{question}</h3>
+                          <div className="mb-15">
+                            <DataTable
+                              columns={
+                                columns as ColumnDef<
+                                  { name: string; email: string; answer: string },
+                                  unknown
+                                >[]
+                              }
+                              data={dataByRoleAndQuestion[role]?.[question] ?? []}
+                            />
+                            <hr className="my-10" />
+                          </div>
+                        </div>
+                      )
+                    }
+                    return null
+                  },
                 )}
               </div>
             );
