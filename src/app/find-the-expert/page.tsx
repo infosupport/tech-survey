@@ -42,10 +42,28 @@ const ContentSection = ({ role, tech } : {role:string, tech:string}) => (
   </>
 );
 
-const FindTheExpertPage = async (context: { params: { role: any; }; searchParams: {role:string, tech:string}}) => {
+async function logMetric(role: string, tech: string) {
+  console.log("LOGGING");
+  switch (true) {
+    case(role != undefined && tech == undefined):
+      await logUsageMetric(`Find The Expert Page Filtered For Role: ${role}`);
+      break;
+    case(role == undefined && tech != undefined):
+      await logUsageMetric(`Find The Expert Page Filtered For Technology: ${tech}`);
+      break;
+    case(role != undefined && tech != undefined):
+      await logUsageMetric(`Find The Expert Page Filtered For Role: ${role} And Technology: ${tech}`);
+      break;
+    default:
+      await logUsageMetric(`Find The Expert Page Accessed`);
+      break;
+
+  }
+}
+
+const FindTheExpertPage = async (context: { searchParams: {role:string, tech:string}}) => {
   const session = await getServerAuthSession();
-  await logUsageMetric("Find The Expert Page Accessed For Role: " + context.searchParams.role);
-  
+  await logMetric(context.searchParams.role, context.searchParams.tech);
   return (
     <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
       <h1 className="text-center text-5xl font-extrabold tracking-tight">
@@ -59,20 +77,22 @@ const FindTheExpertPage = async (context: { params: { role: any; }; searchParams
   );
 };
 
+async function getUserAnswers(tech:string, role:string) {
+  switch (true) {
+    case (tech == undefined && role != undefined):
+      return await fetchUserAnswersForRole(role);
+    case (tech != undefined && role == undefined):
+      return await fetchUserAnswersForQuestion(tech);
+    case (tech != undefined && role != undefined):
+      return await fetchUserAnswersForRoleAndQuestion(role, tech);
+    default:
+      return await fetchUserAnswers();
+  }
+}
+
 const ShowTableWrapper = async ( {tech, role}:{tech:string, role:string}) => {
-  let userAnswersForRole;
-  if (tech == undefined && role != undefined) {
-    userAnswersForRole = await fetchUserAnswersForRole(role);
-  }
-  else if (tech != undefined && role == undefined) {
-    userAnswersForRole = await fetchUserAnswersForQuestion(tech);
-  }
-  else if (tech != undefined && role != undefined) {
-    userAnswersForRole = await fetchUserAnswersForRoleAndQuestion(role, tech);
-  }
-  else {
-    userAnswersForRole = await fetchUserAnswers();
-  }
+  const userAnswersForRole = await getUserAnswers(tech, role);
+
   const { userIds, answerIds } = extractUniqueIds(userAnswersForRole);
   const [users, answerOptions] = await fetchUsersAndAnswerOptions(
     userIds,
