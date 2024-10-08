@@ -18,7 +18,7 @@ const formSchema = z.object({
   tech: z.string()
 })
 
-const ShowTechSearchWrapper = async ({ roles } : { roles: Section[]}) => {
+const ShowTechSearchWrapper = ({ roles } : { roles: Section[]}) => {
   const path = usePathname();
   const searchParams = useSearchParams();
   let defaultRole = searchParams.get("role");
