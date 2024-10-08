@@ -79,7 +79,6 @@ const ShowTechSearchWrapper = ({ roles } : { roles: Section[]}) => {
   )
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
     const role2 = values.role != undefined ? values.role.length != 0 && values.role != "No role" ? `role=${values.role}` : "" : "";
     const tech2 = values.tech != undefined ? values.tech.length != 0 ? `&tech=${values.tech}` : "" : "";
     route.push(`${path}?${role2}${tech2}`);

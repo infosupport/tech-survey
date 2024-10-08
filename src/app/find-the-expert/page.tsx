@@ -43,7 +43,6 @@ const ContentSection = ({ role, tech } : {role:string, tech:string}) => (
 );
 
 async function logMetric(role: string, tech: string) {
-  console.log("LOGGING");
   switch (true) {
     case(role != undefined && tech == undefined):
       await logUsageMetric(`Find The Expert Page Filtered For Role: ${role}`);
