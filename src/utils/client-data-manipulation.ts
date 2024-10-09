@@ -71,7 +71,7 @@ const pushUserData = (
 ): void => {
 
   // do nothing if there is no user data
-  if (!userMap[entry.userId] || !userMap[entry.userId]?.roles.includes(roleName)) {
+  if (!userMap[entry.userId]?.roles.includes(roleName)) {
     return;
   }
 
@@ -199,7 +199,7 @@ export const aggregateDataByRole = (
       const roleName = getRoleName(role);
       initializeRole(aggregatedDataByRole, roleName);
 
-      if (userMap[entry.userId] && userMap[entry.userId]?.roles.includes(roleName)) {
+      if (userMap[entry.userId]?.roles.includes(roleName)) {
         const answerValue = parseInt(answerOptionMap[entry.answerId] ?? "", 10);
         const { userName, userEmail, userCommunicationPreferences } =
           getUserDetails(userMap, entry);
