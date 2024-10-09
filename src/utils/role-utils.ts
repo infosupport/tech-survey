@@ -1,5 +1,4 @@
 import type { Role, Section } from "~/models/types";
-import { slugify } from "./slugify";
 import { db } from "~/server/db";
 
 export function generateRolesWithHref(

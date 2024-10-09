@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
 import type { Session } from "next-auth";
 
-import { Suspense, use, useEffect } from "react";
+import { Suspense} from "react";
 import { ShowRolesWrapper } from "~/app/result/[role]/page";
 import ButtonSkeleton from "~/components/loading/button-loader";
 import { Login } from "~/components/login";
 import ShowDataTable from "~/components/show-data-table";
-import ShowTechSearchWrapper from "~/components/ui/search-expert";
 import { getServerAuthSession } from "~/server/auth";
 import { logUsageMetric } from "~/server/log";
 import {

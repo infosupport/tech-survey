@@ -21,8 +21,8 @@ const formSchema = z.object({
 const ShowTechSearchWrapper = ({ roles } : { roles: Section[]}) => {
   const path = usePathname();
   const searchParams = useSearchParams();
-  let defaultRole = searchParams.get("role");
-  let defaultTech = searchParams.get("tech");
+  const defaultRole = searchParams.get("role");
+  const defaultTech = searchParams.get("tech");
   const route = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
