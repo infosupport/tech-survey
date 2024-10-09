@@ -43,7 +43,7 @@ export const fetchUserAnswersForRoleAndQuestion = async (role:string, question: 
     {
       question: {
         questionText : {
-          equals: question,
+          contains: question,
           mode: "insensitive"
         },
         roles : {
@@ -72,7 +72,7 @@ export const fetchUserAnswersForQuestion = async (question: string) => {
     {
       question: {
         questionText : {
-          equals: question,
+          contains: question,
           mode: "insensitive"
         }
       }

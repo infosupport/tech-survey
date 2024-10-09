@@ -43,7 +43,6 @@ const ShowDataTable = ({
 }) => {
   const searchParams=useSearchParams();
   const currentRole = searchParams.get("role");
-  const currentTech = searchParams.get("tech");
 
   const usersForRole: typeof users = currentRole !== null ? users.filter((user) =>
     user.roles.some((role) => slugify(role.role) === slugify(currentRole)),
@@ -103,45 +102,23 @@ const ShowDataTable = ({
 
                 {Object.keys(dataByRoleAndQuestion[role] ?? {}).map(
                   (question) => {
-                    if (currentTech == null) {
-                      return (
-                        <div key={question}>
-                          <h3 className="mb-3 text-lg font-semibold">{question}</h3>
-                          <div className="mb-15">
-                            <DataTable
-                              columns={
-                                columns as ColumnDef<
-                                  { name: string; email: string; answer: string },
-                                  unknown
-                                >[]
-                              }
-                              data={dataByRoleAndQuestion[role]?.[question] ?? []}
-                            />
-                            <hr className="my-10" />
-                          </div>
+                    return (
+                      <div key={question}>
+                        <h3 className="mb-3 text-lg font-semibold">{question}</h3>
+                        <div className="mb-15">
+                          <DataTable
+                            columns={
+                              columns as ColumnDef<
+                                { name: string; email: string; answer: string },
+                                unknown
+                              >[]
+                            }
+                            data={dataByRoleAndQuestion[role]?.[question] ?? []}
+                          />
+                          <hr className="my-10" />
                         </div>
-                      )
-                    }
-                    if (slugify(question) === slugify(currentTech)) {
-                      return (
-                        <div key={question}>
-                          <h3 className="mb-3 text-lg font-semibold">{question}</h3>
-                          <div className="mb-15">
-                            <DataTable
-                              columns={
-                                columns as ColumnDef<
-                                  { name: string; email: string; answer: string },
-                                  unknown
-                                >[]
-                              }
-                              data={dataByRoleAndQuestion[role]?.[question] ?? []}
-                            />
-                            <hr className="my-10" />
-                          </div>
-                        </div>
-                      )
-                    }
-                    return null
+                      </div>
+                    )
                   },
                 )}
               </div>

@@ -80,7 +80,7 @@ const ShowTechSearchWrapper = ({ roles } : { roles: Section[]}) => {
           </div>
         </div>
         <div className="flex justify-center">
-          <Button type="submit">Submit</Button>
+          <Button type="submit">Search</Button>
         </div>
       </form>
     </Form>
