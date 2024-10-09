@@ -11,6 +11,7 @@ import { Label } from "./label";
 import { Input } from "./input";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "./select";
 import { SelectValue } from "@radix-ui/react-select";
+import { use, useEffect, useState } from "react";
 
 
 const formSchema = z.object({
@@ -21,19 +22,38 @@ const formSchema = z.object({
 const ShowTechSearchWrapper = ({ roles } : { roles: Section[]}) => {
   const path = usePathname();
   const searchParams = useSearchParams();
-  const defaultRole = searchParams.get("role");
-  const defaultTech = searchParams.get("tech");
+  let previousRole = "";
+  let previousTech = "";
   const route = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      role: defaultRole ?? "",
-      tech: defaultTech ?? "",
+      role: searchParams.get("role") ?? "",
+      tech: searchParams.get("tech") ?? "",
     },
   });
 
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    const role2 = values.role != undefined ? values.role.length != 0 && values.role != "No role" ? `role=${values.role}` : "" : "";
+    const tech2 = values.tech != undefined ? values.tech.length != 0 ? `&tech=${values.tech}` : "" : "";
+    route.push(`${path}?${role2}${tech2}`);
+  }
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const currentRole = form.getValues().role;
+      const currentTech = form.getValues().tech;
+      if (previousRole != currentRole || previousTech != currentTech) {
+        previousRole = currentRole;
+        previousTech = currentTech;
+        onSubmit({role: currentRole, tech: currentTech});
+      }
+    }, 1000);
+  }, []);
+
   return (
+    <div>
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
@@ -45,7 +65,7 @@ const ShowTechSearchWrapper = ({ roles } : { roles: Section[]}) => {
                 <FormItem>
                   <Label>Technology</Label>
                   <FormControl>
-                    <Input placeholder="technology" {...field}/>
+                    <Input placeholder="Technology" {...field}/>
                   </FormControl>
                 </FormItem>
                 )}
@@ -79,18 +99,10 @@ const ShowTechSearchWrapper = ({ roles } : { roles: Section[]}) => {
             />
           </div>
         </div>
-        <div className="flex justify-center">
-          <Button type="submit">Search</Button>
-        </div>
       </form>
     </Form>
+    </div>
   )
-
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    const role2 = values.role != undefined ? values.role.length != 0 && values.role != "No role" ? `role=${values.role}` : "" : "";
-    const tech2 = values.tech != undefined ? values.tech.length != 0 ? `&tech=${values.tech}` : "" : "";
-    route.push(`${path}?${role2}${tech2}`);
-  }
 };
 
   export default ShowTechSearchWrapper;

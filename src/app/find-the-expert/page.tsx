@@ -7,7 +7,6 @@ import ButtonSkeleton from "~/components/loading/button-loader";
 import { Login } from "~/components/login";
 import ShowDataTable from "~/components/show-data-table";
 import { getServerAuthSession } from "~/server/auth";
-import { logUsageMetric } from "~/server/log";
 import {
   extractUniqueIds,
   fetchUserAnswers,
@@ -41,27 +40,8 @@ const ContentSection = ({ role, tech } : {role:string, tech:string}) => (
   </>
 );
 
-async function logMetric(role: string, tech: string) {
-  switch (true) {
-    case(role != undefined && tech == undefined):
-      await logUsageMetric(`Find The Expert Page Filtered For Role: ${role}`);
-      break;
-    case(role == undefined && tech != undefined):
-      await logUsageMetric(`Find The Expert Page Filtered For Technology: ${tech}`);
-      break;
-    case(role != undefined && tech != undefined):
-      await logUsageMetric(`Find The Expert Page Filtered For Role: ${role} And Technology: ${tech}`);
-      break;
-    default:
-      await logUsageMetric(`Find The Expert Page Accessed`);
-      break;
-
-  }
-}
-
 const FindTheExpertPage = async (context: { searchParams: {role:string, tech:string}}) => {
   const session = await getServerAuthSession();
-  await logMetric(context.searchParams.role, context.searchParams.tech);
   return (
     <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
       <h1 className="text-center text-5xl font-extrabold tracking-tight">
