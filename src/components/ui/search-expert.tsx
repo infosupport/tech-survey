@@ -36,44 +36,52 @@ const ShowTechSearchWrapper = ({ roles } : { roles: Section[]}) => {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        <FormField
-          control={form.control}
-          name="tech"
-          render={({ field }) => (
-            <FormItem>
-              <Label>Technology</Label>
-              <FormControl>
-                <Input placeholder="technology" {...field}/>
-              </FormControl>
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="role"
-          render={({ field }) => (
-            <FormItem>
-              <Label>Viewing results for role:</Label>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Select a role" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {
-                    roles.map(r => {
-                      return (
-                        <SelectItem value={r.label} key={r.id}>{r.label}</SelectItem>
-                      )
-                    })
-                  }
-                </SelectContent>
-              </Select>
-            </FormItem>
-          )}
-        />
-        <Button type="submit">Submit</Button>
+        <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+          <div className="sm:col-span-3"> 
+            <FormField
+              control={form.control}
+              name="tech"
+              render={({ field }) => (
+                <FormItem>
+                  <Label>Technology</Label>
+                  <FormControl>
+                    <Input placeholder="technology" {...field}/>
+                  </FormControl>
+                </FormItem>
+                )}
+            />
+          </div>
+          <div className="sm:col-span-3">
+            <FormField
+              control={form.control}
+              name="role"
+              render={({ field }) => (
+                <FormItem>
+                    <Label>Viewing results for role:</Label>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger className="w-[180px]">
+                          <SelectValue placeholder="Select a role" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {
+                          roles.map(r => {
+                            return (
+                              <SelectItem value={r.label} key={r.id}>{r.label}</SelectItem>
+                            )
+                          })
+                        }
+                      </SelectContent>
+                    </Select>
+                  </FormItem>
+                )}
+            />
+          </div>
+        </div>
+        <div className="flex justify-center">
+          <Button type="submit">Submit</Button>
+        </div>
       </form>
     </Form>
   )
