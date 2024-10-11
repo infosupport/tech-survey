@@ -63,9 +63,9 @@ const ShowTechSearchWrapper = ({ roles } : { roles: Section[]}) => {
               name="tech"
               render={({ field }) => (
                 <FormItem>
-                  <Label>Technology</Label>
+                  <Label>Viewing results for technology:</Label>
                   <FormControl>
-                    <Input placeholder="Technology" {...field}/>
+                    <Input placeholder="Search the technology" {...field}/>
                   </FormControl>
                 </FormItem>
                 )}
