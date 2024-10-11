@@ -17,6 +17,12 @@ enum CommunicationMethod {
   TEAMS
 }
 
+model BusinessUnit {
+  id         String     @id @default(cuid())
+  unit       String     @unique
+  users      User[]
+}
+
 model Survey {
   id         String     @id @default(cuid())
   surveyName String     @unique
