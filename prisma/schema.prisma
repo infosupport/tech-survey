@@ -80,6 +80,8 @@ model User {
   questionResults          QuestionResult[]
   communicationPreferences CommunicationPreference[]
   sessions                 Session[]
+  businessUnitId           String?
+  businessUnit           BusinessUnit?             @relation(fields: [businessUnitId], references: [id])
 }
 
 model Account {
