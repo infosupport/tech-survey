@@ -14,6 +14,7 @@ import { generateRolesWithHref } from "~/utils/role-utils";
 import { getServerAuthSession } from "~/server/auth";
 import { Login } from "~/components/login";
 import ShowTechSearchWrapper from "~/components/ui/search-expert";
+import { SelectRoleResults } from "~/components/select-role-results";
 
 export const metadata: Metadata = {
   title: "Results",
@@ -64,6 +65,11 @@ export const ShowRolesWrapper = async ({ path }: { path: string }) => {
     currentCompleted: false
   };
   availableRoles.unshift(def as Section);
+  if (path.includes("result")) {
+    return (
+      <SelectRoleResults roles={availableRoles} />
+    )
+  }
   return (
       <ShowTechSearchWrapper roles={availableRoles} />
   );

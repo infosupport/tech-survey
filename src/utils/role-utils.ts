@@ -1,5 +1,6 @@
 import type { Role, Section } from "~/models/types";
 import { db } from "~/server/db";
+import { slugify } from "./slugify";
 
 export function generateRolesWithHref(
   resultHref: string,
@@ -19,7 +20,7 @@ export function generateRolesWithHref(
       })
       .map((role) => ({
         id: role.id,
-        href: `${resultHref}?role=${role.role}`,
+        href: createHref(resultHref, role),
         label: role.role,
         current: false,
         completed: false,
@@ -29,4 +30,11 @@ export function generateRolesWithHref(
 
     return availableRoles;
   };
+}
+
+const createHref = (path: string, role: Role) => {
+  if (path.includes("result")) {
+    return `${path}/${slugify(role.role)}`;
+  }
+  return `${path}?role=${role.role}`;
 }
