@@ -1,6 +1,5 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
 import {
   ResponsiveContainer,
   BarChart,
@@ -15,9 +14,6 @@ import { ResultCommons } from "./results";
 import { idToTextMap } from "~/utils/optionMapping";
 
 const ShowResults = ({ data }: { data: TransformedData }) => {
-  const searchParams = useSearchParams();
-
-  const currentRole  = searchParams.get("role") ?? "";
 
   const { uniqueDataKeys, dataKeyColors, CustomTooltip } = ResultCommons({
     data,

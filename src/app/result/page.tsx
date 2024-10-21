@@ -1,7 +1,6 @@
 import React, { Suspense } from "react";
 import { db } from "~/server/db";
 import {
-  type Role,
   type QuestionResult,
   type TransformedData,
   type Section,
@@ -9,7 +8,7 @@ import {
 import { SelectRoleResults } from "../../components/select-role-results";
 import ResultsWrapper from "~/components/results";
 
-import next, { type Metadata } from "next";
+import { type Metadata } from "next";
 import ButtonSkeleton from "~/components/loading/button-loader";
 import LegendSkeleton from "~/components/loading/results-loader";
 import { generateRolesWithHref } from "~/utils/role-utils";
@@ -17,7 +16,6 @@ import { getServerAuthSession } from "~/server/auth";
 import { Login } from "~/components/login";
 import SearchAnonymized from "~/components/ui/search-anonymized";
 import type { BusinessUnit } from "@prisma/client";
-import { skip } from "node:test";
 
 export const metadata: Metadata = {
   title: "Results",

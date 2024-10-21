@@ -39,7 +39,7 @@ export default function SearchAnonymized({roles, businessUnits} : {roles: Sectio
     }
 
     useEffect(() => {
-        const interval = setInterval(() => {
+        setInterval(() => {
             const currentRole = form.getValues().role;
             const currentUnit = form.getValues().unit;
             if (previousRole != currentRole || previousUnit != currentUnit) {
