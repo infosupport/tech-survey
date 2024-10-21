@@ -168,7 +168,7 @@ export default function SelectRoles({
               </Link>
             </SpinnerButton>
           </div>
-          <Link href="/result/general">
+          <Link href="/result">
             <SpinnerButton
               variant="outline"
               className="border-2 border-[#bed62f]"

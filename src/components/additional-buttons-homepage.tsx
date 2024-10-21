@@ -15,7 +15,7 @@ const Buttons = ({ session }: { session: Session | null }) => {
             <Login session={session} text="Go to survey" />
             <Button
               onClick={() =>
-                signIn("azure-ad", { callbackUrl: "/result/general" })
+                signIn("azure-ad", { callbackUrl: "/result" })
               }
               variant="outline"
               className="border-2 border-[#bed62f]"

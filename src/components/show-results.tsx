@@ -32,18 +32,22 @@ const ShowResults = ({ data }: { data: TransformedData }) => {
 
   return (
     <div className="grid gap-4">
-      <h2 className="mb-4 text-lg font-semibold">Legend</h2>
-      <div className="flex flex-wrap gap-2">
-        {uniqueDataKeys.map((dataKey, index) => (
-          <div key={index} className="flex items-center">
-            <div
-              className="mr-2 h-4 w-4 rounded-full"
-              style={{ backgroundColor: dataKeyColors[dataKey] }}
-            ></div>
-            <span>{idToTextMap[+dataKey]}</span>
+      {data && Object.entries(data).length > 0 &&
+        <>
+          <h2 className="mb-4 text-lg font-semibold">Legend</h2>
+          <div className="flex flex-wrap gap-2">
+            {uniqueDataKeys.map((dataKey, index) => (
+              <div key={index} className="flex items-center">
+                <div
+                  className="mr-2 h-4 w-4 rounded-full"
+                  style={{ backgroundColor: dataKeyColors[dataKey] }}
+                ></div>
+                <span>{idToTextMap[+dataKey]}</span>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+        </>
+      }
       {Object.entries(data).map(([role, questions]) => {
         return (
           <div key={role} className="grid gap-4 md:grid-cols-2">
