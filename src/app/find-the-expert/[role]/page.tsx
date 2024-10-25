@@ -38,9 +38,9 @@ const ContentSection = () => (
   </>
 );
 
-const FindTheExpertPage = async (context: { params: { role: any; }; }) => {
+const FindTheExpertPage = async () => {
   const session = await getServerAuthSession();
-  api.usageMetricLogger.logUsageMetric.mutate({logMessage: 'find-the-expert-page-filtered-on-role'});
+  await api.usageMetricLogger.logUsageMetric.mutate({logMessage: 'find-the-expert-page-filtered-on-role'});
   
   return (
     <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">

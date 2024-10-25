@@ -31,9 +31,9 @@ const Buttons = ({ session }: { session: Session | null }) => {
               <ArrowRightDarkModeFriendly />
             </Button>
             <Button
-              onClick={() => {
+              onClick={async () => {
                   handleLogging();
-                  signIn("azure-ad", { callbackUrl: "/find-the-expert/general" });
+                  await signIn("azure-ad", { callbackUrl: "/find-the-expert/general" });
                 }
               }
               variant="outline"
