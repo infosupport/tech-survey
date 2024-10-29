@@ -93,7 +93,7 @@ export default function SearchAnonymized({roles, businessUnits} : {roles: Sectio
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                             <SelectTrigger className="w-[180px]">
-                            <SelectValue placeholder="Select a role" />
+                            <SelectValue placeholder="Select a role" data-testid="selectedRole"/>
                             </SelectTrigger>
                         </FormControl>
                         <SelectContent>
