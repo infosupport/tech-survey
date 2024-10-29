@@ -28,7 +28,10 @@ export class SurveyPage {
   async navigateToAnonymousResults(role: string) : Promise<boolean>{
     await this.page.goto(`http://localhost:${this.port}/result?role=${role}`);
     await this.page.waitForURL(`http://localhost:${this.port}/result?role=${role}`);
-    return (await this.page.getByTestId('selectedRole').allInnerTexts()).includes(role);
+    const isTextVisible = await this.page
+      .getByText(`Viewing results for role: ${role}`)
+      .isVisible();
+    return isTextVisible;
   }
 
   async navigateToFindTheExpert(role: string) {
