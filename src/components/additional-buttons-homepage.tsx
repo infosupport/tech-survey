@@ -25,7 +25,7 @@ const Buttons = ({ session }: { session: Session | null }) => {
             </Button>
             <Button
               onClick={() =>
-                signIn("azure-ad", { callbackUrl: "/find-the-expert/general" })
+                signIn("azure-ad", { callbackUrl: "/find-the-expert" })
               }
               variant="outline"
               className="border-2 border-[#bed62f]"

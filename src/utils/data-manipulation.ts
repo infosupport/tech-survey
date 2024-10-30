@@ -1,7 +1,31 @@
 import type { UserIdAndAnswerId } from "~/models/types";
 import { db } from "~/server/db";
 
-export const fetchUserAnswersForRole = async () => {
+export const fetchUserAnswersForRole = async (role:string) => {
+  return await db.questionResult.findMany({
+    where: {
+      question: {
+        roles: {
+          some: {
+            role: {
+              equals: role,
+              mode: "insensitive"
+            }
+          }
+        }
+      }
+    },
+    include: {
+      question: {
+        include: {
+          roles: true,
+        },
+      }
+    },
+  });
+};
+
+export const fetchUserAnswers = async () => {
   return await db.questionResult.findMany({
     include: {
       question: {
@@ -12,6 +36,56 @@ export const fetchUserAnswersForRole = async () => {
     },
   });
 };
+
+export const fetchUserAnswersForRoleAndQuestion = async (role:string, question: string) => {
+  return await db.questionResult.findMany({
+    where:
+    {
+      question: {
+        questionText : {
+          contains: question,
+          mode: "insensitive"
+        },
+        roles : {
+          some: {
+            role: {
+              equals: role,
+              mode: "insensitive"
+            }
+          }
+        }
+      }
+    },
+    include: {
+      question: {
+        include: {
+          roles: true,
+        },
+      },
+    },
+  });
+}
+
+export const fetchUserAnswersForQuestion = async (question: string) => {
+  return await db.questionResult.findMany({
+    where:
+    {
+      question: {
+        questionText : {
+          contains: question,
+          mode: "insensitive"
+        }
+      }
+    },
+    include: {
+      question: {
+        include: {
+          roles: true,
+        },
+      },
+    },
+  });
+}
 
 export const fetchUsersAndAnswerOptions = async (
   userIds: string[],

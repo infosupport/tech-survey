@@ -166,7 +166,7 @@ export default function SelectRoles({
               <ArrowRightDarkModeFriendly />
             </SpinnerButton>
           </Link>
-          <Link href="/find-the-expert/general">
+          <Link href="/find-the-expert">
             <SpinnerButton
               state={communicationMethodIsLoading}
               variant="outline"

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import type { Session } from "next-auth";
 
-import { Suspense } from "react";
+import { Suspense} from "react";
 import { ShowRolesWrapper } from "~/app/result/[role]/page";
 import ButtonSkeleton from "~/components/loading/button-loader";
 import { Login } from "~/components/login";
@@ -9,7 +9,10 @@ import ShowDataTable from "~/components/show-data-table";
 import { getServerAuthSession } from "~/server/auth";
 import {
   extractUniqueIds,
+  fetchUserAnswers,
+  fetchUserAnswersForQuestion,
   fetchUserAnswersForRole,
+  fetchUserAnswersForRoleAndQuestion,
   fetchUsersAndAnswerOptions,
 } from "~/utils/data-manipulation";
 
@@ -26,20 +29,19 @@ const LoginSection = ({ session }: { session: Session | null }) => (
   </>
 );
 
-const ContentSection = () => (
+const ContentSection = ({ role, tech } : {role:string, tech:string}) => (
   <>
     <Suspense fallback={<ButtonSkeleton />}>
       <ShowRolesWrapper path="/find-the-expert" />
     </Suspense>
     <Suspense fallback={<ButtonSkeleton />}>
-      <ShowTableWrapper />
+      <ShowTableWrapper tech = {tech} role={role}/>
     </Suspense>
   </>
 );
 
-const FindTheExpertPage = async () => {
+const FindTheExpertPage = async (context: { searchParams: {role:string, tech:string}}) => {
   const session = await getServerAuthSession();
-
   return (
     <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
       <h1 className="text-center text-5xl font-extrabold tracking-tight">
@@ -48,13 +50,27 @@ const FindTheExpertPage = async () => {
         </span>
         <span className="block sm:inline"> Tech Survey - Find the expert</span>
       </h1>
-      {session ? <ContentSection /> : <LoginSection session={session} />}
+      {session ? <ContentSection role={context.searchParams.role} tech={context.searchParams.tech}/> : <LoginSection session={session} />}
     </div>
   );
 };
 
-const ShowTableWrapper = async () => {
-  const userAnswersForRole = await fetchUserAnswersForRole();
+async function getUserAnswers(tech:string, role:string) {
+  switch (true) {
+    case (tech == undefined && role != undefined):
+      return await fetchUserAnswersForRole(role);
+    case (tech != undefined && role == undefined):
+      return await fetchUserAnswersForQuestion(tech);
+    case (tech != undefined && role != undefined):
+      return await fetchUserAnswersForRoleAndQuestion(role, tech);
+    default:
+      return await fetchUserAnswers();
+  }
+}
+
+const ShowTableWrapper = async ( {tech, role}:{tech:string, role:string}) => {
+  const userAnswersForRole = await getUserAnswers(tech, role);
+
   const { userIds, answerIds } = extractUniqueIds(userAnswersForRole);
   const [users, answerOptions] = await fetchUsersAndAnswerOptions(
     userIds,
@@ -69,5 +85,6 @@ const ShowTableWrapper = async () => {
     />
   );
 };
+
 
 export default FindTheExpertPage;
