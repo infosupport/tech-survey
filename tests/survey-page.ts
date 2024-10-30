@@ -35,10 +35,10 @@ export class SurveyPage {
 
   async navigateToFindTheExpert(role: string) {
     await this.page.goto(
-      `http://localhost:${this.port}/find-the-expert/${role}`,
+      `http://localhost:${this.port}/find-the-expert?role=${role}`,
     );
     await this.page.waitForURL(
-      `http://localhost:${this.port}/find-the-expert/${role}`,
+      `http://localhost:${this.port}/find-the-expert?role=${role}`,
     );
     const isTextVisible = await this.page
       .getByText(`Viewing results for role: ${role}`)
