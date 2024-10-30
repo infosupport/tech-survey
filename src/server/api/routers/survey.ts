@@ -174,6 +174,68 @@ export const surveyRouter = createTRPCRouter({
         });
       }
     }),
+  
+  setBusinessUnit: protectedProcedure
+    .input(z.object({ userId: z.string(), businessUnitId: z.string()}))
+    .mutation(async ({ctx, input}) => {
+      const {userId, businessUnitId} = input;
+
+      try {
+        const user = await ctx.db.user.findUnique({
+          where: {
+            id: userId,
+          },
+        });
+
+        if (!user) {
+          throw new TRPCClientError("User not found");
+        }
+
+        const unit = await ctx.db.businessUnit.findUnique({
+          where: {
+            id: businessUnitId
+          }
+        });
+
+        if (!unit) {
+          throw new TRPCClientError("Invalid business unit");
+        }
+
+        await ctx.db.user.update({
+          where: {
+            id: userId,
+          },
+          data: {
+            businessUnit: {
+              connect: unit,
+            },
+          },
+        });
+
+      } catch (error: unknown) {
+        if (error instanceof TRPCClientError) {
+          throw error;
+        } else if (
+          typeof error === "object" &&
+          error !== null &&
+          "message" in error &&
+          typeof error.message === "string"
+        ) {
+          if (error.message.includes("ETIMEDOUT")) {
+            throw new TRPCClientError(
+              "Timeout error occurred while accessing the database",
+            );
+          } else if (error.message.includes("ER_DUP_ENTRY")) {
+            throw new TRPCClientError("Duplicate entry error occurred");
+          } else if (error.message.includes("ER_NO_REFERENCED_ROW")) {
+            throw new TRPCClientError(
+              "Referenced row not found error occurred",
+            );
+          }
+        }
+        throw new TRPCClientError("An unexpected error occurred");
+      }
+    }),
 
   setRole: protectedProcedure
     .input(z.object({ userId: z.string(), roleIds: z.array(z.string()) }))

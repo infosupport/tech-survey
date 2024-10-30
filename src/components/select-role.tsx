@@ -10,17 +10,23 @@ import { toast } from "./ui/use-toast";
 import { ToastAction } from "./ui/toast";
 import SelectCommunicationMethod from "./select-communication-method";
 import { SpinnerButton } from "./ui/button-spinner";
+import type { BusinessUnit } from "@prisma/client";
+import SelectBusinessUnit from "./select-businessunit";
 
 export default function SelectRoles({
   session,
   roles,
   userSelectedRoles,
   methods,
+  businessUnits,
+  userSelectedBusinessUnit
 }: {
   session: Session;
   roles: Role[];
   userSelectedRoles: Role[];
   methods: string[];
+  businessUnits: BusinessUnit[];
+  userSelectedBusinessUnit: BusinessUnit | undefined;
 }) {
   const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
   const {
@@ -136,6 +142,12 @@ export default function SelectRoles({
         setCommunicationMethodIsLoading={setCommunicationMethodIsLoading}
       />
 
+      <SelectBusinessUnit
+        businessUnits={businessUnits}
+        userSelectedBusinessUnit={userSelectedBusinessUnit}
+        session={session}
+      />
+
       <p></p>
 
       <div className="mt-5 flex justify-center">
@@ -156,7 +168,7 @@ export default function SelectRoles({
               </Link>
             </SpinnerButton>
           </div>
-          <Link href="/result/general">
+          <Link href="/result">
             <SpinnerButton
               variant="outline"
               className="border-2 border-[#bed62f]"

@@ -97,7 +97,7 @@ const Home: React.FC = async () => {
 const SelectRoleWrapper: React.FC<{ session: Session }> = async ({
   session,
 }) => {
-  const [roles, userRoles, userCommunicationMethods] = await Promise.all([
+  const [roles, userRoles, userCommunicationMethods, businessUnits] = await Promise.all([
     db.role.findMany(),
     db.user.findUnique({
       where: {
@@ -105,6 +105,7 @@ const SelectRoleWrapper: React.FC<{ session: Session }> = async ({
       },
       include: {
         roles: true,
+        businessUnit: true
       },
     }),
     db.user.findUnique({
@@ -115,9 +116,11 @@ const SelectRoleWrapper: React.FC<{ session: Session }> = async ({
         communicationPreferences: true,
       },
     }),
+    db.businessUnit.findMany()
   ]);
 
   const userSelectedRoles = userRoles?.roles ?? [];
+  const useSelectedBusinessUnit = userRoles?.businessUnit ?? undefined;
   const communicationPreferences =
     userCommunicationMethods?.communicationPreferences ?? [];
   const methods = communicationPreferences.map((method) => method.methods);
@@ -129,6 +132,8 @@ const SelectRoleWrapper: React.FC<{ session: Session }> = async ({
       roles={roles}
       userSelectedRoles={userSelectedRoles}
       methods={methodStrings}
+      businessUnits={businessUnits}
+      userSelectedBusinessUnit={useSelectedBusinessUnit}
     />
   );
 };

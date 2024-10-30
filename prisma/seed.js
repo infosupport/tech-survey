@@ -56,6 +56,33 @@ function parseCSV(filePath) {
 }
 
 /**
+ * Parses a CSV file to extract businessUnits
+ * @param {string} filePath - Path to the CSV file.
+ * @returns {Promise<{ businessUnits: string[]}>} An object containing businessUnits
+ */
+function parseCSVBusinessUnit(filePath) {
+  return new Promise((resolve, reject) => {
+    /** @type {string[]} */
+    const businessUnits = [];
+
+    fs.createReadStream(filePath, { encoding: "utf-8" })
+      .pipe(csv({ separator: ";" }))
+      .on("data", (/** @type {Record<string, string>} */ row) => {
+        /** @type {string} */
+        const unitKey = Object.keys(row)[0] ?? "";
+        businessUnits.push(row[unitKey] ?? "");
+      })
+      .on("end", () => {
+        console.log(businessUnits);
+        resolve({ businessUnits });
+      })
+      .on("error", (error) => {
+        reject(error);
+      });
+  });
+}
+
+/**
  * Main function to seed the database with survey data.
  * @returns {Promise<void>} A Promise that resolves when seeding is complete.
  */
@@ -115,6 +142,15 @@ async function main() {
         },
       });
     }
+
+    const {businessUnits} = await parseCSVBusinessUnit("./import/businessUnits.csv");
+    for (const unit in businessUnits) {
+      await prisma.businessUnit.create({
+        data: {
+          unit: businessUnits[unit] ?? ""
+        },
+      })
+    }
   } catch (error) {
     console.error("An error occurred:", error);
   }
@@ -129,3 +165,4 @@ main()
     await prisma.$disconnect();
     process.exit(1);
   });
+
