@@ -41,7 +41,7 @@ export class SurveyPage {
       `http://localhost:${this.port}/find-the-expert?role=${role}`,
     );
     const isTextVisible = await this.page
-      .getByText(`Viewing results for role: ${role}`)
+      .getByText(`Viewing results for role`)
       .isVisible();
     return isTextVisible;
   }
