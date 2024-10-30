@@ -29,6 +29,7 @@ export class SurveyPage {
     await this.page.goto(`http://localhost:${this.port}/result?role=${role}`);
     await this.page.waitForURL(`http://localhost:${this.port}/result?role=${role}`);
     
+
     const isTextVisible = await this.page
       .getByText(`Viewing results for role:`)
       .isVisible();
