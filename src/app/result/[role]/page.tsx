@@ -1,7 +1,6 @@
 import React, { Suspense } from "react";
 import { db } from "~/server/db";
 import {
-  type Role,
   type QuestionResult,
   type TransformedData,
 } from "~/models/types";

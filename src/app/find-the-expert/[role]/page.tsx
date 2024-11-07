@@ -7,6 +7,7 @@ import ButtonSkeleton from "~/components/loading/button-loader";
 import { Login } from "~/components/login";
 import ShowDataTable from "~/components/show-data-table";
 import { getServerAuthSession } from "~/server/auth";
+import { api } from "~/trpc/server";
 import {
   extractUniqueIds,
   fetchUserAnswersForRole,
@@ -39,7 +40,8 @@ const ContentSection = () => (
 
 const FindTheExpertPage = async () => {
   const session = await getServerAuthSession();
-
+  await api.usageMetricLogger.logUsageMetric.mutate({logMessage: 'find-the-expert-page-filtered-on-role'});
+  
   return (
     <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
       <h1 className="text-center text-5xl font-extrabold tracking-tight">
