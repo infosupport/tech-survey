@@ -55,16 +55,6 @@ const Results: React.FC = async () => {
 
 export const ShowRolesWrapper = async ({ path }: { path: string }) => {
   const availableRoles = await generateRolesWithHref(path)();
-  const def = {
-    id: "",
-    href: path,
-    label: "No role",
-    current: false,
-    completed: false,
-    started: false,
-    currentCompleted: false
-  };
-  availableRoles.unshift(def as Section);
   if (path.includes("result")) {
     return (
       <SelectRoleResults roles={availableRoles} />

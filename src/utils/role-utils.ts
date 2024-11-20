@@ -27,6 +27,17 @@ export function generateRolesWithHref(
         started: false,
         currentCompleted: false,
       }));
+    
+    const def = {
+      id: "",
+      href: resultHref,
+      label: "No role",
+      current: false,
+      completed: false,
+      started: false,
+      currentCompleted: false
+    };
+    availableRoles.unshift(def as Section);
 
     return availableRoles;
   };

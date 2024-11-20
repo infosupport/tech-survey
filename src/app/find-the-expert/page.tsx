@@ -55,17 +55,12 @@ const FindTheExpertPage = async (context: { searchParams: {role:string, tech:str
   );
 };
 
-async function getUserAnswers(tech:string, role:string) {
-  switch (true) {
-    case (tech == undefined && role != undefined):
-      return await fetchUserAnswersForRole(role);
-    case (tech != undefined && role == undefined):
-      return await fetchUserAnswersForQuestion(tech);
-    case (tech != undefined && role != undefined):
-      return await fetchUserAnswersForRoleAndQuestion(role, tech);
-    default:
-      return await fetchUserAnswers();
-  }
+async function getUserAnswers(tech?: string, role?: string) {
+  if (!tech && role) return fetchUserAnswersForRole(role);
+  if (tech && !role) return fetchUserAnswersForQuestion(tech);
+  if (tech && role) return fetchUserAnswersForRoleAndQuestion(role, tech);
+  
+  return fetchUserAnswers();
 }
 
 const ShowTableWrapper = async ( {tech, role}:{tech:string, role:string}) => {

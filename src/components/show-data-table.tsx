@@ -72,7 +72,7 @@ const ShowDataTable = ({
         <p>There are no non-anonymous results yet. Please check back later.</p>
       ) : (
         Object.keys(dataByRoleAndQuestion).map((role) => {
-          if (currentRole == null || slugify(role) === slugify(currentRole)) {
+          if (!currentRole || slugify(role) === slugify(currentRole)) {
             return (
               <div key={role}>
                 <h2 className="mb-4 text-2xl font-bold">{role}</h2>
@@ -101,8 +101,7 @@ const ShowDataTable = ({
                 <hr className="my-10" />
 
                 {Object.keys(dataByRoleAndQuestion[role] ?? {}).map(
-                  (question) => {
-                    return (
+                  (question) => (
                       <div key={question}>
                         <h3 className="mb-3 text-lg font-semibold">{question}</h3>
                         <div className="mb-15">
@@ -118,8 +117,7 @@ const ShowDataTable = ({
                           <hr className="my-10" />
                         </div>
                       </div>
-                    )
-                  },
+                    ),
                 )}
               </div>
             );
