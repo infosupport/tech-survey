@@ -1,5 +1,5 @@
 import { getServerAuthSession } from "~/server/auth";
-import SelectRole from "../components/select-role";
+import SelectRole from "../components/select-input";
 
 import React, { Suspense } from "react";
 import { type Session } from "next-auth";

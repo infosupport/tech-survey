@@ -8,7 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Label } from "./label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./select";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import type { BusinessUnit } from "@prisma/client";
 
 
@@ -18,6 +18,7 @@ const formSchema = z.object({
 })
 
 export default function SearchAnonymized({roles, businessUnits} : {roles: Section[], businessUnits : BusinessUnit[]}) {
+    const [count, setCount] = useState();
     const searchParams = useSearchParams();
     const path = usePathname();
     const route = useRouter();
@@ -39,7 +40,7 @@ export default function SearchAnonymized({roles, businessUnits} : {roles: Sectio
     }
 
     useEffect(() => {
-        setInterval(() => {
+        const intervalId = setInterval(() => {
             const currentRole = form.getValues().role;
             const currentUnit = form.getValues().unit;
             if (previousRole != currentRole || previousUnit != currentUnit) {
@@ -49,6 +50,10 @@ export default function SearchAnonymized({roles, businessUnits} : {roles: Sectio
             }
             
         }, 1000);
+
+        return () => {
+            clearInterval(intervalId);
+        }
       }, []);
 
     return (

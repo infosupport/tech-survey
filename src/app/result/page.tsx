@@ -83,90 +83,92 @@ export const ShowRolesWrapper = async ({ path }: { path: string }) => {
       <SearchAnonymized roles={availableRoles} businessUnits={availableUnits}/>
   )
 };
+
 const FetchQuestionResults = async ({role, unit} : {role:string, unit:string}) => {
-  switch(true) {
-    case (role != undefined && unit == undefined) :
-      return await db.questionResult.findMany(
-        {
-          where: {
-            question: {
-              roles: {
-                some: {
-                  role: {
-                    equals: role,
-                    mode: "insensitive"
-                  }
+  if (role != undefined && unit == undefined) {
+    return await db.questionResult.findMany(
+      {
+        where: {
+          question: {
+            roles: {
+              some: {
+                role: {
+                  equals: role,
+                  mode: "insensitive"
                 }
               }
             }
-          },
-          include: {
-            question: {
-              include: {
-                roles: true,
-              },
+          }
+        },
+        include: {
+          question: {
+            include: {
+              roles: true,
             },
           },
         },
-      );
-    case (role == undefined && unit != undefined):
-      return await db.questionResult.findMany(
-        {
-          where: {
-            user: {
-              businessUnit: {
-                unit: {
-                  equals: unit,
-                  mode: "insensitive"
-                }
-              }
-            }
-          },
-          include: {
-            question: {
-              include: {
-                roles: true,
-              },
-            },
-          },
-        }
-      )
-    case (role != undefined && unit != undefined):
-      return await db.questionResult.findMany(
-        {
-          where: {
-            user: {
-              businessUnit: {
-                unit: {
-                  equals: unit,
-                  mode: "insensitive"
-                }
-              }
-            },
-            question: {
-              roles: {
-                some: {
-                  role: {
-                    equals: role,
-                    mode: "insensitive"
-                  }
-                }
-              }
-            }
-          },
-          include: {
-            question: {
-              include: {
-                roles: true,
-              },
-            },
-          },
-        }
-      )
-    default:
-      return [];
+      },
+    );
   }
-  
+
+  if (role == undefined && unit != undefined) {
+    return await db.questionResult.findMany(
+      {
+        where: {
+          user: {
+            businessUnit: {
+              unit: {
+                equals: unit,
+                mode: "insensitive"
+              }
+            }
+          }
+        },
+        include: {
+          question: {
+            include: {
+              roles: true,
+            },
+          },
+        },
+      }
+    )
+  }
+
+  if (role != undefined && unit != undefined) {
+    return await db.questionResult.findMany(
+      {
+        where: {
+          user: {
+            businessUnit: {
+              unit: {
+                equals: unit,
+                mode: "insensitive"
+              }
+            }
+          },
+          question: {
+            roles: {
+              some: {
+                role: {
+                  equals: role,
+                  mode: "insensitive"
+                }
+              }
+            }
+          }
+        },
+        include: {
+          question: {
+            include: {
+              roles: true,
+            },
+          },
+        },
+      }
+    )
+  }
+  return [];
 }
 
 const ShowResultsWrapper = async ({role, unit} : {role:string, unit:string}) => {
