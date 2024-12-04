@@ -13,7 +13,7 @@ import LegendSkeleton from "~/components/loading/results-loader";
 import { generateRolesWithHref } from "~/utils/role-utils";
 import { getServerAuthSession } from "~/server/auth";
 import { Login } from "~/components/login";
-import ShowTechSearchWrapper from "~/components/ui/search-expert";
+import ShowTechSearchWrapper from "~/components/ui/show-tech-search-wrapper";
 import { SelectRoleResults } from "~/components/select-role-results";
 
 export const metadata: Metadata = {
