@@ -1,21 +1,21 @@
-import React, { Suspense } from "react";
-import { db } from "~/server/db";
+import { Suspense } from "react";
+import ResultsWrapper from "~/components/results";
 import {
   type QuestionResult,
-  type TransformedData,
   type Section,
+  type TransformedData,
 } from "~/models/types";
+import { db } from "~/server/db";
 import { SelectRoleResults } from "../../components/select-role-results";
-import ResultsWrapper from "~/components/results";
 
+import type { BusinessUnit, Prisma } from "@prisma/client";
 import { type Metadata } from "next";
 import ButtonSkeleton from "~/components/loading/button-loader";
 import LegendSkeleton from "~/components/loading/results-loader";
-import { generateRolesWithHref } from "~/utils/role-utils";
-import { getServerAuthSession } from "~/server/auth";
 import { Login } from "~/components/login";
 import SearchAnonymized from "~/components/ui/search-anonymized";
-import type { BusinessUnit } from "@prisma/client";
+import { getServerAuthSession } from "~/server/auth";
+import { generateRolesWithHref } from "~/utils/role-utils";
 
 export const metadata: Metadata = {
   title: "Results",
@@ -85,90 +85,49 @@ export const ShowRolesWrapper = async ({ path }: { path: string }) => {
 };
 
 const FetchQuestionResults = async ({role, unit} : {role:string, unit:string}) => {
-  if (role != undefined && unit == undefined) {
-    return await db.questionResult.findMany(
-      {
-        where: {
-          question: {
-            roles: {
-              some: {
-                role: {
-                  equals: role,
-                  mode: "insensitive"
-                }
-              }
-            }
-          }
-        },
+    // If both role and unit are undefined, return an empty array
+    if (!role && !unit) return [];
+
+    // Base include object reused in all queries
+    const includeConfig = {
+      question: {
         include: {
-          question: {
-            include: {
-              roles: true,
-            },
-          },
+          roles: true,
         },
       },
-    );
-  }
-
-  if (role == undefined && unit != undefined) {
-    return await db.questionResult.findMany(
-      {
-        where: {
-          user: {
-            businessUnit: {
-              unit: {
-                equals: unit,
-                mode: "insensitive"
-              }
-            }
-          }
-        },
-        include: {
-          question: {
-            include: {
-              roles: true,
+    };
+  
+    // Dynamically build the where conditions
+    const whereConditions: Prisma.QuestionResultWhereInput = {};
+  
+    if (role) {
+      whereConditions.question = {
+        roles: {
+          some: {
+            role: {
+              equals: role,
+              mode: "insensitive",
             },
           },
         },
-      }
-    )
-  }
-
-  if (role != undefined && unit != undefined) {
-    return await db.questionResult.findMany(
-      {
-        where: {
-          user: {
-            businessUnit: {
-              unit: {
-                equals: unit,
-                mode: "insensitive"
-              }
-            }
-          },
-          question: {
-            roles: {
-              some: {
-                role: {
-                  equals: role,
-                  mode: "insensitive"
-                }
-              }
-            }
-          }
-        },
-        include: {
-          question: {
-            include: {
-              roles: true,
-            },
+      };
+    }
+  
+    if (unit) {
+      whereConditions.user = {
+        businessUnit: {
+          unit: {
+            equals: unit,
+            mode: "insensitive",
           },
         },
-      }
-    )
-  }
-  return [];
+      };
+    }
+  
+    return await db.questionResult.findMany({
+      where: whereConditions,
+      include: includeConfig,
+    });
 }
 
 const ShowResultsWrapper = async ({role, unit} : {role:string, unit:string}) => {

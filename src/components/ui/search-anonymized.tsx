@@ -1,15 +1,15 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import type { BusinessUnit } from "@prisma/client";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 import type { Section } from "~/models/types";
 import { Form, FormControl, FormField, FormItem } from "./form";
-import { z } from "zod";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Label } from "./label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./select";
-import { useEffect, useState } from "react";
-import type { BusinessUnit } from "@prisma/client";
 
 
 const formSchema = z.object({
@@ -18,7 +18,6 @@ const formSchema = z.object({
 })
 
 export default function SearchAnonymized({roles, businessUnits} : {roles: Section[], businessUnits : BusinessUnit[]}) {
-    const [count, setCount] = useState();
     const searchParams = useSearchParams();
     const path = usePathname();
     const route = useRouter();
