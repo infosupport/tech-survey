@@ -1,12 +1,19 @@
 "use client";
 
 import type { Session } from "next-auth";
-import { Login } from "./login";
-import { Button } from "./ui/button";
-import { ArrowRightDarkModeFriendly } from "./svg";
 import { signIn } from "next-auth/react";
+import { api } from "~/trpc/react";
+import { Login } from "./login";
+import { ArrowRightDarkModeFriendly } from "./svg";
+import { Button } from "./ui/button";
 
 const Buttons = ({ session }: { session: Session | null }) => {
+  const {mutate: logUsageMetric} = api.usageMetricLogger.logUsageMetric.useMutation();
+
+  const handleLogging = () => {
+    logUsageMetric({logMessage:'find-the-expert-page-accessed'});
+  }
+
   return (
     <div className="mt-5 flex justify-center">
       <div className="mt-5 flex flex-col items-center gap-6 md:flex-row">
@@ -24,8 +31,10 @@ const Buttons = ({ session }: { session: Session | null }) => {
               <ArrowRightDarkModeFriendly />
             </Button>
             <Button
-              onClick={() =>
-                signIn("azure-ad", { callbackUrl: "/find-the-expert" })
+              onClick={async () => {
+                  handleLogging();
+                  await signIn("azure-ad", { callbackUrl: "/find-the-expert?role=General" });
+                }
               }
               variant="outline"
               className="border-2 border-[#bed62f]"
