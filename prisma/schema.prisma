@@ -118,3 +118,9 @@ model VerificationToken {
 
   @@unique([identifier, token])
 }
+
+model UsageMetrics {
+  id            String    @id @default(cuid())
+  action        String
+  createdAt     DateTime @default(now())
+}
