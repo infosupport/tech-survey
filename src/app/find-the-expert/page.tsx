@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import type { Session } from "next-auth";
 
-import { Suspense} from "react";
-import { ShowRolesWrapper } from "~/app/result/[role]/page";
+import { Suspense } from "react";
+import { ShowRolesWrapper } from "~/app/result/page";
 import ButtonSkeleton from "~/components/loading/button-loader";
 import { Login } from "~/components/login";
 import ShowDataTable from "~/components/show-data-table";
