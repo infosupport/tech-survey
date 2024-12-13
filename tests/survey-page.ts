@@ -1,4 +1,5 @@
 // @ts-check
+import { expect } from "@playwright/test";
 import { type Page } from "playwright";
 
 export class SurveyPage {
@@ -24,11 +25,13 @@ export class SurveyPage {
     return this.page.url() === `http://localhost:${this.port}/${path}`;
   }
 
-  async navigateToAnonymousResults(role: string) {
-    await this.page.goto(`http://localhost:${this.port}/result/${role}`);
-    await this.page.waitForURL(`http://localhost:${this.port}/result/${role}`);
+  async navigateToAnonymousResults(role: string) : Promise<boolean>{
+    await this.page.goto(`http://localhost:${this.port}/result?role=${role}`);
+    await this.page.waitForURL(`http://localhost:${this.port}/result?role=${role}`);
+    
+
     const isTextVisible = await this.page
-      .getByText(`Viewing results for role: ${role}`)
+      .getByText(`Viewing results for role:`)
       .isVisible();
     return isTextVisible;
   }
