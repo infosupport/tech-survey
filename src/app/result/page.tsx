@@ -2,11 +2,9 @@ import { Suspense } from "react";
 import ResultsWrapper from "~/components/results";
 import {
   type QuestionResult,
-  type Section,
-  type TransformedData,
+  type TransformedData
 } from "~/models/types";
 import { db } from "~/server/db";
-import { SelectRoleResults } from "../../components/select-role-results";
 
 import type { BusinessUnit, Prisma } from "@prisma/client";
 import { type Metadata } from "next";
@@ -14,9 +12,9 @@ import ButtonSkeleton from "~/components/loading/button-loader";
 import LegendSkeleton from "~/components/loading/results-loader";
 import { Login } from "~/components/login";
 import SearchAnonymized from "~/components/ui/search-anonymized";
+import ShowTechSearchWrapper from "~/components/ui/show-tech-search-wrapper";
 import { getServerAuthSession } from "~/server/auth";
 import { generateRolesWithHref } from "~/utils/role-utils";
-import ShowTechSearchWrapper from "~/components/ui/show-tech-search-wrapper";
 
 export const metadata: Metadata = {
   title: "Results",
@@ -57,25 +55,11 @@ const Results = async (context: { searchParams: {role:string, unit:string}}) => 
 
 export const ShowRolesWrapper = async ({ path }: { path: string }) => {
   const availableRoles = await generateRolesWithHref(path)();
-  const def = {
-    id: "",
-    href: path,
-    label: "No role",
-    current: false,
-    completed: false,
-    started: false,
-    currentCompleted: false
-  };
-  availableRoles.unshift(def as Section);
-  if (path.includes("result")) {
+  if (path.includes("expert")) {
     return (
-      <SelectRoleResults roles={availableRoles} />
+      <ShowTechSearchWrapper roles={availableRoles} />
     )
   }
-  return (
-    <ShowTechSearchWrapper roles={availableRoles} />
-  );
-}
 
   const availableUnits = await db.businessUnit.findMany();
   const defaultUnit = {
