@@ -10,7 +10,10 @@ import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
 import {
   extractUniqueIds,
+  fetchUserAnswers,
+  fetchUserAnswersForQuestion,
   fetchUserAnswersForRole,
+  fetchUserAnswersForRoleAndQuestion,
   fetchUsersAndAnswerOptions,
 } from "~/utils/data-manipulation";
 
@@ -27,18 +30,18 @@ const LoginSection = ({ session }: { session: Session | null }) => (
   </>
 );
 
-const ContentSection = () => (
+const ContentSection = ({ role, tech } : {role:string, tech:string}) => (
   <>
     <Suspense fallback={<ButtonSkeleton />}>
       <ShowRolesWrapper path="/find-the-expert" />
     </Suspense>
     <Suspense fallback={<ButtonSkeleton />}>
-      <ShowTableWrapper />
+      <ShowTableWrapper tech = {tech} role={role}/>
     </Suspense>
   </>
 );
 
-const FindTheExpertPage = async () => {
+const FindTheExpertPage = async (context: { searchParams: {role:string, tech:string}}) => {
   const session = await getServerAuthSession();
   await api.usageMetricLogger.logUsageMetric.mutate({logMessage: 'find-the-expert-page-filtered-on-role'});
   
@@ -50,13 +53,22 @@ const FindTheExpertPage = async () => {
         </span>
         <span className="block sm:inline"> Tech Survey - Find the expert</span>
       </h1>
-      {session ? <ContentSection /> : <LoginSection session={session} />}
+      {session ? <ContentSection role={context.searchParams.role} tech={context.searchParams.tech}/> : <LoginSection session={session} />}
     </div>
   );
 };
 
-const ShowTableWrapper = async () => {
-  const userAnswersForRole = await fetchUserAnswersForRole();
+async function getUserAnswers(tech?: string, role?: string) {
+  if (!tech && role) return fetchUserAnswersForRole(role);
+  if (tech && !role) return fetchUserAnswersForQuestion(tech);
+  if (tech && role) return fetchUserAnswersForRoleAndQuestion(role, tech);
+  
+  return fetchUserAnswers();
+}
+
+const ShowTableWrapper = async ( {tech, role}:{tech:string, role:string}) => {
+  const userAnswersForRole = await getUserAnswers(tech, role);
+
   const { userIds, answerIds } = extractUniqueIds(userAnswersForRole);
   const [users, answerOptions] = await fetchUsersAndAnswerOptions(
     userIds,
@@ -71,5 +83,6 @@ const ShowTableWrapper = async () => {
     />
   );
 };
+
 
 export default FindTheExpertPage;

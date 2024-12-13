@@ -1,11 +1,11 @@
 "use client";
 
 import type { Session } from "next-auth";
-import { Login } from "./login";
-import { Button } from "./ui/button";
-import { ArrowRightDarkModeFriendly } from "./svg";
 import { signIn } from "next-auth/react";
 import { api } from "~/trpc/react";
+import { Login } from "./login";
+import { ArrowRightDarkModeFriendly } from "./svg";
+import { Button } from "./ui/button";
 
 const Buttons = ({ session }: { session: Session | null }) => {
   const {mutate: logUsageMetric} = api.usageMetricLogger.logUsageMetric.useMutation();
@@ -33,7 +33,7 @@ const Buttons = ({ session }: { session: Session | null }) => {
             <Button
               onClick={async () => {
                   handleLogging();
-                  await signIn("azure-ad", { callbackUrl: "/find-the-expert/general" });
+                  await signIn("azure-ad", { callbackUrl: "/find-the-expert?role=General" });
                 }
               }
               variant="outline"
