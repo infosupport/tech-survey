@@ -109,6 +109,128 @@ export const fetchUsersAndAnswerOptions = async (
   ]);
 };
 
+export const fetchUserAnswersForUnit = async(
+  unit: string
+) => {
+  return await db.questionResult.findMany({
+    where: {
+      user: {
+        businessUnit: {
+          unit: {
+            equals: unit,
+            mode: "insensitive"
+          }
+        }
+      }
+    },
+    include: {
+      question: {
+        include: {
+          roles: true,
+        },
+      }
+    },
+  });
+}
+
+export const fetchUserAnswersForQuestionAndUnit = async(tech: string, unit: string) => {
+  return await db.questionResult.findMany({
+    where:
+    {
+      question: {
+        questionText : {
+          contains: tech,
+          mode: "insensitive"
+        }
+      },
+      user: {
+        businessUnit: {
+          unit: {
+            equals: unit,
+            mode: "insensitive"
+          }
+        }
+      }
+    },
+    include: {
+      question: {
+        include: {
+          roles: true,
+        },
+      },
+    },
+  });
+}
+
+export const fetchUserAnswersForRoleAndUnit = async(role:string, unit:string) => {
+  return await db.questionResult.findMany({
+    where: {
+      question: {
+        roles: {
+          some: {
+            role: {
+              equals: role,
+              mode: "insensitive"
+            }
+          }
+        }
+      },
+      user: {
+        businessUnit: {
+          unit: {
+            equals: unit,
+            mode: "insensitive"
+          }
+        }
+      }
+    },
+    include: {
+      question: {
+        include: {
+          roles: true,
+        },
+      }
+    },
+  });
+}
+
+export const fethcUserAnswersForQuestionAndRoleAndUnit = async(tech:string, role:string, unit:string) => {
+  return await db.questionResult.findMany({
+    where:
+    {
+      question: {
+        questionText : {
+          contains: tech,
+          mode: "insensitive"
+        },
+        roles : {
+          some: {
+            role: {
+              equals: role,
+              mode: "insensitive"
+            }
+          }
+        }
+      },
+      user: {
+        businessUnit: {
+          unit: {
+            equals: unit,
+            mode: "insensitive"
+          }
+        }
+      }
+    },
+    include: {
+      question: {
+        include: {
+          roles: true,
+        },
+      },
+    },
+  });
+}
+
 function uniqueValues<T>(array: T[]): T[] {
   return Array.from(new Set(array));
 }

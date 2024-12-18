@@ -10,18 +10,21 @@ import { Input } from "./input";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "./select";
 import { SelectValue } from "@radix-ui/react-select";
 import { useEffect} from "react";
+import type { BusinessUnit } from "@prisma/client";
 
 
 const formSchema = z.object({
   role: z.string(),
-  tech: z.string()
+  tech: z.string(),
+  unit: z.string()
 })
 
-const ShowTechSearchWrapper = ({ roles } : { roles: Section[]}) => {
+const ShowTechSearchWrapper = ({ roles, businessUnits} : { roles: Section[], businessUnits : BusinessUnit[]}) => {
   const path = usePathname();
   const searchParams = useSearchParams();
   let previousRole = "";
   let previousTech = "";
+  let previousUnit = "";
   const route = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -29,32 +32,41 @@ const ShowTechSearchWrapper = ({ roles } : { roles: Section[]}) => {
     defaultValues: {
       role: searchParams.get("role") ?? "",
       tech: searchParams.get("tech") ?? "",
+      unit: searchParams.get("unit") ?? ""
     },
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     const role2 = values.role != undefined ? values.role.length != 0 && values.role != "No role" ? `role=${values.role}` : "" : "";
     const tech2 = values.tech != undefined ? values.tech.length != 0 ? `&tech=${values.tech}` : "" : "";
-    route.push(`${path}?${role2}${tech2}`);
+    const unit2 = values.unit != undefined ? values.unit.length != 0 && values.unit != "No unit" ? `&unit=${values.unit}` : "" : "";
+
+    route.push(`${path}?${role2}${tech2}${unit2}`);
   }
 
   useEffect(() => {
     const interval = setInterval(() => {
       const currentRole = form.getValues().role;
       const currentTech = form.getValues().tech;
-      if (previousRole != currentRole || previousTech != currentTech) {
+      const currentUnit = form.getValues().unit;
+      if (previousRole != currentRole || previousTech != currentTech || previousUnit != currentUnit) {
         previousRole = currentRole;
         previousTech = currentTech;
-        onSubmit({role: currentRole, tech: currentTech});
+        previousUnit = currentUnit;
+        onSubmit({role: currentRole, tech: currentTech, unit: currentUnit});
       }
     }, 1000);
+
+    return () => {
+      clearInterval(interval);
+    }
   }, []);
 
   return (
     <div>
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+        <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-9">
           <div className="sm:col-span-3"> 
             <FormField
               control={form.control}
@@ -96,6 +108,33 @@ const ShowTechSearchWrapper = ({ roles } : { roles: Section[]}) => {
                 )}
             />
           </div>
+          <div className="sm:col-span-3"> 
+                <FormField
+                control={form.control}
+                name="unit"
+                render={({ field }) => (
+                    <FormItem>
+                        <Label>Viewing results for Unit:</Label>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                                <SelectTrigger className="w-[180px]">
+                                <SelectValue placeholder="Select a unit" />
+                                </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                                {
+                                businessUnits.map(u => {
+                                    return (
+                                    <SelectItem value={u.unit} key={u.id}>{u.unit}</SelectItem>
+                                    )
+                                })
+                                }
+                            </SelectContent>
+                        </Select>
+                    </FormItem>
+                    )}
+                />
+            </div>
         </div>
       </form>
     </Form>
