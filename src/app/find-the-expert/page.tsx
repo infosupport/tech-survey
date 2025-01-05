@@ -12,13 +12,13 @@ import {
   extractUniqueIds,
   fetchUserAnswers,
   fetchUserAnswersForQuestion,
+  fetchUserAnswersForQuestionAndRoleAndUnit,
   fetchUserAnswersForQuestionAndUnit,
   fetchUserAnswersForRole,
   fetchUserAnswersForRoleAndQuestion,
   fetchUserAnswersForRoleAndUnit,
   fetchUserAnswersForUnit,
   fetchUsersAndAnswerOptions,
-  fethcUserAnswersForQuestionAndRoleAndUnit,
 } from "~/utils/data-manipulation";
 
 export const metadata: Metadata = {
@@ -69,7 +69,7 @@ async function getUserAnswers(tech?: string, role?: string, unit?:string) {
   if (!tech && !role && unit) return fetchUserAnswersForUnit(unit);
   if (tech && !role && unit) return fetchUserAnswersForQuestionAndUnit(tech, unit);
   if (!tech && role && unit) return fetchUserAnswersForRoleAndUnit(role, unit);
-  if(tech && role && unit) return fethcUserAnswersForQuestionAndRoleAndUnit(tech, role, unit);
+  if(tech && role && unit) return fetchUserAnswersForQuestionAndRoleAndUnit(tech, role, unit);
 
   return fetchUserAnswers();
 }

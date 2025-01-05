@@ -194,7 +194,7 @@ export const fetchUserAnswersForRoleAndUnit = async(role:string, unit:string) =>
   });
 }
 
-export const fethcUserAnswersForQuestionAndRoleAndUnit = async(tech:string, role:string, unit:string) => {
+export const fetchUserAnswersForQuestionAndRoleAndUnit = async(tech:string, role:string, unit:string) => {
   return await db.questionResult.findMany({
     where:
     {
