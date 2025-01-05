@@ -1,90 +1,9 @@
+import type { Prisma } from "@prisma/client";
 import type { UserIdAndAnswerId } from "~/models/types";
 import { db } from "~/server/db";
 
-export const fetchUserAnswersForRole = async (role:string) => {
-  return await db.questionResult.findMany({
-    where: {
-      question: {
-        roles: {
-          some: {
-            role: {
-              equals: role,
-              mode: "insensitive"
-            }
-          }
-        }
-      }
-    },
-    include: {
-      question: {
-        include: {
-          roles: true,
-        },
-      }
-    },
-  });
-};
-
-export const fetchUserAnswers = async () => {
-  return await db.questionResult.findMany({
-    include: {
-      question: {
-        include: {
-          roles: true,
-        },
-      },
-    },
-  });
-};
-
-export const fetchUserAnswersForRoleAndQuestion = async (role:string, question: string) => {
-  return await db.questionResult.findMany({
-    where:
-    {
-      question: {
-        questionText : {
-          contains: question,
-          mode: "insensitive"
-        },
-        roles : {
-          some: {
-            role: {
-              equals: role,
-              mode: "insensitive"
-            }
-          }
-        }
-      }
-    },
-    include: {
-      question: {
-        include: {
-          roles: true,
-        },
-      },
-    },
-  });
-}
-
-export const fetchUserAnswersForQuestion = async (question: string) => {
-  return await db.questionResult.findMany({
-    where:
-    {
-      question: {
-        questionText : {
-          contains: question,
-          mode: "insensitive"
-        }
-      }
-    },
-    include: {
-      question: {
-        include: {
-          roles: true,
-        },
-      },
-    },
-  });
+function uniqueValues<T>(array: T[]): T[] {
+  return Array.from(new Set(array));
 }
 
 export const fetchUsersAndAnswerOptions = async (
@@ -109,132 +28,6 @@ export const fetchUsersAndAnswerOptions = async (
   ]);
 };
 
-export const fetchUserAnswersForUnit = async(
-  unit: string
-) => {
-  return await db.questionResult.findMany({
-    where: {
-      user: {
-        businessUnit: {
-          unit: {
-            equals: unit,
-            mode: "insensitive"
-          }
-        }
-      }
-    },
-    include: {
-      question: {
-        include: {
-          roles: true,
-        },
-      }
-    },
-  });
-}
-
-export const fetchUserAnswersForQuestionAndUnit = async(tech: string, unit: string) => {
-  return await db.questionResult.findMany({
-    where:
-    {
-      question: {
-        questionText : {
-          contains: tech,
-          mode: "insensitive"
-        }
-      },
-      user: {
-        businessUnit: {
-          unit: {
-            equals: unit,
-            mode: "insensitive"
-          }
-        }
-      }
-    },
-    include: {
-      question: {
-        include: {
-          roles: true,
-        },
-      },
-    },
-  });
-}
-
-export const fetchUserAnswersForRoleAndUnit = async(role:string, unit:string) => {
-  return await db.questionResult.findMany({
-    where: {
-      question: {
-        roles: {
-          some: {
-            role: {
-              equals: role,
-              mode: "insensitive"
-            }
-          }
-        }
-      },
-      user: {
-        businessUnit: {
-          unit: {
-            equals: unit,
-            mode: "insensitive"
-          }
-        }
-      }
-    },
-    include: {
-      question: {
-        include: {
-          roles: true,
-        },
-      }
-    },
-  });
-}
-
-export const fetchUserAnswersForQuestionAndRoleAndUnit = async(tech:string, role:string, unit:string) => {
-  return await db.questionResult.findMany({
-    where:
-    {
-      question: {
-        questionText : {
-          contains: tech,
-          mode: "insensitive"
-        },
-        roles : {
-          some: {
-            role: {
-              equals: role,
-              mode: "insensitive"
-            }
-          }
-        }
-      },
-      user: {
-        businessUnit: {
-          unit: {
-            equals: unit,
-            mode: "insensitive"
-          }
-        }
-      }
-    },
-    include: {
-      question: {
-        include: {
-          roles: true,
-        },
-      },
-    },
-  });
-}
-
-function uniqueValues<T>(array: T[]): T[] {
-  return Array.from(new Set(array));
-}
-
 export function extractUniqueIds(userAnswersForRole: UserIdAndAnswerId[]): {
   userIds: string[];
   answerIds: string[];
@@ -245,3 +38,71 @@ export function extractUniqueIds(userAnswersForRole: UserIdAndAnswerId[]): {
   );
   return { userIds, answerIds };
 }
+
+export interface FetchUserAnswersParams {
+  role?: string;
+  questionText?: string;
+  unit?: string;
+}
+
+export const fetchUserAnswers = async ({
+  role,
+  questionText,
+  unit,
+}: FetchUserAnswersParams = {}) => {
+  // 1. Build up a QuestionWhereInput object
+  const questionWhere: Prisma.QuestionWhereInput = {};
+
+  if (role) {
+    questionWhere.roles = {
+      some: {
+        role: {
+          equals: role,
+          mode: "insensitive",
+        },
+      },
+    };
+  }
+
+  if (questionText) {
+    questionWhere.questionText = {
+      contains: questionText,
+      mode: "insensitive",
+    };
+  }
+
+  // 2. Build up a UserWhereInput object
+  const userWhere: Prisma.UserWhereInput = {};
+
+  if (unit) {
+    userWhere.businessUnit = {
+      unit: {
+        equals: unit,
+        mode: "insensitive",
+      },
+    };
+  }
+
+  // 3. Build the final `where` for QuestionResult
+  //    Only attach `question` or `user` if they're non-empty
+  const where: Prisma.QuestionResultWhereInput = {};
+  if (Object.keys(questionWhere).length > 0) {
+    where.question = questionWhere;
+  }
+  if (Object.keys(userWhere).length > 0) {
+    where.user = userWhere;
+  }
+
+  // 4. Run the query
+  return db.questionResult.findMany({
+    where,
+    include: {
+      question: {
+        include: {
+          roles: true,
+        },
+      },
+      user: true,
+    },
+  });
+};

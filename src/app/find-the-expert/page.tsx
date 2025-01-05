@@ -11,13 +11,6 @@ import { api } from "~/trpc/server";
 import {
   extractUniqueIds,
   fetchUserAnswers,
-  fetchUserAnswersForQuestion,
-  fetchUserAnswersForQuestionAndRoleAndUnit,
-  fetchUserAnswersForQuestionAndUnit,
-  fetchUserAnswersForRole,
-  fetchUserAnswersForRoleAndQuestion,
-  fetchUserAnswersForRoleAndUnit,
-  fetchUserAnswersForUnit,
   fetchUsersAndAnswerOptions,
 } from "~/utils/data-manipulation";
 
@@ -63,15 +56,13 @@ const FindTheExpertPage = async (context: { searchParams: {role:string, tech:str
 };
 
 async function getUserAnswers(tech?: string, role?: string, unit?:string) {
-  if (!tech && role && !unit) return fetchUserAnswersForRole(role);
-  if (tech && !role && !unit) return fetchUserAnswersForQuestion(tech);
-  if (tech && role && !unit) return fetchUserAnswersForRoleAndQuestion(role, tech);
-  if (!tech && !role && unit) return fetchUserAnswersForUnit(unit);
-  if (tech && !role && unit) return fetchUserAnswersForQuestionAndUnit(tech, unit);
-  if (!tech && role && unit) return fetchUserAnswersForRoleAndUnit(role, unit);
-  if(tech && role && unit) return fetchUserAnswersForQuestionAndRoleAndUnit(tech, role, unit);
-
-  return fetchUserAnswers();
+  return fetchUserAnswers(
+    {
+      role,
+      questionText: tech,
+      unit,
+    },
+  );
 }
 
 const ShowTableWrapper = async ( {tech, role, unit}:{tech:string, role:string, unit:string}) => {
