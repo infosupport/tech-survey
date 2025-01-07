@@ -60,10 +60,12 @@ jobs:
       - name: "💤 Unzip artifact"
         run: unzip release.zip
       - name: "🙌 Prepare"
-        run: az storage file download --share-name import --path survey.csv --account-name $AZURE_STORAGE_ACCOUNT --account-key $AZURE_STORAGE_KEY --dest import/survey.csv
+        run: |
+          az storage file download --share-name import --path survey.csv --account-name $AZURE_STORAGE_ACCOUNT --account-key $AZURE_STORAGE_KEY --dest import/survey.csv
+          az storage file download --share-name import --path businessUnits.csv --account-name $AZURE_STORAGE_ACCOUNT --account-key $AZURE_STORAGE_KEY --dest import/businessUnits.csv
         env:
-          AZURE_STORAGE_ACCOUNT: ${{ secrets.AZURE_STORAGE_ACCOUNT }}
-          AZURE_STORAGE_KEY: ${{ secrets.AZURE_STORAGE_KEY }}
+          AZURE_STORAGE_ACCOUNT: ${{ secrets.AZURE_STORAGE_ACCOUNT_V2 }}
+          AZURE_STORAGE_KEY: ${{ secrets.AZURE_STORAGE_KEY_V2 }}
       - name: "🚀 Deploy"
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v2
