@@ -11,9 +11,6 @@ import { api } from "~/trpc/server";
 import {
   extractUniqueIds,
   fetchUserAnswers,
-  fetchUserAnswersForQuestion,
-  fetchUserAnswersForRole,
-  fetchUserAnswersForRoleAndQuestion,
   fetchUsersAndAnswerOptions,
 } from "~/utils/data-manipulation";
 
@@ -30,18 +27,18 @@ const LoginSection = ({ session }: { session: Session | null }) => (
   </>
 );
 
-const ContentSection = ({ role, tech } : {role:string, tech:string}) => (
+const ContentSection = ({ role, tech, unit } : {role:string, tech:string, unit:string}) => (
   <>
     <Suspense fallback={<ButtonSkeleton />}>
       <ShowRolesWrapper path="/find-the-expert" />
     </Suspense>
     <Suspense fallback={<ButtonSkeleton />}>
-      <ShowTableWrapper tech = {tech} role={role}/>
+      <ShowTableWrapper tech = {tech} role={role} unit={unit}/>
     </Suspense>
   </>
 );
 
-const FindTheExpertPage = async (context: { searchParams: {role:string, tech:string}}) => {
+const FindTheExpertPage = async (context: { searchParams: {role:string, tech:string, unit:string}}) => {
   const session = await getServerAuthSession();
   await api.usageMetricLogger.logUsageMetric.mutate({logMessage: 'find-the-expert-page-filtered-on-role'});
   
@@ -53,21 +50,23 @@ const FindTheExpertPage = async (context: { searchParams: {role:string, tech:str
         </span>
         <span className="block sm:inline"> Tech Survey - Find the expert</span>
       </h1>
-      {session ? <ContentSection role={context.searchParams.role} tech={context.searchParams.tech}/> : <LoginSection session={session} />}
+      {session ? <ContentSection role={context.searchParams.role} tech={context.searchParams.tech} unit={context.searchParams.unit}/> : <LoginSection session={session} />}
     </div>
   );
 };
 
-async function getUserAnswers(tech?: string, role?: string) {
-  if (!tech && role) return fetchUserAnswersForRole(role);
-  if (tech && !role) return fetchUserAnswersForQuestion(tech);
-  if (tech && role) return fetchUserAnswersForRoleAndQuestion(role, tech);
-  
-  return fetchUserAnswers();
+async function getUserAnswers(tech?: string, role?: string, unit?:string) {
+  return fetchUserAnswers(
+    {
+      role,
+      questionText: tech,
+      unit,
+    },
+  );
 }
 
-const ShowTableWrapper = async ( {tech, role}:{tech:string, role:string}) => {
-  const userAnswersForRole = await getUserAnswers(tech, role);
+const ShowTableWrapper = async ( {tech, role, unit}:{tech:string, role:string, unit:string}) => {
+  const userAnswersForRole = await getUserAnswers(tech, role, unit);
 
   const { userIds, answerIds } = extractUniqueIds(userAnswersForRole);
   const [users, answerOptions] = await fetchUsersAndAnswerOptions(

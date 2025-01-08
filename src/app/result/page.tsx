@@ -55,18 +55,19 @@ const Results = async (context: { searchParams: {role:string, unit:string}}) => 
 
 export const ShowRolesWrapper = async ({ path }: { path: string }) => {
   const availableRoles = await generateRolesWithHref(path)();
-  if (path.includes("expert")) {
-    return (
-      <ShowTechSearchWrapper roles={availableRoles} />
-    )
-  }
-
   const availableUnits = await db.businessUnit.findMany();
   const defaultUnit = {
     id: "",
     unit: "No unit"
   };
   availableUnits.unshift(defaultUnit as BusinessUnit);
+  if (path.includes("expert")) {
+    return (
+      <ShowTechSearchWrapper roles={availableRoles} businessUnits={availableUnits}/>
+    )
+  }
+
+  
 
   return (
       <SearchAnonymized roles={availableRoles} businessUnits={availableUnits}/>

@@ -8,8 +8,8 @@ on:
       - main
 jobs:
   test:
+    runs-on: ubuntu-22.04
     timeout-minutes: 60
-    runs-on: ubuntu-latest
     steps:
       - name: Set Swap Space
         uses: pierotofy/set-swap-space@master
