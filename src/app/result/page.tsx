@@ -2,7 +2,8 @@ import { Suspense } from "react";
 import ResultsWrapper from "~/components/results";
 import {
   type QuestionResult,
-  type TransformedData
+  type Section,
+  type TransformedData,
 } from "~/models/types";
 import { db } from "~/server/db";
 
@@ -20,7 +21,9 @@ export const metadata: Metadata = {
   title: "Results",
 };
 
-const Results = async (context: { searchParams: {role:string, unit:string}}) => {
+const Results = async (context: {
+  searchParams: { role: string; unit: string };
+}) => {
   const session = await getServerAuthSession();
   return (
     <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
@@ -45,7 +48,10 @@ const Results = async (context: { searchParams: {role:string, unit:string}}) => 
           </Suspense>
 
           <Suspense fallback={<LegendSkeleton />}>
-            <ShowResultsWrapper role={context.searchParams.role} unit={context.searchParams.unit}/>
+            <ShowResultsWrapper
+              role={context.searchParams.role}
+              unit={context.searchParams.unit}
+            />
           </Suspense>
         </>
       )}
@@ -56,72 +62,101 @@ const Results = async (context: { searchParams: {role:string, unit:string}}) => 
 export const ShowRolesWrapper = async ({ path }: { path: string }) => {
   const availableRoles = await generateRolesWithHref(path)();
   const availableUnits = await db.businessUnit.findMany();
-  const defaultUnit = {
-    id: "",
-    unit: "No unit"
-  };
-  availableUnits.unshift(defaultUnit as BusinessUnit);
+
   if (path.includes("expert")) {
     return (
-      <ShowTechSearchWrapper roles={availableRoles} businessUnits={availableUnits}/>
-    )
+      <ShowTechSearchWrapper
+        roles={availableRoles}
+        businessUnits={availableUnits}
+      />
+    );
   }
 
-  
+  const def: Section = {
+    id: "",
+    href: path,
+    label: "No role",
+    current: false,
+    completed: false,
+    started: false,
+    currentCompleted: false,
+  };
+  availableRoles.unshift(def);
+
+  const defaultUnit: BusinessUnit = {
+    id: "",
+    unit: "No unit",
+  };
+  availableUnits.unshift(defaultUnit);
 
   return (
-      <SearchAnonymized roles={availableRoles} businessUnits={availableUnits}/>
-  )
+    <SearchAnonymized roles={availableRoles} businessUnits={availableUnits} />
+  );
 };
 
-const FetchQuestionResults = async ({role, unit} : {role:string, unit:string}) => {
-    // If both role and unit are undefined, return an empty array
-    if (!role && !unit) return [];
+const FetchQuestionResults = async ({
+  role,
+  unit,
+}: {
+  role: string;
+  unit: string;
+}) => {
+  // If both role and unit are undefined, return an empty array
+  if (!role && !unit) return [];
 
-    // Base include object reused in all queries
-    const includeConfig = {
-      question: {
-        include: {
-          roles: true,
-        },
+  // Base include object reused in all queries
+  const includeConfig = {
+    question: {
+      include: {
+        roles: true,
       },
-    };
-  
-    // Dynamically build the where conditions
-    const whereConditions: Prisma.QuestionResultWhereInput = {};
-  
-    if (role) {
-      whereConditions.question = {
-        roles: {
-          some: {
-            role: {
-              equals: role,
-              mode: "insensitive",
-            },
-          },
-        },
-      };
-    }
-  
-    if (unit) {
-      whereConditions.user = {
-        businessUnit: {
-          unit: {
-            equals: unit,
+    },
+  };
+
+  // Dynamically build the where conditions
+  const whereConditions: Prisma.QuestionResultWhereInput = {};
+
+  if (role) {
+    whereConditions.question = {
+      roles: {
+        some: {
+          role: {
+            equals: role,
             mode: "insensitive",
           },
         },
-      };
-    }
-  
-    return await db.questionResult.findMany({
-      where: whereConditions,
-      include: includeConfig,
-    });
-}
+      },
+    };
+  }
 
-const ShowResultsWrapper = async ({role, unit} : {role:string, unit:string}) => {
-  const userAnswersForRole: QuestionResult[] = await FetchQuestionResults({role,unit});
+  if (unit) {
+    whereConditions.user = {
+      businessUnit: {
+        unit: {
+          equals: unit,
+          mode: "insensitive",
+        },
+      },
+    };
+  }
+
+  return await db.questionResult.findMany({
+    where: whereConditions,
+    include: includeConfig,
+  });
+};
+
+const ShowResultsWrapper = async ({
+  role,
+  unit,
+}: {
+  role: string;
+  unit: string;
+}) => {
+  const userAnswersForRole: QuestionResult[] = await FetchQuestionResults({
+    role,
+    unit,
+  });
   const answerOptions = await db.answerOption.findMany();
 
   const transformedData: TransformedData = {};
@@ -139,9 +174,9 @@ const ShowResultsWrapper = async ({role, unit} : {role:string, unit:string}) => 
           const answerString =
             answerOptions.find(({ id }) => id === answerId)?.option ?? "";
           transformedData[roleName]![questionText]![answerString] =
-            (transformedData[roleName]![questionText]![answerString] ?? 0) + 1;     
-        }      
-      }); 
+            (transformedData[roleName]![questionText]![answerString] ?? 0) + 1;
+        }
+      });
     } else if (unit != undefined) {
       transformedData[unit] ??= {};
       transformedData[unit]![questionText] ??= {};
@@ -149,7 +184,7 @@ const ShowResultsWrapper = async ({role, unit} : {role:string, unit:string}) => 
       const answerString =
         answerOptions.find(({ id }) => id === answerId)?.option ?? "";
       transformedData[unit]![questionText]![answerString] =
-        (transformedData[unit]![questionText]![answerString] ?? 0) + 1;  
+        (transformedData[unit]![questionText]![answerString] ?? 0) + 1;
     }
   });
 
