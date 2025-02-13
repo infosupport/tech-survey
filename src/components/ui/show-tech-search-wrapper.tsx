@@ -86,7 +86,7 @@ const ShowTechSearchWrapper = ({
   useEffect(() => {
     if (!unit) return;
     logUsageMetric({
-      logMessage: "show-tech-search-wrapper-unit-changed",
+      logMessage: "show-tech-search-wrapper-unit-changed-" + unit, // We're dynamically adding (just) the unit to the log message
     });
   }, [unit, logUsageMetric]);
 
