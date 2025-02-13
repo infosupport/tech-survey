@@ -82,6 +82,7 @@ const ShowTechSearchWrapper = ({
     });
   }, [role, logUsageMetric]);
 
+  // Log dropdown changes immediately
   useEffect(() => {
     if (!unit) return;
     logUsageMetric({
