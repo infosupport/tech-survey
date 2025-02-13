@@ -70,7 +70,7 @@ const ShowTechSearchWrapper = ({
   useEffect(() => {
     if (!debouncedTech) return;
     logUsageMetric({
-      logMessage: "show-tech-search-wrapper-tech-changed-" + debouncedTech,
+      logMessage: "show-tech-search-wrapper-tech-changed",
     });
   }, [debouncedTech, logUsageMetric]);
 
@@ -78,7 +78,7 @@ const ShowTechSearchWrapper = ({
   useEffect(() => {
     if (!role) return;
     logUsageMetric({
-      logMessage: "show-tech-search-wrapper-role-changed-" + role,
+      logMessage: "show-tech-search-wrapper-role-changed",
     });
   }, [role, logUsageMetric]);
 
@@ -86,7 +86,7 @@ const ShowTechSearchWrapper = ({
   useEffect(() => {
     if (!unit) return;
     logUsageMetric({
-      logMessage: "show-tech-search-wrapper-unit-changed-" + unit,
+      logMessage: "show-tech-search-wrapper-unit-changed",
     });
   }, [unit, logUsageMetric]);
 
