@@ -174,11 +174,11 @@ export const surveyRouter = createTRPCRouter({
         });
       }
     }),
-  
+
   setBusinessUnit: protectedProcedure
-    .input(z.object({ userId: z.string(), businessUnitId: z.string()}))
-    .mutation(async ({ctx, input}) => {
-      const {userId, businessUnitId} = input;
+    .input(z.object({ userId: z.string(), businessUnitId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const { userId, businessUnitId } = input;
 
       try {
         const user = await ctx.db.user.findUnique({
@@ -193,8 +193,8 @@ export const surveyRouter = createTRPCRouter({
 
         const unit = await ctx.db.businessUnit.findUnique({
           where: {
-            id: businessUnitId
-          }
+            id: businessUnitId,
+          },
         });
 
         if (!unit) {
@@ -211,7 +211,6 @@ export const surveyRouter = createTRPCRouter({
             },
           },
         });
-
       } catch (error: unknown) {
         if (error instanceof TRPCClientError) {
           throw error;

@@ -9,7 +9,7 @@ import { usageMetricLogger } from "../log";
  */
 export const appRouter = createTRPCRouter({
   survey: surveyRouter,
-  usageMetricLogger: usageMetricLogger
+  usageMetricLogger: usageMetricLogger,
 });
 
 // export type definition of API

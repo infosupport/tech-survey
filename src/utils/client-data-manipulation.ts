@@ -69,7 +69,6 @@ const pushUserData = (
   userMap: UserMap,
   answerOptionMap: AnswerOptionMap,
 ): void => {
-
   // do nothing if there is no user data
   if (!userMap[entry.userId]?.roles.includes(roleName)) {
     return;

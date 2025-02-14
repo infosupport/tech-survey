@@ -41,12 +41,17 @@ const ShowDataTable = ({
   }[];
   answerOptions: { id: string; option: number }[];
 }) => {
-  const searchParams=useSearchParams();
+  const searchParams = useSearchParams();
   const currentRole = searchParams.get("role");
 
-  const usersForRole: typeof users = currentRole !== null ? users.filter((user) =>
-    user.roles.some((role) => slugify(role.role) === slugify(currentRole)),
-  ) : users;
+  const usersForRole: typeof users =
+    currentRole !== null
+      ? users.filter((user) =>
+          user.roles.some(
+            (role) => slugify(role.role) === slugify(currentRole),
+          ),
+        )
+      : users;
 
   const { userMap, answerOptionMap } = createUserAndAnswerMaps(
     usersForRole,
@@ -102,22 +107,22 @@ const ShowDataTable = ({
 
                 {Object.keys(dataByRoleAndQuestion[role] ?? {}).map(
                   (question) => (
-                      <div key={question}>
-                        <h3 className="mb-3 text-lg font-semibold">{question}</h3>
-                        <div className="mb-15">
-                          <DataTable
-                            columns={
-                              columns as ColumnDef<
-                                { name: string; email: string; answer: string },
-                                unknown
-                              >[]
-                            }
-                            data={dataByRoleAndQuestion[role]?.[question] ?? []}
-                          />
-                          <hr className="my-10" />
-                        </div>
+                    <div key={question}>
+                      <h3 className="mb-3 text-lg font-semibold">{question}</h3>
+                      <div className="mb-15">
+                        <DataTable
+                          columns={
+                            columns as ColumnDef<
+                              { name: string; email: string; answer: string },
+                              unknown
+                            >[]
+                          }
+                          data={dataByRoleAndQuestion[role]?.[question] ?? []}
+                        />
+                        <hr className="my-10" />
                       </div>
-                    ),
+                    </div>
+                  ),
                 )}
               </div>
             );

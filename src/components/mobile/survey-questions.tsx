@@ -31,7 +31,6 @@ import { type useForm } from "react-hook-form";
 import { findAnswerId } from "~/utils/survey-utils";
 import { Button } from "../ui/button";
 
-
 export function MobileSurveyQuestionnaire({
   session,
   filteredQuestions,
@@ -106,7 +105,6 @@ export function MobileSurveyQuestionnaire({
                                 {idToTextMap[option.option]}
                               </span>
 
-
                               <Popover>
                                 <PopoverTrigger asChild>
                                   <Button variant="ghost" size="icon">
@@ -123,7 +121,6 @@ export function MobileSurveyQuestionnaire({
                                   </div>
                                 </PopoverContent>
                               </Popover>
-
                             </div>
                           </label>
                         </RadioGroup>

@@ -143,13 +143,15 @@ async function main() {
       });
     }
 
-    const {businessUnits} = await parseCSVBusinessUnit("./import/businessUnits.csv");
+    const { businessUnits } = await parseCSVBusinessUnit(
+      "./import/businessUnits.csv",
+    );
     for (const unit in businessUnits) {
       await prisma.businessUnit.create({
         data: {
-          unit: businessUnits[unit] ?? ""
+          unit: businessUnits[unit] ?? "",
         },
-      })
+      });
     }
   } catch (error) {
     console.error("An error occurred:", error);
@@ -165,4 +167,3 @@ main()
     await prisma.$disconnect();
     process.exit(1);
   });
-

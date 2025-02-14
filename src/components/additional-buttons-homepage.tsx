@@ -8,11 +8,12 @@ import { ArrowRightDarkModeFriendly } from "./svg";
 import { Button } from "./ui/button";
 
 const Buttons = ({ session }: { session: Session | null }) => {
-  const {mutate: logUsageMetric} = api.usageMetricLogger.logUsageMetric.useMutation();
+  const { mutate: logUsageMetric } =
+    api.usageMetricLogger.logUsageMetric.useMutation();
 
   const handleLogging = () => {
-    logUsageMetric({logMessage:'find-the-expert-page-accessed'});
-  }
+    logUsageMetric({ logMessage: "find-the-expert-page-accessed" });
+  };
 
   return (
     <div className="mt-5 flex justify-center">
@@ -32,10 +33,11 @@ const Buttons = ({ session }: { session: Session | null }) => {
             </Button>
             <Button
               onClick={async () => {
-                  handleLogging();
-                  await signIn("azure-ad", { callbackUrl: "/find-the-expert?role=General" });
-                }
-              }
+                handleLogging();
+                await signIn("azure-ad", {
+                  callbackUrl: "/find-the-expert?role=General",
+                });
+              }}
               variant="outline"
               className="border-2 border-[#bed62f]"
             >

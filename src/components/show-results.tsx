@@ -14,7 +14,6 @@ import { ResultCommons } from "./results";
 import { idToTextMap } from "~/utils/optionMapping";
 
 const ShowResults = ({ data }: { data: TransformedData }) => {
-
   const { uniqueDataKeys, dataKeyColors, CustomTooltip } = ResultCommons({
     data,
   });
@@ -28,7 +27,7 @@ const ShowResults = ({ data }: { data: TransformedData }) => {
 
   return (
     <div className="grid gap-4">
-      {data && Object.entries(data).length > 0 &&
+      {data && Object.entries(data).length > 0 && (
         <>
           <h2 className="mb-4 text-lg font-semibold">Legend</h2>
           <div className="flex flex-wrap gap-2">
@@ -43,7 +42,7 @@ const ShowResults = ({ data }: { data: TransformedData }) => {
             ))}
           </div>
         </>
-      }
+      )}
       {Object.entries(data).map(([role, questions]) => {
         return (
           <div key={role} className="grid gap-4 md:grid-cols-2">
@@ -67,9 +66,7 @@ const ShowResults = ({ data }: { data: TransformedData }) => {
                       />
                       <Tooltip
                         cursor={{ fill: "transparent" }}
-                        content={
-                          <CustomTooltip active={false} payload={[]} />
-                        }
+                        content={<CustomTooltip active={false} payload={[]} />}
                       />
                       {uniqueDataKeys.map((dataKey, index) => (
                         <Bar

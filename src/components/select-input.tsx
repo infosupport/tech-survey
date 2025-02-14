@@ -19,7 +19,7 @@ export default function SelectRoles({
   userSelectedRoles,
   methods,
   businessUnits,
-  userSelectedBusinessUnit
+  userSelectedBusinessUnit,
 }: {
   session: Session;
   roles: Role[];
@@ -36,7 +36,8 @@ export default function SelectRoles({
   } = api.survey.setRole.useMutation();
   const { mutate: setDefaultRoleMutate, isSuccess: setDefaultRoleIsSuccess } =
     api.survey.setDefaultRole.useMutation();
-  const {mutate: logUsageMetric} = api.usageMetricLogger.logUsageMetric.useMutation();
+  const { mutate: logUsageMetric } =
+    api.usageMetricLogger.logUsageMetric.useMutation();
 
   // Show a toast notification on role mutation error
   useEffect(() => {
@@ -92,10 +93,10 @@ export default function SelectRoles({
       roleIds: selectedRoles,
     });
   };
-  
+
   const handleLogging = () => {
-    logUsageMetric({logMessage:'find-the-expert-page-accessed'});
-  }
+    logUsageMetric({ logMessage: "find-the-expert-page-accessed" });
+  };
 
   const [communicationMethodIsLoading, setCommunicationMethodIsLoading] =
     useState(false);
