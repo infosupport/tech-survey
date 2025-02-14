@@ -17,7 +17,7 @@ npm run db:generate
 npm run db:push
 npm run db:seed
 ```
-5. Now you should be ready to go! 🎉 You can check your local database by opening the studio of Primsa. Here you should see that the database populated with questions, roles, etc.
+5. Now you should be ready to go! 🎉 You can check your local database by opening the studio of Prisma. Here you should see that the database populated with questions, roles, etc.
 ```bash
 npm run db:studio
 ```
