@@ -149,12 +149,9 @@ export const surveyRouter = createTRPCRouter({
       }
 
       // Check if the user already has communication preferences
-      const hasCommunicationPreferences =
-        user.communicationPreferences.length > 0;
-
-      if (hasCommunicationPreferences) {
+      if (user.communicationPreferences) {
         // If the user already has communication preferences, update them
-        const communicationPreferenceId = user.communicationPreferences[0]?.id;
+        const communicationPreferenceId = user.communicationPreferences.id;
 
         await ctx.db.communicationPreference.update({
           where: {
