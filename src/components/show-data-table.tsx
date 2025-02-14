@@ -37,7 +37,7 @@ const ShowDataTable = ({
       id: string;
       userId: string;
       methods: $Enums.CommunicationMethod[];
-    }[];
+    } | null;
   }[];
   answerOptions: { id: string; option: number }[];
 }) => {

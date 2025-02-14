@@ -20,7 +20,7 @@ export const createUserAndAnswerMaps = (
       id: string;
       userId: string;
       methods: $Enums.CommunicationMethod[];
-    }[];
+    } | null;
     roles: { id: string; role: string }[];
   }[],
   answerOptions: { id: string; option: number }[],
@@ -30,9 +30,9 @@ export const createUserAndAnswerMaps = (
     userMap[user.id] = {
       name: user.name ?? "Unknown User",
       email: user.email ?? "Unknown Email",
-      communicationPreferences: user.communicationPreferences.map((method) =>
-        method.methods.toString(),
-      ),
+      communicationPreferences: user.communicationPreferences?.methods.map(
+        (method) => method.toString(),
+        ) ?? [],
       roles: user.roles.map((role) => role.role),
     };
   }
