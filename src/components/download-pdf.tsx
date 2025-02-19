@@ -12,7 +12,6 @@ import { ArrowLeftDarkModeFriendly, Download } from "./svg";
 import { type Session } from "next-auth";
 
 const PDFDownloadLink = dynamic(
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     () => import("@react-pdf/renderer").then((mod) => mod.PDFDownloadLink),
     {
         ssr: false,
