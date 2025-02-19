@@ -55,6 +55,8 @@ playwright/.auth
 **/.idea/shelf/*
 **/.idea/dictionaries
 **/.idea/httpRequests/
+**/.idea/sqldialects.xml
+**/.idea/projectSettingsUpdater.xml
 
 # Sensitive or high-churn files
 **/.idea/**/dataSources/
