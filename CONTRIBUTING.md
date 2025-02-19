@@ -14,3 +14,5 @@ To contribute to this project, follow these steps:
 6. Push to the original branch: `git push origin <project-name>/<location>`.
 7. Create a pull request with a descriptive title.
 8. Link the issue in the pull request description.
+
+Make sure your pull request is a small, focused change. Don't try to fix multiple issues in one pull request. However, some boyscouting is allowed.
