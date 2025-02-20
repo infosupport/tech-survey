@@ -1,5 +1,10 @@
 import type { Prisma } from "@prisma/client";
-import type { UserIdAndAnswerId } from "~/models/types";
+import type {
+    AnswerOptionMap,
+    UserIdAndAnswerId,
+    UserMap,
+    UserStuff,
+} from "~/models/types";
 import { db } from "~/server/db";
 
 function uniqueValues<T>(array: T[]): T[] {
@@ -10,15 +15,18 @@ export const fetchUsersAndAnswerOptions = async (
     userIds: string[],
     answerIds: string[],
 ) => {
-    return await Promise.all([
+    const [users, answerOptions] = await Promise.all([
         db.user.findMany({
             where: { id: { in: userIds } },
             select: {
                 id: true,
                 name: true,
-                email: true,
-                communicationPreferences: true,
-                roles: true,
+                communicationPreferences: {
+                    select: { methods: true },
+                },
+                roles: {
+                    select: { role: true },
+                },
             },
         }),
         db.answerOption.findMany({
@@ -26,6 +34,37 @@ export const fetchUsersAndAnswerOptions = async (
             select: { id: true, option: true },
         }),
     ]);
+
+    const { userMap, answerOptionMap } = createUserAndAnswerMaps(
+        users,
+        answerOptions,
+    );
+
+    return { userMap, answerOptionMap };
+};
+
+const createUserAndAnswerMaps = (
+    users: UserStuff[],
+    answerOptions: { id: string; option: number }[],
+) => {
+    const userMap = users.reduce((acc, user) => {
+        acc[user.id] = {
+            name: user.name ?? "Unknown User",
+            communicationPreferences:
+                user.communicationPreferences?.methods.map((method) =>
+                    method.toString(),
+                ) ?? [],
+            roles: user.roles.map((role) => role.role),
+        };
+        return acc;
+    }, {} as UserMap);
+
+    const answerOptionMap = answerOptions.reduce((acc, answerOption) => {
+        acc[answerOption.id] = answerOption.option.toString();
+        return acc;
+    }, {} as AnswerOptionMap);
+
+    return { userMap, answerOptionMap };
 };
 
 export function extractUniqueIds(userAnswersForRole: UserIdAndAnswerId[]): {

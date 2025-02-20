@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import type { Session } from "next-auth";
 
 import { Suspense } from "react";
-import { ShowRolesWrapper } from "~/app/result/page";
 import ButtonSkeleton from "~/components/loading/button-loader";
 import { Login } from "~/components/login";
 import ShowDataTable from "~/components/show-data-table";
@@ -12,6 +11,9 @@ import {
     fetchUserAnswers,
     fetchUsersAndAnswerOptions,
 } from "~/utils/data-manipulation";
+import { getRoles } from "~/utils/role-utils";
+import { db } from "~/server/db";
+import ShowTechSearchWrapper from "~/components/ui/show-tech-search-wrapper";
 
 export const metadata: Metadata = {
     title: "Find the expert",
@@ -37,13 +39,25 @@ const ContentSection = ({
 }) => (
     <>
         <Suspense fallback={<ButtonSkeleton />}>
-            <ShowRolesWrapper path="/find-the-expert" />
+            <FindTheExpertSearch />
         </Suspense>
         <Suspense fallback={<ButtonSkeleton />}>
             <ShowTableWrapper tech={tech} role={role} unit={unit} />
         </Suspense>
     </>
 );
+
+const FindTheExpertSearch = async () => {
+    const availableRoles = await getRoles()();
+    const availableUnits = await db.businessUnit.findMany();
+
+    return (
+        <ShowTechSearchWrapper
+            roles={availableRoles}
+            businessUnits={availableUnits}
+        />
+    );
+};
 
 const FindTheExpertPage = async (context: {
     searchParams: { role: string; tech: string; unit: string };
@@ -74,14 +88,6 @@ const FindTheExpertPage = async (context: {
     );
 };
 
-async function getUserAnswers(tech?: string, role?: string, unit?: string) {
-    return fetchUserAnswers({
-        role,
-        questionText: tech,
-        unit,
-    });
-}
-
 const ShowTableWrapper = async ({
     tech,
     role,
@@ -91,10 +97,14 @@ const ShowTableWrapper = async ({
     role: string;
     unit: string;
 }) => {
-    const userAnswersForRole = await getUserAnswers(tech, role, unit);
+    const userAnswersForRole = await fetchUserAnswers({
+        role,
+        questionText: tech,
+        unit,
+    });
 
     const { userIds, answerIds } = extractUniqueIds(userAnswersForRole);
-    const [users, answerOptions] = await fetchUsersAndAnswerOptions(
+    const { userMap, answerOptionMap } = await fetchUsersAndAnswerOptions(
         userIds,
         answerIds,
     );
@@ -102,8 +112,8 @@ const ShowTableWrapper = async ({
     return (
         <ShowDataTable
             userAnswersForRole={userAnswersForRole}
-            users={users}
-            answerOptions={answerOptions}
+            userMap={userMap}
+            answerOptionMap={answerOptionMap}
         />
     );
 };

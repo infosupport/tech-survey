@@ -1,6 +1,7 @@
 import type { Session } from "next-auth";
 import type { z } from "zod";
 import type { api } from "~/trpc/react";
+import type { $Enums } from "@prisma/client";
 
 export interface Survey {
     id: string;
@@ -30,6 +31,7 @@ export interface Answers {
     questionId: string;
     answerId: string;
 }
+
 [];
 
 export interface QuestionResult {
@@ -123,7 +125,6 @@ export type DataByRoleAndQuestion = Record<
         string,
         {
             name: string;
-            email: string;
             communicationPreferences: string[] | undefined;
             answer: string;
             roles: string[];
@@ -135,7 +136,6 @@ export type UserMap = Record<
     string,
     {
         name: string;
-        email: string;
         communicationPreferences: string[];
         roles: string[];
     }
@@ -167,6 +167,15 @@ export interface UserAnswersForRole {
     userId: string;
     questionId: string;
     answerId: string;
+}
+
+export interface UserStuff {
+    id: string;
+    name: string | null;
+    communicationPreferences: {
+        methods: $Enums.CommunicationMethod[];
+    } | null;
+    roles: { role: string }[];
 }
 
 export type UserAnswersForRoleArray = UserAnswersForRole[];

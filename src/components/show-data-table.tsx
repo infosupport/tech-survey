@@ -1,5 +1,4 @@
 "use client";
-import type { $Enums } from "@prisma/client";
 import React from "react";
 import { slugify } from "~/utils/slugify";
 import {
@@ -12,64 +11,64 @@ import { DataTable } from "./data-table";
 import { useSearchParams } from "next/navigation";
 import {
     aggregateDataByRole,
-    createUserAndAnswerMaps,
     groupDataByRoleAndQuestion,
     sortResults,
 } from "~/utils/client-data-manipulation";
-import type { UserAnswersForRoleArray } from "~/models/types";
+import type {
+    AnswerOptionMap,
+    UserAnswersForRoleArray,
+    UserMap,
+} from "~/models/types";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 const ShowDataTable = ({
     userAnswersForRole,
-    users,
-    answerOptions,
+    userMap,
+    answerOptionMap,
 }: {
     userAnswersForRole: UserAnswersForRoleArray;
-    users: {
-        name: string | null;
-        id: string;
-        roles: {
-            id: string;
-            role: string;
-            default: boolean;
-        }[];
-        email: string | null;
-        communicationPreferences: {
-            id: string;
-            userId: string;
-            methods: $Enums.CommunicationMethod[];
-        } | null;
-    }[];
-    answerOptions: { id: string; option: number }[];
+    userMap: UserMap;
+    answerOptionMap: AnswerOptionMap;
 }) => {
     const searchParams = useSearchParams();
     const currentRole = searchParams.get("role");
 
-    const usersForRole: typeof users =
-        currentRole !== null
-            ? users.filter((user) =>
-                  user.roles.some(
-                      (role) => slugify(role.role) === slugify(currentRole),
-                  ),
-              )
-            : users;
-
-    const { userMap, answerOptionMap } = createUserAndAnswerMaps(
-        usersForRole,
-        answerOptions,
-    );
+    const userMapForRole = currentRole
+        ? Object.keys(userMap).reduce((acc, userId) => {
+              const user = userMap[userId]!;
+              if (user.roles.includes(currentRole ?? "")) {
+                  acc[userId] = user;
+              }
+              return acc;
+          }, {} as UserMap)
+        : userMap;
 
     const dataByRoleAndQuestion = groupDataByRoleAndQuestion(
         userAnswersForRole,
-        userMap,
+        userMapForRole,
         answerOptionMap,
     );
 
-    const aggregatedDataByRole = aggregateDataByRole(
+    let aggregatedDataByRole = aggregateDataByRole(
         userAnswersForRole,
-        userMap,
+        userMapForRole,
         answerOptionMap,
     );
-    sortResults(aggregatedDataByRole);
+    aggregatedDataByRole = sortResults(aggregatedDataByRole);
+
+    const [expandedRoles, setExpandedRoles] = React.useState<string[]>([
+        Object.keys(aggregatedDataByRole)[0] ?? "",
+    ]);
+
+    const toggleRoleExpansion = (role: string) => {
+        setExpandedRoles((prevExpandedRoles) => {
+            if (prevExpandedRoles.includes(role)) {
+                return prevExpandedRoles.filter((r) => r !== role);
+            } else {
+                return [...prevExpandedRoles, role];
+            }
+        });
+    };
 
     return (
         <>
@@ -84,68 +83,95 @@ const ShowDataTable = ({
                         !currentRole ||
                         slugify(role) === slugify(currentRole)
                     ) {
+                        const isExpanded =
+                            expandedRoles.includes(role) ||
+                            role === currentRole;
+
                         return (
-                            <div key={role}>
+                            <div key={role} className="w-full">
                                 <h2 className="mb-4 text-2xl font-bold">
-                                    {role}
+                                    <button
+                                        onClick={() =>
+                                            toggleRoleExpansion(role)
+                                        }
+                                        className="flex items-center gap-2 hover:underline" // Added flex and gap for icon alignment
+                                    >
+                                        {role}
+                                        {role !== currentRole ? (
+                                            isExpanded ? (
+                                                <ChevronUp className="h-4 w-4" />
+                                            ) : (
+                                                <ChevronDown className="h-4 w-4" />
+                                            )
+                                        ) : null}
+                                    </button>
                                 </h2>
-                                <h3 className="mb-3 text-lg font-semibold">
-                                    Aggregated Results
-                                </h3>
-
-                                <DataTable<AggregatedSurveyResult, unknown>
-                                    columns={aggregateColumns}
-                                    data={Object.keys(
-                                        aggregatedDataByRole[role] ?? {},
-                                    ).map((question) => {
-                                        const rowData =
-                                            aggregatedDataByRole[role]?.[
-                                                question
-                                            ];
-                                        return {
-                                            name: rowData?.name ?? "",
-                                            email: question,
-                                            communicationPreferences:
-                                                rowData?.communicationPreferences ??
-                                                [],
-                                            "0": rowData?.counts[0] ?? 0,
-                                            "1": rowData?.counts[1] ?? 0,
-                                            "2": rowData?.counts[2] ?? 0,
-                                            "3": rowData?.counts[3] ?? 0,
-                                        };
-                                    })}
-                                />
-                                <hr className="my-10" />
-
-                                {Object.keys(
-                                    dataByRoleAndQuestion[role] ?? {},
-                                ).map((question) => (
-                                    <div key={question}>
+                                {isExpanded && (
+                                    <>
                                         <h3 className="mb-3 text-lg font-semibold">
-                                            {question}
+                                            Aggregated Results
                                         </h3>
-                                        <div className="mb-15">
-                                            <DataTable
-                                                columns={
-                                                    columns as ColumnDef<
-                                                        {
-                                                            name: string;
-                                                            email: string;
-                                                            answer: string;
-                                                        },
-                                                        unknown
-                                                    >[]
-                                                }
-                                                data={
-                                                    dataByRoleAndQuestion[
+
+                                        <DataTable<
+                                            AggregatedSurveyResult,
+                                            unknown
+                                        >
+                                            columns={aggregateColumns}
+                                            data={Object.keys(
+                                                aggregatedDataByRole[role] ??
+                                                    {},
+                                            ).map((question) => {
+                                                const rowData =
+                                                    aggregatedDataByRole[
                                                         role
-                                                    ]?.[question] ?? []
-                                                }
-                                            />
-                                            <hr className="my-10" />
-                                        </div>
-                                    </div>
-                                ))}
+                                                    ]?.[question];
+                                                return {
+                                                    name: rowData?.name ?? "",
+                                                    email: question,
+                                                    communicationPreferences:
+                                                        rowData?.communicationPreferences ??
+                                                        [],
+                                                    "0":
+                                                        rowData?.counts[0] ?? 0,
+                                                    "1":
+                                                        rowData?.counts[1] ?? 0,
+                                                    "2":
+                                                        rowData?.counts[2] ?? 0,
+                                                    "3":
+                                                        rowData?.counts[3] ?? 0,
+                                                };
+                                            })}
+                                        />
+                                        <hr className="my-10" />
+
+                                        {Object.keys(
+                                            dataByRoleAndQuestion[role] ?? {},
+                                        ).map((question) => (
+                                            <div key={question}>
+                                                <h3 className="mb-3 text-lg font-semibold">
+                                                    {question}
+                                                </h3>
+                                                <div className="mb-15">
+                                                    <DataTable
+                                                        columns={
+                                                            columns as ColumnDef<{
+                                                                name: string;
+                                                                communicationPreferences?: string[];
+                                                                answer: string;
+                                                            }>[]
+                                                        }
+                                                        data={
+                                                            dataByRoleAndQuestion[
+                                                                role
+                                                            ]?.[question] ?? []
+                                                        }
+                                                    />
+                                                    <hr className="my-10" />
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </>
+                                )}
                             </div>
                         );
                     } else {

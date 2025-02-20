@@ -1,6 +1,5 @@
 "use client";
 
-import type { $Enums } from "@prisma/client";
 import type {
     AggregatedDataByRole,
     AnswerOptionMap,
@@ -10,42 +9,6 @@ import type {
     UserAnswersForRoleArray,
     UserMap,
 } from "~/models/types";
-
-export const createUserAndAnswerMaps = (
-    users: {
-        id: string;
-        name: string | null;
-        email: string | null;
-        communicationPreferences: {
-            id: string;
-            userId: string;
-            methods: $Enums.CommunicationMethod[];
-        } | null;
-        roles: { id: string; role: string }[];
-    }[],
-    answerOptions: { id: string; option: number }[],
-) => {
-    const userMap: UserMap = {};
-    for (const user of users) {
-        userMap[user.id] = {
-            name: user.name ?? "Unknown User",
-            email: user.email ?? "Unknown Email",
-            communicationPreferences:
-                user.communicationPreferences?.methods.map((method) =>
-                    method.toString(),
-                ) ?? [],
-            roles: user.roles.map((role) => role.role),
-        };
-    }
-
-    const answerOptionMap: AnswerOptionMap = {};
-    for (const answerOption of answerOptions) {
-        answerOptionMap[answerOption.id] =
-            answerOption.option.toString() ?? "Unknown Answer";
-    }
-
-    return { userMap, answerOptionMap };
-};
 
 // Helper function to initialize role and question in the data structure
 const initializeRoleAndQuestion = (
@@ -77,7 +40,6 @@ const pushUserData = (
 
     dataByRoleAndQuestion[roleName]![questionText]!.push({
         name: userMap[entry.userId]?.name ?? "Unknown User",
-        email: userMap[entry.userId]?.email ?? "Unknown Email",
         communicationPreferences: userMap[
             entry.userId
         ]!.communicationPreferences?.some((pref) => pref.trim().length > 0)
@@ -114,8 +76,12 @@ export const groupDataByRoleAndQuestion = (
     const dataByRoleAndQuestion: DataByRoleAndQuestion = {};
 
     for (const entry of userAnswersForRole) {
-        for (const role of entry.question.roles ?? []) {
-            const roleName = role.role || "Unknown Role";
+        const roles = entry.question.roles;
+        if (!roles || roles.length === 0) {
+            continue;
+        }
+        for (const role of roles) {
+            const roleName = getRoleName(role);
             const questionText =
                 entry.question.questionText || "Unknown Question";
 
@@ -141,58 +107,6 @@ export const groupDataByRoleAndQuestion = (
 
 const getRoleName = (role: Role) => role.role || "Unknown Role";
 
-const initializeRole = (
-    aggregatedDataByRole: AggregatedDataByRole,
-    roleName: string,
-) => {
-    if (!aggregatedDataByRole[roleName]) {
-        aggregatedDataByRole[roleName] = {};
-    }
-};
-
-const getUserDetails = (userMap: UserMap, entry: Entry) => {
-    const userName = userMap[entry.userId]?.name ?? "Unknown User";
-    const userEmail = userMap[entry.userId]?.email ?? "Unknown Email";
-    let userCommunicationPreferences =
-        userMap[entry.userId]?.communicationPreferences;
-    userCommunicationPreferences = userCommunicationPreferences?.some(
-        (pref) => pref.trim().length > 0,
-    )
-        ? userCommunicationPreferences
-        : ["Do not contact"];
-    return { userName, userEmail, userCommunicationPreferences };
-};
-
-const initializeUser = (
-    aggregatedDataByRole: AggregatedDataByRole,
-    roleName: string,
-    userEmail: string,
-    userName: string,
-    userCommunicationPreferences: string[],
-) => {
-    if (!aggregatedDataByRole[roleName]![userEmail]) {
-        aggregatedDataByRole[roleName]![userEmail] = {
-            name: userName,
-            communicationPreferences: userCommunicationPreferences ?? [],
-            counts: [0, 0, 0, 0],
-        };
-    }
-};
-
-const updateCounts = (
-    aggregatedDataByRole: AggregatedDataByRole,
-    roleName: string,
-    userEmail: string,
-    answerValue: number,
-) => {
-    if (!aggregatedDataByRole[roleName]![userEmail]?.counts[answerValue]) {
-        aggregatedDataByRole[roleName]![userEmail]!.counts[answerValue] = 0;
-    }
-    aggregatedDataByRole[roleName]![userEmail]!.counts[answerValue] =
-        (aggregatedDataByRole[roleName]![userEmail]?.counts[answerValue] ?? 0) +
-        1;
-};
-
 export const aggregateDataByRole = (
     userAnswersForRole: UserAnswersForRoleArray,
     userMap: UserMap,
@@ -201,34 +115,41 @@ export const aggregateDataByRole = (
     const aggregatedDataByRole: AggregatedDataByRole = {};
 
     for (const entry of userAnswersForRole) {
-        for (const role of entry.question.roles ?? []) {
+        const roles = entry.question.roles;
+        if (!roles || roles.length === 0) {
+            continue;
+        } 
+
+        for (const role of roles) {
             const roleName = getRoleName(role);
-            initializeRole(aggregatedDataByRole, roleName);
 
-            if (userMap[entry.userId]?.roles.includes(roleName)) {
-                const answerValue = parseInt(
-                    answerOptionMap[entry.answerId] ?? "",
-                    10,
-                );
-                const { userName, userEmail, userCommunicationPreferences } =
-                    getUserDetails(userMap, entry);
-                initializeUser(
-                    aggregatedDataByRole,
-                    roleName,
-                    userEmail,
-                    userName,
-                    userCommunicationPreferences,
-                );
+            // Create the role if it doesn't exist
+            aggregatedDataByRole[roleName] =
+                aggregatedDataByRole[roleName] ?? {};
 
-                if (!isNaN(answerValue)) {
-                    updateCounts(
-                        aggregatedDataByRole,
-                        roleName,
-                        userEmail,
-                        answerValue,
-                    );
-                }
+            const user = userMap[entry.userId];
+            const userId = entry.userId;
+            if (!user?.roles.includes(roleName)) {
+                continue;
             }
+
+            const answerValue = parseInt(
+                answerOptionMap[entry.answerId] ?? "",
+                10,
+            );
+            if (isNaN(answerValue)) {
+                continue;
+            }
+
+            const { name, communicationPreferences } = user;
+            if (!aggregatedDataByRole[roleName]![userId]) {
+                aggregatedDataByRole[roleName]![userId] = {
+                    name: name,
+                    communicationPreferences: communicationPreferences ?? [],
+                    counts: [0, 0, 0, 0],
+                };
+            }
+            aggregatedDataByRole[roleName]![userId]!.counts[answerValue]++;
         }
     }
 
@@ -236,23 +157,16 @@ export const aggregateDataByRole = (
 };
 
 export const sortResults = (aggregatedDataByRole: AggregatedDataByRole) => {
+    const sortedAggregatedDataByRole: AggregatedDataByRole = {};
     // Sorting the results based on the counts of each answer
     for (const role in aggregatedDataByRole) {
-        for (const user in aggregatedDataByRole[role]) {
-            const counts = aggregatedDataByRole[role]![user]?.counts ?? [
-                0, 0, 0, 0,
-            ];
-            aggregatedDataByRole[role]![user]!.counts = counts;
-        }
-    }
-
-    // Sorting users based on the total count of 0 answers, then 1, 2, and 3
-    for (const role in aggregatedDataByRole) {
+        // Sorting users based on the total count of 0 answers, then 1, 2, and 3
         const sortedEntries = Object.entries(
             aggregatedDataByRole[role] ?? {},
         ).sort((a, b) => {
             const countsA = a[1].counts;
             const countsB = b[1].counts;
+
             for (let i = 0; i < countsA.length; i++) {
                 const diff = (countsB[i] ?? 0) - (countsA[i] ?? 0);
                 if (diff !== 0) {
@@ -261,8 +175,8 @@ export const sortResults = (aggregatedDataByRole: AggregatedDataByRole) => {
             }
             return 0;
         });
-        aggregatedDataByRole[role] = Object.fromEntries(sortedEntries);
+        sortedAggregatedDataByRole[role] = Object.fromEntries(sortedEntries);
     }
 
-    return aggregatedDataByRole;
+    return sortedAggregatedDataByRole;
 };
