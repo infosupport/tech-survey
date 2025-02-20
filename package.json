@@ -13,7 +13,7 @@
     "db:seed": "node prisma/seed.js",
     "dev": "next dev",
     "lint": "next lint",
-    "lint:fix": "next lint --fix",
+    "lint:fix": "npm run lint -- --fix",
     "start": "node ./node_modules/next/dist/bin/next start",
     "typecheck": "tsc --noEmit",
     "test": "playwright test"

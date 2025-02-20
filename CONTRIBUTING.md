@@ -16,3 +16,6 @@ To contribute to this project, follow these steps:
 8. Link the issue in the pull request description.
 
 Make sure your pull request is a small, focused change. Don't try to fix multiple issues in one pull request. However, some boyscouting is allowed.
+
+## Getting started
+See the [README.md](README.md) for information on how to run this project locally.
