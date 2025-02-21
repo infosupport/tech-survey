@@ -14,7 +14,17 @@ import {
   TestSetup,
   USER_NAME,
 } from "./test-setup";
+import treeKill from "tree-kill";
 
+const killAllProcesses = async (process: ChildProcess) => {
+    if (process?.pid) {
+        treeKill(process.pid, "SIGKILL", (error) => {
+            if (error) {
+                throw error;
+            }
+        });
+    }
+};
 test.describe("Desktop tests using a single role", () => {
   let nextProcess: ChildProcess;
   let surveyPage: SurveyPage;
@@ -26,7 +36,8 @@ test.describe("Desktop tests using a single role", () => {
     try {
       dbHelper = await DbHelper.create();
       testSetup = new TestSetup(dbHelper.getContainer());
-      const port = await testSetup.setupNextProcess();
+      const { port, process } = await testSetup.setupNextProcess();
+      nextProcess = process;
       surveyPage = await testSetup.setupSurveyPage(page, port);
       await testSetup.setupUserAndSession(page, dbHelper);
 
@@ -52,9 +63,7 @@ test.describe("Desktop tests using a single role", () => {
         await page.context().clearCookies();
       }
 
-      if (nextProcess) {
-        nextProcess.kill();
-      }
+    await killAllProcesses(nextProcess);
     } finally {
       await dbHelper.getContainer().stop();
       await page.close();
@@ -208,7 +217,8 @@ test.describe("Desktop tests using a multiple roles", () => {
     try {
       dbHelper = await DbHelper.create();
       testSetup = new TestSetup(dbHelper.getContainer());
-      const port = await testSetup.setupNextProcess();
+      const { port, process } = await testSetup.setupNextProcess();
+      nextProcess = process;
       surveyPage = await testSetup.setupSurveyPage(page, port);
       await testSetup.setupUserAndSession(page, dbHelper);
 
@@ -230,9 +240,7 @@ test.describe("Desktop tests using a multiple roles", () => {
       await page.context().clearCookies();
     }
     await page.close();
-    if (nextProcess) {
-      nextProcess.kill();
-    }
+    await killAllProcesses(nextProcess);
     await dbHelper.getContainer().stop();
   });
 
@@ -307,7 +315,8 @@ test.describe("Mobile tests using a single role", () => {
     try {
       dbHelper = await DbHelper.create();
       testSetup = new TestSetup(dbHelper.getContainer());
-      const port = await testSetup.setupNextProcess();
+      const { port, process } = await testSetup.setupNextProcess();
+      nextProcess = process;
       surveyPage = await testSetup.setupSurveyPage(page, port);
       await testSetup.setupUserAndSession(page, dbHelper);
 
@@ -333,9 +342,7 @@ test.describe("Mobile tests using a single role", () => {
         await page.context().clearCookies();
       }
 
-      if (nextProcess) {
-        nextProcess.kill();
-      }
+      await killAllProcesses(nextProcess);
     } finally {
       await dbHelper.getContainer().stop();
       await page.close();
@@ -473,7 +480,8 @@ test.describe("Mobile tests using multiple roles", () => {
     try {
       dbHelper = await DbHelper.create();
       testSetup = new TestSetup(dbHelper.getContainer());
-      const port = await testSetup.setupNextProcess();
+      const { port, process } = await testSetup.setupNextProcess();
+      nextProcess = process;
       surveyPage = await testSetup.setupSurveyPage(page, port);
       await testSetup.setupUserAndSession(page, dbHelper);
 
@@ -499,9 +507,7 @@ test.describe("Mobile tests using multiple roles", () => {
         await page.context().clearCookies();
       }
 
-      if (nextProcess) {
-        nextProcess.kill();
-      }
+      await killAllProcesses(nextProcess);
     } finally {
       await dbHelper.getContainer().stop();
       await page.close();
