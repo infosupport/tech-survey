@@ -17,7 +17,7 @@ import {
     TableRow,
 } from "~/components/ui/table";
 import { idToTextMap } from "~/utils/optionMapping";
-import { DataTablePagination } from "./data-table-pagination";
+import { DataTablePagination } from "~/components/data-tables/data-table-pagination";
 import {
     SlackLogo,
     TeamsLogo,
@@ -25,7 +25,7 @@ import {
     PhoneLogo,
     SignalLogo,
     WhatsappLogo,
-} from "./svg";
+} from "~/components/svg";
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[];

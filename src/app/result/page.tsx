@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import ResultsWrapper from "~/components/results";
 import {
     type QuestionResult,
-    type Section,
+    type Role,
     type TransformedData,
 } from "~/models/types";
 import { db } from "~/server/db";
@@ -13,9 +13,8 @@ import ButtonSkeleton from "~/components/loading/button-loader";
 import LegendSkeleton from "~/components/loading/results-loader";
 import { Login } from "~/components/login";
 import SearchAnonymized from "~/components/ui/search-anonymized";
-import ShowTechSearchWrapper from "~/components/ui/show-tech-search-wrapper";
 import { getServerAuthSession } from "~/server/auth";
-import { generateRolesWithHref } from "~/utils/role-utils";
+import { getRoles } from "~/utils/role-utils";
 
 export const metadata: Metadata = {
     title: "Results",
@@ -44,7 +43,7 @@ const Results = async (context: {
             {session && (
                 <>
                     <Suspense fallback={<ButtonSkeleton />}>
-                        <ShowRolesWrapper path="/result" />
+                        <AnonymousRoleSearch />
                     </Suspense>
 
                     <Suspense fallback={<LegendSkeleton />}>
@@ -59,27 +58,14 @@ const Results = async (context: {
     );
 };
 
-export const ShowRolesWrapper = async ({ path }: { path: string }) => {
-    const availableRoles = await generateRolesWithHref(path)();
+export async function AnonymousRoleSearch() {
+    const availableRoles = await getRoles()();
     const availableUnits = await db.businessUnit.findMany();
 
-    if (path.includes("expert")) {
-        return (
-            <ShowTechSearchWrapper
-                roles={availableRoles}
-                businessUnits={availableUnits}
-            />
-        );
-    }
-
-    const def: Section = {
+    const def: Role = {
         id: "",
-        href: path,
-        label: "No role",
-        current: false,
-        completed: false,
-        started: false,
-        currentCompleted: false,
+        default: true,
+        role: "No role",
     };
     availableRoles.unshift(def);
 
@@ -95,7 +81,7 @@ export const ShowRolesWrapper = async ({ path }: { path: string }) => {
             businessUnits={availableUnits}
         />
     );
-};
+}
 
 const FetchQuestionResults = async ({
     role,
@@ -143,7 +129,7 @@ const FetchQuestionResults = async ({
         };
     }
 
-    return await db.questionResult.findMany({
+    return db.questionResult.findMany({
         where: whereConditions,
         include: includeConfig,
     });

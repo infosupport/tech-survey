@@ -6,7 +6,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import type { Section } from "~/models/types";
+import type { Role } from "~/models/types";
 import { Form, FormControl, FormField, FormItem } from "./form";
 import { Label } from "./label";
 import {
@@ -26,7 +26,7 @@ export default function SearchAnonymized({
     roles,
     businessUnits,
 }: {
-    roles: Section[];
+    roles: Role[];
     businessUnits: BusinessUnit[];
 }) {
     const searchParams = useSearchParams();
@@ -139,10 +139,10 @@ export default function SearchAnonymized({
                                                 {roles.map((r) => {
                                                     return (
                                                         <SelectItem
-                                                            value={r.label}
+                                                            value={r.role}
                                                             key={r.id}
                                                         >
-                                                            {r.label}
+                                                            {r.role}
                                                         </SelectItem>
                                                     );
                                                 })}

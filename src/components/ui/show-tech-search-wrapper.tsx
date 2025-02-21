@@ -6,18 +6,20 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import type { Section } from "~/models/types";
+import type { Role } from "~/models/types";
 import { api } from "~/trpc/react";
-import { Form, FormControl, FormField, FormItem } from "./form";
-import { Input } from "./input";
-import { Label } from "./label";
+import { useDebouncedCallback } from "use-debounce";
+
+import { Form, FormField, FormItem, FormControl } from "~/components/ui/form";
 import {
     Select,
     SelectContent,
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from "./select";
+} from "~/components/ui/select";
+import { Label } from "~/components/ui/label";
+import { Input } from "~/components/ui/input";
 
 const formSchema = z.object({
     role: z.string().optional(),
@@ -45,7 +47,7 @@ const ShowTechSearchWrapper = ({
     roles,
     businessUnits,
 }: {
-    roles: Section[];
+    roles: Role[];
     businessUnits: BusinessUnit[];
 }) => {
     const path = usePathname();
@@ -90,15 +92,27 @@ const ShowTechSearchWrapper = ({
         });
     }, [unit, logUsageMetric]);
 
+    // Create a debounced function to update the URL
+    const debouncedUpdateURL = useDebouncedCallback(
+        (
+            role: string | undefined,
+            tech: string | undefined,
+            unit: string | undefined,
+        ) => {
+            const params = new URLSearchParams();
+            if (role) params.set("role", role);
+            if (tech) params.set("tech", tech);
+            if (unit) params.set("unit", unit);
+
+            router.push(`${path}?${params.toString()}`);
+        },
+        250,
+    );
+
     // Whenever form values change, generate a new query string and push
     useEffect(() => {
-        const params = new URLSearchParams();
-        if (role) params.set("role", role);
-        if (tech) params.set("tech", tech);
-        if (unit) params.set("unit", unit);
-
-        router.push(`${path}?${params.toString()}`);
-    }, [role, tech, unit, path, router]);
+        debouncedUpdateURL(role, tech, unit);
+    }, [role, tech, unit, path, router, debouncedUpdateURL]);
 
     function onSubmit(values: FormSchema) {
         const params = new URLSearchParams();
@@ -168,10 +182,10 @@ const ShowTechSearchWrapper = ({
                                                     </SelectItem>
                                                     {roles.map((r) => (
                                                         <SelectItem
-                                                            value={r.label}
+                                                            value={r.role}
                                                             key={r.id}
                                                         >
-                                                            {r.label}
+                                                            {r.role}
                                                         </SelectItem>
                                                     ))}
                                                 </SelectContent>
