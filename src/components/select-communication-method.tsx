@@ -19,12 +19,11 @@ export default function SelectCommunicationMethod({
     setCommunicationMethodIsLoading,
 }: {
     session: Session;
-    methods: string[];
+    methods: CommunicationMethod[];
     setCommunicationMethodIsLoading: (value: boolean) => void;
 }) {
-    const [selectedMethods, setSelectedMethods] = useState<
-        CommunicationMethod[]
-    >([]);
+    const [selectedMethods, setSelectedMethods] =
+        useState<CommunicationMethod[]>(methods);
 
     const { mutate: setMethodMutate, isLoading: setMethodIsLoading } =
         api.survey.setCommunicationMethods.useMutation();
@@ -33,14 +32,9 @@ export default function SelectCommunicationMethod({
         setCommunicationMethodIsLoading(setMethodIsLoading);
     }, [setCommunicationMethodIsLoading, setMethodIsLoading]);
 
-    // If we have multiple selected role, we get `"SLACK,SIGNAL,TEAMS"` as a string
-    // We need to split this string into an array of strings
     useEffect(() => {
-        if (methods.length > 0) {
-            const splitMethods = (methods[0] ?? "").split(",");
-            setSelectedMethods(splitMethods as CommunicationMethod[]);
-        }
-    }, [methods]);
+        console.log(selectedMethods, methods);
+    }, [selectedMethods]);
 
     const handleMethodChange = (method: CommunicationMethod) => {
         let updatedSelection: string[];

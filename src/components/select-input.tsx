@@ -10,7 +10,7 @@ import { toast } from "./ui/use-toast";
 import { ToastAction } from "./ui/toast";
 import SelectCommunicationMethod from "./select-communication-method";
 import { SpinnerButton } from "./ui/button-spinner";
-import type { BusinessUnit } from "@prisma/client";
+import type { BusinessUnit, CommunicationMethod } from "@prisma/client";
 import SelectBusinessUnit from "./select-businessunit";
 
 export default function SelectRoles({
@@ -24,7 +24,7 @@ export default function SelectRoles({
     session: Session;
     roles: Role[];
     userSelectedRoles: Role[];
-    methods: string[];
+    methods: CommunicationMethod[];
     businessUnits: BusinessUnit[];
     userSelectedBusinessUnit: BusinessUnit | undefined;
 }) {

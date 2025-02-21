@@ -144,14 +144,13 @@ const SelectRoleWrapper: React.FC<{ session: Session }> = async ({
     const communicationPreferences =
         userCommunicationMethods?.communicationPreferences;
     const methods = communicationPreferences?.methods ?? [];
-    const methodStrings = methods.map((method) => method.toString());
 
     return (
         <SelectRole
             session={session}
             roles={roles}
             userSelectedRoles={userSelectedRoles}
-            methods={methodStrings}
+            methods={methods}
             businessUnits={businessUnits}
             userSelectedBusinessUnit={useSelectedBusinessUnit}
         />
