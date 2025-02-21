@@ -1,4 +1,4 @@
-import { spawn } from "child_process";
+import { type ChildProcess, spawn } from "child_process";
 import { expect, type Page } from "@playwright/test";
 import { SurveyPage } from "./survey-page";
 import { type StartedPostgreSqlContainer } from "@testcontainers/postgresql";
@@ -37,8 +37,8 @@ export class TestSetup {
     this.container = container;
   }
 
-  async setupNextProcess(): Promise<number> {
-    return new Promise<number>((res, rej) => {
+  async setupNextProcess(): Promise<{ port: number; process: ChildProcess }> {
+    return new Promise<{ port: number; process: ChildProcess }>((res, rej) => {
       const nextProcess = spawn("npm", ["run", "dev", "--", "--port", "0"], {
         cwd: this.cwd,
         shell: true,
@@ -53,7 +53,10 @@ export class TestSetup {
         process.stdout.write(str);
         const portMatch = /local:\s*http:\/\/.+:(\d+)/gim.exec(str);
         if (portMatch) {
-          res(parseInt(portMatch[1]!));
+            res({
+                port: parseInt(portMatch[1]!),
+                process: nextProcess,
+            });
         }
       });
       nextProcess.stderr.on("data", (chunk: Buffer) => {
