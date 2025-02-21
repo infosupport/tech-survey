@@ -1,6 +1,5 @@
 "use client";
 import React from "react";
-import { slugify } from "~/utils/slugify";
 import {
     columns,
     aggregateColumns,
@@ -18,10 +17,10 @@ import DataTableTitle from "~/components/data-tables/data-table-title";
 import { clsx } from "clsx";
 
 const ShowDataTable = ({
-    dataByRoleAndQuestionForRole,
+    dataByRoleAndQuestion,
     aggregatedDataByRole,
 }: {
-    dataByRoleAndQuestionForRole: DataByRoleAndQuestion;
+    dataByRoleAndQuestion: DataByRoleAndQuestion;
     aggregatedDataByRole: AggregatedDataByRole;
 }) => {
     const searchParams = useSearchParams();
@@ -42,13 +41,13 @@ const ShowDataTable = ({
 
     return (
         <>
-            {Object.keys(dataByRoleAndQuestionForRole).length === 0 ? (
+            {Object.keys(dataByRoleAndQuestion).length === 0 ? (
                 <p>
                     There are no non-anonymous results yet. Please check back
                     later.
                 </p>
             ) : (
-                Object.keys(dataByRoleAndQuestionForRole).map((role) => {
+                Object.keys(dataByRoleAndQuestion).map((role) => {
                     const roleIsCurrentRole = role === currentRole;
                     const isExpanded =
                         expandedRoles.includes(role) || roleIsCurrentRole;
@@ -109,8 +108,7 @@ const ShowDataTable = ({
                                     <hr className="my-10" />
 
                                     {Object.keys(
-                                        dataByRoleAndQuestionForRole[role] ??
-                                            {},
+                                        dataByRoleAndQuestion[role] ?? {},
                                     ).map((question) => (
                                         <div key={question}>
                                             <DataTableTitle text={question} />
@@ -124,7 +122,7 @@ const ShowDataTable = ({
                                                         }>[]
                                                     }
                                                     data={
-                                                        dataByRoleAndQuestionForRole[
+                                                        dataByRoleAndQuestion[
                                                             role
                                                         ]?.[question] ?? []
                                                     }

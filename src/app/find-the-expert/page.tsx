@@ -104,7 +104,7 @@ const ShowTableWrapper = async ({
     });
 
     const { userIds, answerIds } = extractUniqueIds(userAnswersForRole);
-    const { dataByRoleAndQuestionForRole, aggregatedDataByRole } =
+    const { dataByRoleAndQuestion, aggregatedDataByRole } =
         await fetchUsersAndAnswerOptions(
             userIds,
             answerIds,
@@ -113,7 +113,7 @@ const ShowTableWrapper = async ({
 
     return (
         <ShowDataTable
-            dataByRoleAndQuestionForRole={dataByRoleAndQuestionForRole}
+            dataByRoleAndQuestion={dataByRoleAndQuestion}
             aggregatedDataByRole={aggregatedDataByRole}
         />
     );

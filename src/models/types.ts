@@ -161,7 +161,7 @@ export interface GroupDataQuestion {
     questionText: string;
 }
 
-export interface UserAnswersForRole {
+export interface QuestionWithUserAnswer {
     question: GroupDataQuestion;
     id: string;
     userId: string;
@@ -178,4 +178,4 @@ export interface UserInfo {
     roles: { role: string }[];
 }
 
-export type UserAnswersForRoleArray = UserAnswersForRole[];
+export type QuestionWithUserAnswerArray = QuestionWithUserAnswer[];

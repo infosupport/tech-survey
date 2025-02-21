@@ -4,7 +4,7 @@ import type {
     UserIdAndAnswerId,
     UserMap,
     UserInfo,
-    UserAnswersForRoleArray,
+    QuestionWithUserAnswerArray,
     DataByRoleAndQuestion,
     AggregatedDataByRole,
     Role,
@@ -19,7 +19,7 @@ function uniqueValues<T>(array: T[]): T[] {
 export const fetchUsersAndAnswerOptions = async (
     userIds: string[],
     answerIds: string[],
-    userAnswersForRole: UserAnswersForRoleArray,
+    userAnswersForRole: QuestionWithUserAnswerArray,
 ) => {
     const [users, answerOptions] = await Promise.all([
         db.user.findMany({
@@ -46,7 +46,7 @@ export const fetchUsersAndAnswerOptions = async (
         answerOptions,
     );
 
-    const dataByRoleAndQuestionForRole = groupDataByRoleAndQuestion(
+    const dataByRoleAndQuestion = groupDataByRoleAndQuestion(
         userAnswersForRole,
         userMap,
         answerOptionMap,
@@ -60,7 +60,7 @@ export const fetchUsersAndAnswerOptions = async (
     aggregatedDataByRole = sortResults(aggregatedDataByRole);
 
     return {
-        dataByRoleAndQuestionForRole,
+        dataByRoleAndQuestion,
         aggregatedDataByRole,
     };
 };
@@ -93,7 +93,7 @@ const sortResults = (aggregatedDataByRole: AggregatedDataByRole) => {
 const getRoleName = (role: Role) => role.role || "Unknown Role";
 
 const aggregateDataByRole = (
-    userAnswersForRole: UserAnswersForRoleArray,
+    userAnswersForRole: QuestionWithUserAnswerArray,
     userMap: UserMap,
     answerOptionMap: AnswerOptionMap,
 ) => {
@@ -142,13 +142,13 @@ const aggregateDataByRole = (
 };
 
 const groupDataByRoleAndQuestion = (
-    userAnswersForRole: UserAnswersForRoleArray,
+    questionWithUserAnswers: QuestionWithUserAnswerArray,
     userMap: UserMap,
     answerOptionMap: AnswerOptionMap,
 ) => {
     const dataByRoleAndQuestion: DataByRoleAndQuestion = {};
 
-    for (const entry of userAnswersForRole) {
+    for (const entry of questionWithUserAnswers) {
         const roles = entry.question.roles;
         if (!roles || roles.length === 0) {
             continue;
