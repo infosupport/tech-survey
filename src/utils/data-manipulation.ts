@@ -1,62 +1,82 @@
 import type { Prisma } from "@prisma/client";
 import type {
-    AnswerOptionMap,
-    UserIdAndAnswerId,
-    UserMap,
-    UserInfo,
-    QuestionWithUserAnswerArray,
     DataByRoleAndQuestion,
     AggregatedDataByRole,
     Role,
-    Entry,
 } from "~/models/types";
 import { db } from "~/server/db";
 
-function uniqueValues<T>(array: T[]): T[] {
-    return Array.from(new Set(array));
-}
-
-export const fetchUsersAndAnswerOptions = async (
-    userIds: string[],
-    answerIds: string[],
-    userAnswersForRole: QuestionWithUserAnswerArray,
-) => {
-    const [users, answerOptions] = await Promise.all([
-        db.user.findMany({
-            where: { id: { in: userIds } },
+type QuestionResultWithRelations = Prisma.QuestionResultGetPayload<{
+    include: {
+        question: {
+            include: {
+                roles: true;
+            };
+        };
+        user: {
             select: {
-                id: true,
-                name: true,
+                id: true;
+                name: true;
                 communicationPreferences: {
-                    select: { methods: true },
-                },
+                    select: { methods: true };
+                };
                 roles: {
-                    select: { role: true },
+                    select: { role: true };
+                };
+            };
+        };
+        answer: {
+            select: {
+                id: true;
+                option: true;
+            };
+        };
+    };
+}>;
+
+export const fetchAnswerData = async ({
+    role,
+    questionText,
+    unit,
+}: {
+    role?: string;
+    questionText?: string;
+    unit?: string;
+}) => {
+    const where = buildWhereClause({ role, questionText, unit });
+
+    const questionResults = await db.questionResult.findMany({
+        where,
+        include: {
+            question: {
+                include: {
+                    roles: true,
                 },
             },
-        }),
-        db.answerOption.findMany({
-            where: { id: { in: answerIds } },
-            select: { id: true, option: true },
-        }),
-    ]);
+            user: {
+                select: {
+                    id: true,
+                    name: true,
+                    communicationPreferences: {
+                        select: { methods: true },
+                    },
+                    roles: {
+                        select: { role: true },
+                    },
+                },
+            },
+            answer: {
+                select: {
+                    id: true,
+                    option: true,
+                },
+            },
+        },
+    });
 
-    const { userMap, answerOptionMap } = createUserAndAnswerMaps(
-        users,
-        answerOptions,
-    );
+    const dataByRoleAndQuestion = groupDataByRoleAndQuestion(questionResults);
 
-    const dataByRoleAndQuestion = groupDataByRoleAndQuestion(
-        userAnswersForRole,
-        userMap,
-        answerOptionMap,
-    );
-
-    let aggregatedDataByRole = aggregateDataByRole(
-        userAnswersForRole,
-        userMap,
-        answerOptionMap,
-    );
+    let aggregatedDataByRole = aggregateDataByRole(questionResults);
     aggregatedDataByRole = sortResults(aggregatedDataByRole);
 
     return {
@@ -93,13 +113,11 @@ const sortResults = (aggregatedDataByRole: AggregatedDataByRole) => {
 const getRoleName = (role: Role) => role.role || "Unknown Role";
 
 const aggregateDataByRole = (
-    userAnswersForRole: QuestionWithUserAnswerArray,
-    userMap: UserMap,
-    answerOptionMap: AnswerOptionMap,
+    questionResults: QuestionResultWithRelations[],
 ) => {
     const aggregatedDataByRole: AggregatedDataByRole = {};
 
-    for (const entry of userAnswersForRole) {
+    for (const entry of questionResults) {
         const roles = entry.question.roles;
         if (!roles || roles.length === 0) {
             continue;
@@ -112,25 +130,27 @@ const aggregateDataByRole = (
             aggregatedDataByRole[roleName] =
                 aggregatedDataByRole[roleName] ?? {};
 
-            const user = userMap[entry.userId];
             const userId = entry.userId;
-            if (!user?.roles.includes(roleName)) {
-                continue;
-            }
 
             const answerValue = parseInt(
-                answerOptionMap[entry.answerId] ?? "",
+                entry.answer.option.toString() ?? "0",
                 10,
             );
-            if (isNaN(answerValue)) {
-                continue;
+
+            const { name, communicationPreferences } = entry.user;
+            let communicationMethods: string[] =
+                communicationPreferences?.methods ?? [];
+            if (
+                !communicationPreferences ||
+                communicationPreferences.methods.length === 0
+            ) {
+                communicationMethods = ["Do not contact"];
             }
 
-            const { name, communicationPreferences } = user;
             if (!aggregatedDataByRole[roleName]![userId]) {
                 aggregatedDataByRole[roleName]![userId] = {
-                    name: name,
-                    communicationPreferences: communicationPreferences ?? [],
+                    name: name ?? "Unknown User",
+                    communicationPreferences: communicationMethods,
                     counts: [0, 0, 0, 0],
                 };
             }
@@ -142,13 +162,11 @@ const aggregateDataByRole = (
 };
 
 const groupDataByRoleAndQuestion = (
-    questionWithUserAnswers: QuestionWithUserAnswerArray,
-    userMap: UserMap,
-    answerOptionMap: AnswerOptionMap,
+    questionResults: QuestionResultWithRelations[],
 ) => {
     const dataByRoleAndQuestion: DataByRoleAndQuestion = {};
 
-    for (const entry of questionWithUserAnswers) {
+    for (const entry of questionResults) {
         const roles = entry.question.roles;
         if (!roles || roles.length === 0) {
             continue;
@@ -163,14 +181,7 @@ const groupDataByRoleAndQuestion = (
                 roleName,
                 questionText,
             );
-            pushUserData(
-                dataByRoleAndQuestion,
-                roleName,
-                questionText,
-                entry,
-                userMap,
-                answerOptionMap,
-            );
+            pushUserData(dataByRoleAndQuestion, roleName, questionText, entry);
             sortUserData(dataByRoleAndQuestion, roleName, questionText);
         }
     }
@@ -196,24 +207,21 @@ const pushUserData = (
     dataByRoleAndQuestion: DataByRoleAndQuestion,
     roleName: string,
     questionText: string,
-    entry: Entry,
-    userMap: UserMap,
-    answerOptionMap: AnswerOptionMap,
+    entry: QuestionResultWithRelations,
 ): void => {
-    // do nothing if there is no user data
-    if (!userMap[entry.userId]?.roles.includes(roleName)) {
-        return;
+    let communicationMethod: string[] =
+        entry.user.communicationPreferences?.methods ?? [];
+    if (
+        !entry.user.communicationPreferences ||
+        entry.user.communicationPreferences.methods.length === 0
+    ) {
+        communicationMethod = ["Do not contact"];
     }
-
     dataByRoleAndQuestion[roleName]![questionText]!.push({
-        name: userMap[entry.userId]?.name ?? "Unknown User",
-        communicationPreferences: userMap[
-            entry.userId
-        ]!.communicationPreferences?.some((pref) => pref.trim().length > 0)
-            ? userMap[entry.userId]?.communicationPreferences
-            : ["Do not contact"],
-        answer: answerOptionMap[entry.answerId] ?? "Unknown Answer",
-        roles: userMap[entry.userId]?.roles ?? [],
+        name: entry.user.name ?? "Unknown User",
+        communicationPreferences: communicationMethod,
+        answer: entry.answer.option.toString() ?? "Unknown Answer",
+        roles: entry.user.roles.map((role) => role.role) ?? [],
     });
 };
 
@@ -235,57 +243,20 @@ const sortUserData = (
     });
 };
 
-const createUserAndAnswerMaps = (
-    users: UserInfo[],
-    answerOptions: { id: string; option: number }[],
-) => {
-    const userMap = users.reduce((acc, user) => {
-        acc[user.id] = {
-            name: user.name ?? "Unknown User",
-            communicationPreferences:
-                user.communicationPreferences?.methods.map((method) =>
-                    method.toString(),
-                ) ?? [],
-            roles: user.roles.map((role) => role.role),
-        };
-        return acc;
-    }, {} as UserMap);
-
-    const answerOptionMap = answerOptions.reduce((acc, answerOption) => {
-        acc[answerOption.id] = answerOption.option.toString();
-        return acc;
-    }, {} as AnswerOptionMap);
-
-    return { userMap, answerOptionMap };
-};
-
-export function extractUniqueIds(userAnswersForRole: UserIdAndAnswerId[]): {
-    userIds: string[];
-    answerIds: string[];
-} {
-    const userIds = uniqueValues(
-        userAnswersForRole.map((entry) => entry.userId),
-    );
-    const answerIds = uniqueValues(
-        userAnswersForRole.map((entry) => entry.answerId),
-    );
-    return { userIds, answerIds };
-}
-
 export interface FetchUserAnswersParams {
     role?: string;
     questionText?: string;
     unit?: string;
 }
 
-export const fetchUserAnswers = async ({
+const buildWhereClause = ({
     role,
     questionText,
     unit,
-}: FetchUserAnswersParams = {}) => {
-    // 1. Build up a QuestionWhereInput object
+}: FetchUserAnswersParams) => {
     const questionWhere: Prisma.QuestionWhereInput = {};
 
+    // Only select the role that is selected. This ensures we don't have to filter out the roles later
     if (role) {
         questionWhere.roles = {
             some: {
@@ -304,7 +275,6 @@ export const fetchUserAnswers = async ({
         };
     }
 
-    // 2. Build up a UserWhereInput object
     const userWhere: Prisma.UserWhereInput = {};
 
     if (unit) {
@@ -316,8 +286,6 @@ export const fetchUserAnswers = async ({
         };
     }
 
-    // 3. Build the final `where` for QuestionResult
-    //    Only attach `question` or `user` if they're non-empty
     const where: Prisma.QuestionResultWhereInput = {};
     if (Object.keys(questionWhere).length > 0) {
         where.question = questionWhere;
@@ -325,17 +293,5 @@ export const fetchUserAnswers = async ({
     if (Object.keys(userWhere).length > 0) {
         where.user = userWhere;
     }
-
-    // 4. Run the query
-    return db.questionResult.findMany({
-        where,
-        include: {
-            question: {
-                include: {
-                    roles: true,
-                },
-            },
-            user: true,
-        },
-    });
+    return where;
 };
