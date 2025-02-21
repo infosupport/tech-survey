@@ -18,9 +18,9 @@ enum CommunicationMethod {
 }
 
 model BusinessUnit {
-  id         String     @id @default(cuid())
-  unit       String     @unique
-  users      User[]
+  id    String @id @default(cuid())
+  unit  String @unique
+  users User[]
 }
 
 model Survey {
@@ -64,24 +64,24 @@ model QuestionResult {
 
 model CommunicationPreference {
   id      String                @id @default(cuid())
-  userId  String
+  userId  String                @unique
   methods CommunicationMethod[] @default([])
   user    User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model User {
-  id                       String                    @id @default(cuid())
+  id                       String                   @id @default(cuid())
   name                     String?
-  email                    String?                   @unique
+  email                    String?                  @unique
   emailVerified            DateTime?
   image                    String?
-  roles                    Role[]                    @relation("UserRole")
+  roles                    Role[]                   @relation("UserRole")
   accounts                 Account[]
   questionResults          QuestionResult[]
-  communicationPreferences CommunicationPreference[]
+  communicationPreferences CommunicationPreference?
   sessions                 Session[]
   businessUnitId           String?
-  businessUnit           BusinessUnit?             @relation(fields: [businessUnitId], references: [id])
+  businessUnit             BusinessUnit?            @relation(fields: [businessUnitId], references: [id])
 }
 
 model Account {
@@ -120,7 +120,7 @@ model VerificationToken {
 }
 
 model UsageMetrics {
-  id            String    @id @default(cuid())
-  action        String
-  createdAt     DateTime @default(now())
+  id        String   @id @default(cuid())
+  action    String
+  createdAt DateTime @default(now())
 }

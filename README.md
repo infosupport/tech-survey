@@ -2,47 +2,71 @@
 
 ## Setup for local development
 
-### Setup database
-
-1. Make sure docker desktop or another tool of your liking is installed on your machine.
+1. Install [Rancher](https://rancherdesktop.io/) (or Docker if you prefer/you have a license) and make sure it is running.
 2. Spin up a postgres database with the following command. You need to choose your own password and username:
 ```bash
 docker run --name tech-survey -e "POSTGRES_USER=dummyusr" -e "POSTGRES_PASSWORD=dummypw" -e "POSTGRES_DB=tech-survey" -d -p 5432:5432 docker.io/postgres
 ```
-3. Make sure to also use that username and password inside of the `.env` file:
+3. Copy `.env.example` to `.env` and update the `DATABASE_URL` variable with the username and password you chose in the previous step. The default value is:
 `DATABASE_URL="postgresql://dummyusr:dummypw@localhost/tech-survey`
-4. Run the following commands to setup your db locally. For the `npm run db:seed` command you need a CSV file in the root of your project inside an 'import' folder to populate the database. You can ask your co-worker for this CSV file, or skip this if you don't want any data. Also important to note here is that you don't want to execture the `npm run db:seed` command multiple times, this will initiate the seed again and duplicate all of the data. If you want to run the seed again, you'll need to start with an empty database.
+4. Create a secret for NEXTAUTH_SECRET by running the following command. Use WSL for this command if you are on Windows.
+```bash
+openssl rand -base64 32
+```
+5. Ask a co-worker for the Azure credentials or the rights to create an app registration yourself.
+   1. AZURE_AD_CLIENT_SECRET: A secret credential created in an app registration.
+   2. AZURE_AD_CLIENT_ID: The client ID of the app registration.
+   3. AZURE_AD_TENANT_ID: The tenant ID of the Azure AD.
+6. Run the following commands to setup your db locally.
 ```bash
 npm run db:generate
 npm run db:push
+```
+7. You can seed the database with some initial data by running the following command. For this you need a file called `survey.csv` in the folder `./import`. Ask a co-worker for this file.
+```bash
 npm run db:seed
 ```
-5. Now you should be ready to go! 🎉 You can check your local database by opening the studio of Primsa. Here you should see that the database populated with questions, roles, etc.
+Note that if you run this command again, your database will be populated with duplicate data.
+8. Now you should be ready to go! 🎉 You can check your local database by opening the studio of Prisma. Here you should see that the database populated with questions, roles, etc.
 ```bash
 npm run db:studio
 ```
 
-### Setup Azure AD authentication
-
-The Azure AD credentials can be found in the `.env` file:
-```
-AZURE_AD_CLIENT_ID="dummy"
-AZURE_AD_CLIENT_SECRET="dummy"
-AZURE_AD_TENANT_ID="dummy"
-```
-
-You can go one of two ways to get your hands on these credentials:
-- Get them yourself from the Azure AD on the Azure Environment of your company
-- Ask a co-worker who has already worked on the project to sent those credentials to you in a secure manner
-
-### Setup NextAuth
-
-1. For using next auth, we need to setup a secret. This can be done in the .env file:
-```
-NEXTAUTH_SECRET="dummy"
-```
-2. Generate a new secret wit the following command:
+## Running the application
+To run the application, you can use the following command:
 ```bash
-openssl rand -base64 32
+npm run dev
 ```
-3. Update the `NEXTAUTH_SECRET` variable with the new value
+
+## Running the tests
+Tests are done using Playwright. To run the tests, you can use the following command:
+```bash
+npm run test
+```
+
+## Code style
+In this project, the code style is enforced by ESLint and Prettier. You can run the following command to check if your code is compliant with the code style:
+```bash
+npm run lint
+```
+If you want to automatically fix the code style issues, you can run the following command:
+```bash
+npm run lint:fix
+```
+Your IDE can help you with this, check out these links:
+- Jetbrains
+  - [ESLint](https://www.jetbrains.com/help/rider/eslint.html) 
+  - [Prettier](https://www.jetbrains.com/help/rider/Prettier.html)
+- Visual Studio Code
+  - [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint)
+  - [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)
+- Visual Studio
+  - [ESLint](https://learn.microsoft.com/en-us/visualstudio/javascript/linting-javascript?view=vs-2022)
+  - [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)
+
+## Database changes
+If you make changes to the database schema, you need to generate a new migration. You can do this by running the following command:
+```bash
+npx prisma migrate dev --name <name-of-your-migration>
+```
+For more information, look at the Prisma [documentation](https://www.prisma.io/docs/concepts/components/prisma-migrate).

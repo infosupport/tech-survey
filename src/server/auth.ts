@@ -1,8 +1,8 @@
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import {
-  getServerSession,
-  type DefaultSession,
-  type NextAuthOptions,
+    getServerSession,
+    type DefaultSession,
+    type NextAuthOptions,
 } from "next-auth";
 import { type Adapter } from "next-auth/adapters";
 import AzureADProvider from "next-auth/providers/azure-ad";
@@ -17,17 +17,17 @@ import { db } from "~/server/db";
  * @see https://next-auth.js.org/getting-started/typescript#module-augmentation
  */
 declare module "next-auth" {
-  interface Session extends DefaultSession {
-    user: {
-      id: string;
-      // findExpertOptIn: boolean;
-    } & DefaultSession["user"];
-  }
+    interface Session extends DefaultSession {
+        user: {
+            id: string;
+            // findExpertOptIn: boolean;
+        } & DefaultSession["user"];
+    }
 
-  interface User {
-    id: string;
-    // findExpertOptIn: boolean;
-  }
+    interface User {
+        id: string;
+        // findExpertOptIn: boolean;
+    }
 }
 
 /**
@@ -36,25 +36,25 @@ declare module "next-auth" {
  * @see https://next-auth.js.org/configuration/options
  */
 export const authOptions: NextAuthOptions = {
-  callbacks: {
-    session({ session, token }) {
-      if (session.user) {
-        session.user.id = token.sub ?? "userId";
-      }
-      return session;
+    callbacks: {
+        session({ session, token }) {
+            if (session.user) {
+                session.user.id = token.sub ?? "userId";
+            }
+            return session;
+        },
     },
-  },
-  session: {
-    strategy: "jwt",
-  },
-  adapter: PrismaAdapter(db) as Adapter,
-  providers: [
-    AzureADProvider({
-      clientId: env.AZURE_AD_CLIENT_ID,
-      clientSecret: env.AZURE_AD_CLIENT_SECRET,
-      tenantId: env.AZURE_AD_TENANT_ID,
-    }),
-  ],
+    session: {
+        strategy: "jwt",
+    },
+    adapter: PrismaAdapter(db) as Adapter,
+    providers: [
+        AzureADProvider({
+            clientId: env.AZURE_AD_CLIENT_ID,
+            clientSecret: env.AZURE_AD_CLIENT_SECRET,
+            tenantId: env.AZURE_AD_TENANT_ID,
+        }),
+    ],
 };
 
 /**

@@ -41,6 +41,7 @@ export class TestSetup {
     return new Promise<number>((res, rej) => {
       const nextProcess = spawn("npm", ["run", "dev", "--", "--port", "0"], {
         cwd: this.cwd,
+        shell: true,
         stdio: "pipe",
         env: {
           ...process.env,
@@ -146,7 +147,7 @@ export class TestSetup {
     const token = async () => {
       return jwt.encode({
         token: payload,
-        secret: "dummy",
+        secret: process.env.NEXTAUTH_SECRET!,
       });
     };
 

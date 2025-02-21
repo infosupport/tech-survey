@@ -1,9 +1,9 @@
 import { usePathname } from "next/navigation";
 
 export function GetCurrentRoleFromPath() {
-  const pathname = usePathname() || "";
+    const pathname = usePathname() || "";
 
-  const currentRole = pathname.split("/").pop() ?? "";
+    const currentRole = pathname.split("/").pop() ?? "";
 
-  return currentRole;
+    return currentRole;
 }
