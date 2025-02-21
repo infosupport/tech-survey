@@ -29,7 +29,7 @@ const formSchema = z.object({
 
 type FormSchema = z.infer<typeof formSchema>;
 
-const useDebounce = (value: string | undefined, delay = 5000) => {
+const useDebounce = (value: string | undefined, delay = 500) => {
     const [debouncedValue, setDebouncedValue] = useState(value);
 
     useEffect(() => {

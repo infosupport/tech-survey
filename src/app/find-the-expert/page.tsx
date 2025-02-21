@@ -4,7 +4,7 @@ import type { Session } from "next-auth";
 import { Suspense } from "react";
 import ButtonSkeleton from "~/components/loading/button-loader";
 import { Login } from "~/components/login";
-import ShowDataTable from "~/components/show-data-table";
+import ShowDataTable from "~/components/data-tables/show-data-table";
 import { getServerAuthSession } from "~/server/auth";
 import {
     extractUniqueIds,
@@ -104,16 +104,17 @@ const ShowTableWrapper = async ({
     });
 
     const { userIds, answerIds } = extractUniqueIds(userAnswersForRole);
-    const { userMap, answerOptionMap } = await fetchUsersAndAnswerOptions(
-        userIds,
-        answerIds,
-    );
+    const { dataByRoleAndQuestionForRole, aggregatedDataByRole } =
+        await fetchUsersAndAnswerOptions(
+            userIds,
+            answerIds,
+            userAnswersForRole,
+        );
 
     return (
         <ShowDataTable
-            userAnswersForRole={userAnswersForRole}
-            userMap={userMap}
-            answerOptionMap={answerOptionMap}
+            dataByRoleAndQuestionForRole={dataByRoleAndQuestionForRole}
+            aggregatedDataByRole={aggregatedDataByRole}
         />
     );
 };

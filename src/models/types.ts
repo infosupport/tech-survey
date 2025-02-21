@@ -169,7 +169,7 @@ export interface UserAnswersForRole {
     answerId: string;
 }
 
-export interface UserStuff {
+export interface UserInfo {
     id: string;
     name: string | null;
     communicationPreferences: {
