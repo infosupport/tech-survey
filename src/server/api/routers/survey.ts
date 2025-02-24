@@ -1,5 +1,9 @@
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
+import {
+    createTRPCRouter,
+    protectedProcedure,
+    publicProcedure,
+} from "~/server/api/trpc";
 import { type Role } from "~/models/types";
 import { TRPCClientError } from "@trpc/client";
 import { CommunicationMethod } from "@prisma/client";
@@ -42,6 +46,21 @@ export const surveyRouter = createTRPCRouter({
             }
 
             return user.roles as Role[];
+        }),
+
+    getUserInfo: protectedProcedure
+        .input(z.object({ userId: z.string() }))
+        .query(async ({ ctx, input }) => {
+            return await ctx.db.user.findUnique({
+                where: {
+                    id: input.userId,
+                },
+                include: {
+                    communicationPreferences: true,
+                    businessUnit: true,
+                    roles: true,
+                },
+            });
         }),
 
     getUserAnswersForRole: protectedProcedure
