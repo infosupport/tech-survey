@@ -90,10 +90,18 @@ export const publicProcedure = t.procedure;
  *
  * @see https://trpc.io/docs/procedures
  */
-export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
+export const protectedProcedure = t.procedure.use(({ ctx, next, rawInput }) => {
     if (!ctx.session || !ctx.session.user) {
         throw new TRPCError({ code: "UNAUTHORIZED" });
     }
+
+    // Users can only make requests for themselves
+    const userIdFromRequest = (rawInput as { userId: string }).userId;
+
+    if (userIdFromRequest !== ctx.session.user.id) {
+        throw new TRPCError({ code: "FORBIDDEN" });
+    }
+
     return next({
         ctx: {
             // infers the `session` as non-nullable
