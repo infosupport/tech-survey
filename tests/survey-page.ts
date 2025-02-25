@@ -89,7 +89,6 @@ export class SurveyPage {
     await this.page
       .getByRole("button", { name: "Submit", exact: true })
       .click();
-    await this.page.waitForTimeout(1000);
   }
 
   async selectRoles(roleNames: readonly string[]) {

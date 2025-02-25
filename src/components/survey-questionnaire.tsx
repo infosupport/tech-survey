@@ -41,7 +41,6 @@ export function SurveyQuestionnaire({
     userSelectedRoles: Role[];
     userAnswersForRole: QuestionResult[];
 }) {
-    const router = useRouter();
     const [selectedRoles] = useState<string[]>(
         userSelectedRoles.map((role) => role.id),
     );
@@ -195,10 +194,10 @@ export function SurveyQuestionnaire({
             event.preventDefault();
             const nextHref = getNextHref(selectedRolesForProgressBar);
             if (nextHref) {
-                router.push(nextHref);
+                window.location.href = nextHref;
             }
         } else {
-            router.push("/thank-you");
+            window.location.href = "/thank-you";
         }
     }
 
