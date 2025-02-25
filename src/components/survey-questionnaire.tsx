@@ -6,7 +6,7 @@ import {
     type Question,
     type QuestionResult,
 } from "~/models/types";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter} from "next/navigation";
 import { useEffect, useState } from "react";
 import { type Session } from "next-auth";
 import { slugify } from "~/utils/slugify";
@@ -41,6 +41,7 @@ export function SurveyQuestionnaire({
     userSelectedRoles: Role[];
     userAnswersForRole: QuestionResult[];
 }) {
+    const router = useRouter();
     const [selectedRoles] = useState<string[]>(
         userSelectedRoles.map((role) => role.id),
     );
@@ -194,10 +195,10 @@ export function SurveyQuestionnaire({
             event.preventDefault();
             const nextHref = getNextHref(selectedRolesForProgressBar);
             if (nextHref) {
-                window.location.href = nextHref;
+                router.push(nextHref);
             }
         } else {
-            window.location.href = "/thank-you";
+            router.push("/thank-you");
         }
     }
 
