@@ -20,7 +20,7 @@ import { promisify } from "node:util";
 const treeKillAsPromised = promisify(treeKill);
 const killAllProcesses = async (process: ChildProcess) => {
     if (process?.pid) {
-      await treeKillAsPromised(process.pid, "SIGKILL");
+      await treeKillAsPromised(process.pid);
     }
 };
 test.describe("Desktop tests using a single role", () => {
