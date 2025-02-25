@@ -80,15 +80,16 @@ function SelectRoles({
 
     const handleRoleToggle = (roleId: string, isDefault: boolean) => {
         if (!isDefault && !setRoleError) {
+            const index = selectedRoles.indexOf(roleId);
             let updatedRoles;
-            if (selectedRoles.includes(roleId)) {
-                updatedRoles = selectedRoles.filter((role) => role !== roleId);
-            } else {
+            if (index === -1) {
                 updatedRoles = [...selectedRoles, roleId];
+            } else {
+                updatedRoles = [...selectedRoles];
+                updatedRoles.splice(index, 1);
             }
 
             setSelectedRoles(updatedRoles);
-
             setRoleMutate({
                 userId: userId,
                 roleIds: updatedRoles,
