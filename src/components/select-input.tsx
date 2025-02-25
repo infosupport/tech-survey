@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { api } from "~/trpc/react";
 import { type Role } from "~/models/types";
 import Link from "next/link";
@@ -27,7 +27,9 @@ function SelectRoles({
         { userId: userId },
         { enabled: !!userId },
     );
-    const userSelectedRoles = user?.roles;
+    const userSelectedRoles = useMemo(() => {
+        return user?.roles ?? [];
+    }, [user]);
     const userSelectedBusinessUnit = user?.businessUnit ?? undefined;
     const communicationPreferences = user?.communicationPreferences;
     const [methods, setMethods] = useState<CommunicationMethod[]>(
@@ -75,21 +77,20 @@ function SelectRoles({
 
     // Initialize selected roles from userSelectedRoles prop
     useEffect(() => {
-        setSelectedRoles(userSelectedRoles?.map((role) => role.id) ?? []);
+        setSelectedRoles(userSelectedRoles?.map((role) => role.id));
     }, [userSelectedRoles]);
 
     const handleRoleToggle = (roleId: string, isDefault: boolean) => {
         if (!isDefault && !setRoleError) {
-            const index = selectedRoles.indexOf(roleId);
             let updatedRoles;
-            if (index === -1) {
-                updatedRoles = [...selectedRoles, roleId];
+            if (selectedRoles.includes(roleId)) {
+                updatedRoles = selectedRoles.filter((role) => role !== roleId);
             } else {
-                updatedRoles = [...selectedRoles];
-                updatedRoles.splice(index, 1);
+                updatedRoles = [...selectedRoles, roleId];
             }
 
             setSelectedRoles(updatedRoles);
+
             setRoleMutate({
                 userId: userId,
                 roleIds: updatedRoles,
