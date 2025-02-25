@@ -96,9 +96,8 @@ export const protectedProcedure = t.procedure.use(({ ctx, next, rawInput }) => {
     }
 
     // Users can only make requests for themselves
-    const userIdFromRequest = (rawInput as { userId: string }).userId;
-
-    if (userIdFromRequest !== ctx.session.user.id) {
+    const userIdsFromRequest = getUserIdFromInput(rawInput);
+    if (userIdsFromRequest.some((id) => id !== ctx.session!.user.id)) {
         throw new TRPCError({ code: "FORBIDDEN" });
     }
 
@@ -109,3 +108,12 @@ export const protectedProcedure = t.procedure.use(({ ctx, next, rawInput }) => {
         },
     });
 });
+
+// userId can be directly in an object, or there can be multiple in an array
+const getUserIdFromInput = (input: unknown): string[] => {
+    if (Array.isArray(input)) {
+        return input.map((i) => (i as { userId: string }).userId);
+    }
+
+    return [(input as { userId: string }).userId];
+};
