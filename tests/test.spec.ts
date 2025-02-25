@@ -16,13 +16,11 @@ import {
 } from "./test-setup";
 import treeKill from "tree-kill";
 
+import { promisify } from "node:util";
+const treeKillAsPromised = promisify(treeKill);
 const killAllProcesses = async (process: ChildProcess) => {
     if (process?.pid) {
-        treeKill(process.pid, "SIGKILL", (error) => {
-            if (error) {
-                throw error;
-            }
-        });
+      await treeKillAsPromised(process.pid, "SIGKILL");
     }
 };
 test.describe("Desktop tests using a single role", () => {
