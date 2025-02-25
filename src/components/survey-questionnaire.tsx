@@ -6,7 +6,7 @@ import {
     type Question,
     type QuestionResult,
 } from "~/models/types";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { type Session } from "next-auth";
 import { slugify } from "~/utils/slugify";
