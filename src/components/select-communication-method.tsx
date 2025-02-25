@@ -4,14 +4,7 @@ import { CommunicationMethod } from "@prisma/client";
 import { type Session } from "next-auth";
 import { useEffect, useState } from "react";
 import { api } from "~/trpc/react";
-import {
-    SlackLogo,
-    TeamsLogo,
-    EmailLogo,
-    PhoneLogo,
-    SignalLogo,
-    WhatsappLogo,
-} from "./svg";
+import communicationMethodToIcon from "~/components/ui/CommunicationMethodToIcon";
 
 export default function SelectCommunicationMethod({
     session,
@@ -65,15 +58,6 @@ export default function SelectCommunicationMethod({
             userId: session.user.id,
             methods: updatedSelectionCommunication,
         });
-    };
-
-    const communicationMethodToIcon: Record<string, JSX.Element> = {
-        SLACK: <SlackLogo />,
-        EMAIL: <EmailLogo />,
-        PHONE: <PhoneLogo />,
-        SIGNAL: <SignalLogo />,
-        TEAMS: <TeamsLogo />,
-        WHATSAPP: <WhatsappLogo />,
     };
 
     return (

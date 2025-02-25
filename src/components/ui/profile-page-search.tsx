@@ -7,6 +7,8 @@ import { Form, FormControl, FormField, FormItem } from "~/components/ui/form";
 import { Label } from "~/components/ui/label";
 import { Input } from "~/components/ui/input";
 import { z } from "zod";
+import { useEffect } from "react";
+import { useDebouncedCallback } from "use-debounce";
 
 const formSchema = z.object({
     name: z.string().trim(),
@@ -24,6 +26,18 @@ const ProfilePageSearch = () => {
             name: searchParams.get("name") ?? "",
         },
     });
+
+    const { name } = form.watch();
+
+    const debouncedUpdateURL = useDebouncedCallback((name: string) => {
+        const params = new URLSearchParams();
+        if (name) params.set("name", name);
+
+        router.push(`${path}?${params.toString()}`);
+    }, 250);
+    useEffect(() => {
+        debouncedUpdateURL(name);
+    }, [name, path, router, debouncedUpdateURL]);
 
     function onSubmit(values: FormSchema) {
         const params = new URLSearchParams();
