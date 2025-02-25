@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { api } from "~/trpc/react";
 import { type Role } from "~/models/types";
 import Link from "next/link";
@@ -27,9 +27,7 @@ function SelectRoles({
         { userId: userId },
         { enabled: !!userId },
     );
-    const userSelectedRoles = useMemo(() => {
-        return user?.roles ?? [];
-    }, [user]);
+    const userSelectedRoles = user?.roles ?? [];
     const userSelectedBusinessUnit = user?.businessUnit ?? undefined;
     const communicationPreferences = user?.communicationPreferences;
     const [methods, setMethods] = useState<CommunicationMethod[]>(
