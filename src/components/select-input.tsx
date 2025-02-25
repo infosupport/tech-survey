@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import {useState, useEffect, useMemo} from "react";
 import { api } from "~/trpc/react";
 import { type Role } from "~/models/types";
 import Link from "next/link";
@@ -11,7 +11,6 @@ import SelectCommunicationMethod from "~/components/select-communication-method"
 import { SpinnerButton } from "~/components/ui/button-spinner";
 import type { BusinessUnit, CommunicationMethod } from "@prisma/client";
 import SelectBusinessUnit from "~/components/select-businessunit";
-import { useRouter } from "next/navigation";
 import CommunicationPreferencesSelectionSkeleton from "~/components/loading/communication-preferences-selection-loader";
 
 function SelectRoles({
@@ -27,7 +26,7 @@ function SelectRoles({
         { userId: userId },
         { enabled: !!userId },
     );
-    const userSelectedRoles = user?.roles ?? [];
+    const userSelectedRoles = useMemo(() => user?.roles ?? [], [user]);
     const userSelectedBusinessUnit = user?.businessUnit ?? undefined;
     const communicationPreferences = user?.communicationPreferences;
     const [methods, setMethods] = useState<CommunicationMethod[]>(
@@ -110,13 +109,12 @@ function SelectRoles({
     const [communicationMethodIsLoading, setCommunicationMethodIsLoading] =
         useState(false);
 
-    const router = useRouter();
     // Redirect to /survey/general after the default role mutation succeeds
     useEffect(() => {
         if (setDefaultRoleIsSuccess) {
-            router.push("/survey/general");
+            window.location.href = "/survey/general";
         }
-    }, [router, setDefaultRoleIsSuccess]);
+    }, [setDefaultRoleIsSuccess]);
 
     return (
         <div className="container mx-auto py-8">
