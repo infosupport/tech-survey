@@ -6,7 +6,7 @@ import ButtonSkeleton from "~/components/loading/button-loader";
 import { Login } from "~/components/login";
 import ShowDataTable from "~/components/data-tables/show-data-table";
 import { getServerAuthSession } from "~/server/auth";
-import { fetchAnswerData } from "~/utils/data-manipulation";
+import { retrieveAnswersByRole } from "~/utils/data-manipulation";
 import { getRoles } from "~/utils/role-utils";
 import { db } from "~/server/db";
 import ShowTechSearchWrapper from "~/components/ui/show-tech-search-wrapper";
@@ -94,7 +94,7 @@ const ShowTableWrapper = async ({
     unit: string;
 }) => {
     const { dataByRoleAndQuestion, aggregatedDataByRole } =
-        await fetchAnswerData({
+        await retrieveAnswersByRole({
             role,
             questionText: tech,
             unit,

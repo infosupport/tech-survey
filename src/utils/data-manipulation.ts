@@ -34,7 +34,7 @@ type QuestionResultWithRelations = Prisma.QuestionResultGetPayload<{
     };
 }>;
 
-export const fetchAnswerData = async ({
+export const retrieveAnswersByRole = async ({
     role,
     questionText,
     unit,
