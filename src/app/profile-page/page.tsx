@@ -24,22 +24,30 @@ const LoginSection = ({ session }: { session: Session | null }) => (
     </>
 );
 
-const ContentSection = ({ name }: { name: string }) => (
-    <>
-        <Suspense fallback={<ButtonSkeleton />}>
-            <ProfilePageSearch />
-        </Suspense>
-        <Suspense fallback={<ButtonSkeleton />}>
-            {name ? (
-                <ProfilePage name={name} />
-            ) : (
-                <h3 className="text-center text-lg font-semibold">
-                    Type a name to start searching
-                </h3>
-            )}
-        </Suspense>
-    </>
-);
+const ContentSection = async ({ name }: { name: string }) => {
+    const users = await db.user.findMany({
+        select: userSelect,
+    });
+
+    const selectedUser = users.find((user) => user.name === name);
+
+    return (
+        <>
+            <Suspense fallback={<ButtonSkeleton />}>
+                <ProfilePageSearch allUsers={users} />
+            </Suspense>
+            <Suspense fallback={<ButtonSkeleton />}>
+                {name ? (
+                    <ProfilePage user={selectedUser} />
+                ) : (
+                    <h3 className="text-center text-lg font-semibold">
+                        Type a name to start searching
+                    </h3>
+                )}
+            </Suspense>
+        </>
+    );
+};
 
 const userSelect = {
     name: true,
@@ -59,6 +67,11 @@ const userSelect = {
             question: {
                 select: {
                     questionText: true,
+                    roles: {
+                        select: {
+                            role: true,
+                        },
+                    },
                 },
             },
         },
@@ -70,20 +83,35 @@ const userSelect = {
     },
 } satisfies Prisma.UserSelect;
 
-type UserData = Prisma.UserGetPayload<{
+export type UserData = Prisma.UserGetPayload<{
     select: typeof userSelect;
 }>;
 
-const ProfilePage = async ({ name }: { name: string }) => {
-    const users = await db.user.findMany({
-        where: {
-            name: {
-                contains: name,
-                mode: "insensitive",
-            },
+const ProfilePage = async ({ user }: { user?: UserData }) => {
+    if (!user) {
+        return (
+            <h3 className="text-center text-lg font-semibold">No user found</h3>
+        );
+    }
+
+    const userDataByRole = user.questionResults.reduce(
+        (acc, questionResult) => {
+            questionResult.question.roles.forEach((role) => {
+                if (!acc[role.role]) {
+                    acc[role.role] = {};
+                }
+
+                if (!acc[role.role]![questionResult.answer.option]) {
+                    acc[role.role]![questionResult.answer.option] = 0;
+                }
+
+                acc[role.role]![questionResult.answer.option]++;
+            });
+
+            return acc;
         },
-        select: userSelect,
-    });
+        {} as Record<string, Record<string, number>>,
+    );
 
     const columns: ColumnDef<UserData["questionResults"][0]>[] = [
         {
@@ -96,37 +124,71 @@ const ProfilePage = async ({ name }: { name: string }) => {
         },
     ];
 
+    const aggregatedColumns = [
+        {
+            accessorKey: "role",
+            header: "Role",
+        },
+        {
+            accessorKey: "0",
+            header: "🤗 Expert",
+        },
+        {
+            accessorKey: "1",
+            header: "😏 Competent",
+        },
+        {
+            accessorKey: "2",
+            header: "👷‍♀️ Novice & Would like to learn",
+        },
+        {
+            accessorKey: "3",
+            header: "🤷‍♂️ Novice / Don’t know",
+        },
+    ];
+
     return (
         <div>
-            {users.map((user) => {
-                return (
-                    <div key={user.id}>
-                        <h2 className="text-center text-2xl font-bold">
-                            Profile page for {user.name}
-                        </h2>
-                        <h3 className="text-center text-lg font-semibold">
-                            Preferred communication methods
-                            <div className="flex justify-center gap-2">
-                                {user.communicationPreferences?.methods.map(
-                                    (method) => (
-                                        <div key={method}>
-                                            {communicationMethodToIcon[method]}
-                                        </div>
-                                    ),
-                                )}
-                            </div>
-                        </h3>
-                        <DataTable
-                            columns={columns}
-                            data={user.questionResults}
-                        />
+            <div key={user.id}>
+                <h2 className="text-center text-2xl font-bold">
+                    Profile page for {user.name}
+                </h2>
+                <h3 className="text-center text-lg font-semibold">
+                    Preferred communication methods
+                    <div className="flex justify-center gap-2">
+                        {user.communicationPreferences?.methods.map(
+                            (method) => (
+                                <div key={method}>
+                                    {communicationMethodToIcon[method]}
+                                </div>
+                            ),
+                        )}
                     </div>
-                );
-            })}
+                </h3>
+                <h3 className="text-center text-lg font-semibold">
+                    Aggregated data by role
+                </h3>
+                <DataTable
+                    columns={aggregatedColumns}
+                    data={Object.keys(userDataByRole).map((role) => {
+                        const rowData = userDataByRole[role] ?? {};
+                        return {
+                            role,
+                            "0": rowData["0"] ?? 0,
+                            "1": rowData["1"] ?? 0,
+                            "2": rowData["2"] ?? 0,
+                            "3": rowData["3"] ?? 0,
+                        };
+                    })}
+                />
+                <h3 className="text-center text-lg font-semibold">
+                    Technology survey results
+                </h3>
+                <DataTable columns={columns} data={user.questionResults} />
+            </div>
         </div>
     );
 };
-
 const ProfilePageWrapper = async (context: {
     searchParams: { name: string };
 }) => {
