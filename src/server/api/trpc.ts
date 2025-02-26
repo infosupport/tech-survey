@@ -90,15 +90,9 @@ export const publicProcedure = t.procedure;
  *
  * @see https://trpc.io/docs/procedures
  */
-export const protectedProcedure = t.procedure.use(({ ctx, next, rawInput }) => {
+export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
     if (!ctx.session || !ctx.session.user) {
         throw new TRPCError({ code: "UNAUTHORIZED" });
-    }
-
-    // Users can only make requests for themselves
-    const userIdsFromRequest = getUserIdFromInput(rawInput);
-    if (userIdsFromRequest.some((id) => id !== ctx.session!.user.id)) {
-        throw new TRPCError({ code: "FORBIDDEN" });
     }
 
     return next({
@@ -108,12 +102,3 @@ export const protectedProcedure = t.procedure.use(({ ctx, next, rawInput }) => {
         },
     });
 });
-
-// userId can be directly in an object, or there can be multiple in an array
-const getUserIdFromInput = (input: unknown): string[] => {
-    if (Array.isArray(input)) {
-        return input.map((i) => (i as { userId: string }).userId);
-    }
-
-    return [(input as { userId: string }).userId];
-};
