@@ -7,7 +7,7 @@ import { Login } from "~/components/login";
 import { getServerAuthSession } from "~/server/auth";
 import ProfilePageSearch from "~/components/ui/profile-page-search";
 import { db } from "~/server/db";
-import { DataTable } from "~/components/data-table";
+import { DataTable } from "~/components/data-tables/data-table";
 import type { ColumnDef } from "@tanstack/react-table";
 import communicationMethodToIcon from "~/components/ui/CommunicationMethodToIcon";
 

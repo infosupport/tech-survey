@@ -1,11 +1,10 @@
 import type { ColumnDef } from "@tanstack/react-table";
-import Link from "next/link";
 import {
     aggregateColumns,
     columns,
     type AggregatedSurveyResult,
 } from "~/components/columns";
-import { DataTable } from "~/components/data-table";
+import { DataTable } from "~/components/data-tables/data-table";
 import {
     Accordion,
     AccordionContent,
