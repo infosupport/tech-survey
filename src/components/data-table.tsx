@@ -5,6 +5,7 @@ import {
     flexRender,
     getCoreRowModel,
     getPaginationRowModel,
+    getSortedRowModel,
     useReactTable,
 } from "@tanstack/react-table";
 
@@ -52,6 +53,8 @@ export function DataTable<TData, TValue>({
         columns,
         getCoreRowModel: getCoreRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
+        enableSorting: true,
+        getSortedRowModel: getSortedRowModel(),
     });
 
     return (
@@ -66,6 +69,7 @@ export function DataTable<TData, TValue>({
                                         <TableHead
                                             key={header.id}
                                             className="w-1/12"
+                                            onClick={header.column.getToggleSortingHandler()}
                                         >
                                             {" "}
                                             {header.isPlaceholder
@@ -75,6 +79,12 @@ export function DataTable<TData, TValue>({
                                                           .header,
                                                       header.getContext(),
                                                   )}
+                                            {{
+                                                asc: " 🔼",
+                                                desc: " 🔽",
+                                            }[
+                                                header.column.getIsSorted() as string
+                                            ] ?? null}
                                         </TableHead>
                                     );
                                 })}

@@ -101,3 +101,26 @@ export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
         },
     });
 });
+
+export const adminProtectedProcedure = protectedProcedure.use(
+    async ({ ctx, next }) => {
+        const user = await db.user.findFirst({
+            where: {
+                id: ctx.session?.user.id,
+                isAdministrator: true,
+            },
+        });
+        const userIsAdministrator = user !== null;
+
+        if (!userIsAdministrator) {
+            throw new TRPCError({ code: "UNAUTHORIZED" });
+        }
+
+        return next({
+            ctx: {
+                // infers the `session` as non-nullable
+                session: { ...ctx.session, user: ctx.session.user },
+            },
+        });
+    },
+);

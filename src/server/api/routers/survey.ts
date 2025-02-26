@@ -1,5 +1,10 @@
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
+import {
+    adminProtectedProcedure,
+    createTRPCRouter,
+    protectedProcedure,
+    publicProcedure,
+} from "../trpc";
 import { type Role } from "~/models/types";
 import { TRPCClientError } from "@trpc/client";
 import { CommunicationMethod } from "@prisma/client";
@@ -275,6 +280,119 @@ export const surveyRouter = createTRPCRouter({
                         roles: {
                             set: roles,
                         },
+                    },
+                });
+            } catch (error: unknown) {
+                if (error instanceof TRPCClientError) {
+                    throw error;
+                } else if (
+                    typeof error === "object" &&
+                    error !== null &&
+                    "message" in error &&
+                    typeof error.message === "string"
+                ) {
+                    if (error.message.includes("ETIMEDOUT")) {
+                        throw new TRPCClientError(
+                            "Timeout error occurred while accessing the database",
+                        );
+                    } else if (error.message.includes("ER_DUP_ENTRY")) {
+                        throw new TRPCClientError(
+                            "Duplicate entry error occurred",
+                        );
+                    } else if (error.message.includes("ER_NO_REFERENCED_ROW")) {
+                        throw new TRPCClientError(
+                            "Referenced row not found error occurred",
+                        );
+                    }
+                }
+                throw new TRPCClientError("An unexpected error occurred");
+            }
+        }),
+
+    setIsAdministrator: adminProtectedProcedure
+        .input(z.object({ userId: z.string(), isAdministrator: z.boolean() }))
+        .mutation(async ({ ctx, input }) => {
+            const { userId, isAdministrator } = input;
+
+            try {
+                const existingUser = await ctx.db.user.findUnique({
+                    where: {
+                        id: userId,
+                    },
+                });
+
+                if (!existingUser) {
+                    throw new TRPCClientError("User not found");
+                }
+
+                const amountOfAdmins = await ctx.db.user.count({
+                    where: {
+                        isAdministrator: true,
+                    },
+                });
+
+                if (!isAdministrator && amountOfAdmins === 1) {
+                    throw new TRPCClientError(
+                        "At least one admin must be present",
+                    );
+                }
+
+                // update the user
+                await ctx.db.user.update({
+                    where: {
+                        id: userId,
+                    },
+                    data: {
+                        isAdministrator,
+                    },
+                });
+            } catch (error: unknown) {
+                if (error instanceof TRPCClientError) {
+                    throw error;
+                } else if (
+                    typeof error === "object" &&
+                    error !== null &&
+                    "message" in error &&
+                    typeof error.message === "string"
+                ) {
+                    if (error.message.includes("ETIMEDOUT")) {
+                        throw new TRPCClientError(
+                            "Timeout error occurred while accessing the database",
+                        );
+                    } else if (error.message.includes("ER_DUP_ENTRY")) {
+                        throw new TRPCClientError(
+                            "Duplicate entry error occurred",
+                        );
+                    } else if (error.message.includes("ER_NO_REFERENCED_ROW")) {
+                        throw new TRPCClientError(
+                            "Referenced row not found error occurred",
+                        );
+                    }
+                }
+                throw new TRPCClientError("An unexpected error occurred");
+            }
+        }),
+
+    deleteUser: adminProtectedProcedure
+        .input(z.object({ userId: z.string() }))
+        .mutation(async ({ ctx, input }) => {
+            const { userId } = input;
+
+            try {
+                const existingUser = await ctx.db.user.findUnique({
+                    where: {
+                        id: userId,
+                    },
+                });
+
+                if (!existingUser) {
+                    throw new TRPCClientError("User not found");
+                }
+
+                // delete the user
+                await ctx.db.user.delete({
+                    where: {
+                        id: userId,
                     },
                 });
             } catch (error: unknown) {

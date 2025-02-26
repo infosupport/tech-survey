@@ -17,6 +17,7 @@ import { ArrowLeftDarkModeFriendly } from "~/components/svg";
 import Link from "next/link";
 import { headers } from "next/headers";
 import GithubLink from "~/components/github-link";
+import { db } from "~/server/db";
 
 const inter = Inter({
     subsets: ["latin"],
@@ -44,6 +45,14 @@ export default async function RootLayout({
     children: React.ReactNode;
 }) {
     const session = await getServerAuthSession();
+    const user = await db.user.findFirst({
+        where: {
+            id: session?.user.id,
+            isAdministrator: true,
+        },
+    });
+    const userIsAdministrator = user !== null;
+
     return (
         <html lang="en" suppressHydrationWarning={true}>
             <body
@@ -77,6 +86,13 @@ export default async function RootLayout({
                                     <Suspense fallback={<ButtonSkeleton />}>
                                         <LoginWrapper session={session} />
                                     </Suspense>
+                                )}
+                                {userIsAdministrator && (
+                                    <Link href="/administrator-dashboard">
+                                        <Button variant="outline">
+                                            Administrator dashboard
+                                        </Button>
+                                    </Link>
                                 )}
                                 <ModeToggle />
                                 <GithubLink />

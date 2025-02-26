@@ -82,6 +82,7 @@ model User {
   sessions                 Session[]
   businessUnitId           String?
   businessUnit             BusinessUnit?            @relation(fields: [businessUnitId], references: [id])
+  isAdministrator          Boolean                  @default(false)  
 }
 
 model Account {

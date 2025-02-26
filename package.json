@@ -11,6 +11,7 @@
     "db:generate": "prisma generate",
     "db:deploy": "prisma migrate deploy",
     "db:seed": "node prisma/seed.js",
+    "db:create_admin": "tsx prisma/create_admin.ts",
     "dev": "next dev",
     "lint": "next lint",
     "lint:fix": "npm run lint -- --fix",
@@ -65,6 +66,7 @@
     "superjson": "^2.2.1",
     "tailwind-merge": "^2.3.0",
     "tailwindcss-animate": "^1.0.7",
+    "use-debounce": "^10.0.4",
     "zod": "^3.23.8"
   },
   "devDependencies": {
