@@ -1,6 +1,6 @@
 import { surveyRouter } from "~/server/api/routers/survey";
 import { createTRPCRouter } from "~/server/api/trpc";
-import { usageMetricLogger } from "../log";
+import { usageMetricLogger } from "~/server/log";
 
 /**
  * This is the primary router for your server.
