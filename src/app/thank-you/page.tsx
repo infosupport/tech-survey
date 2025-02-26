@@ -1,5 +1,5 @@
 import { db } from "~/server/db";
-import PdfDownloadButton from "../../components/download-pdf";
+import PdfDownloadButton from "~/components/download-pdf";
 import React, { Suspense } from "react";
 import { getServerAuthSession } from "~/server/auth";
 import {
