@@ -45,7 +45,7 @@ export const aggregateColumns: ColumnDef<AggregatedSurveyResult>[] = [
         cell: ({ row }) => {
             const name = row.original.name.replace(" ", "+");
             return (
-                <Link href={`/profile-page?name=${name}`}>
+                <Link href={`/find-the-expert/profile-page?name=${name}`}>
                     {row.original.name}
                     <ExternalLinkIcon className="ml-1 inline-block text-blue-600" />
                 </Link>

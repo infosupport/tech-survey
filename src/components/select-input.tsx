@@ -203,17 +203,6 @@ export default function SelectRoles({
                             <ArrowRightDarkModeFriendly />
                         </SpinnerButton>
                     </Link>
-                    <Link href="/profile-page">
-                        <SpinnerButton
-                            onClick={handleLogging}
-                            state={communicationMethodIsLoading}
-                            variant="outline"
-                            className="border-2 border-[#bed62f]"
-                            name="Profile page"
-                        >
-                            <ArrowRightDarkModeFriendly />
-                        </SpinnerButton>
-                    </Link>
                 </div>
             </div>
         </div>

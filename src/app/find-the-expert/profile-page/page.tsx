@@ -10,6 +10,7 @@ import { db } from "~/server/db";
 import { DataTable } from "~/components/data-tables/data-table";
 import type { ColumnDef } from "@tanstack/react-table";
 import communicationMethodToIcon from "~/components/ui/CommunicationMethodToIcon";
+import ProfileRadarChart from "~/components/profile-radar-chart";
 
 export const metadata: Metadata = {
     title: "Find the expert",
@@ -67,6 +68,11 @@ const userSelect = {
             question: {
                 select: {
                     questionText: true,
+                    survey: {
+                        select: {
+                            surveyName: true,
+                        },
+                    },
                     roles: {
                         select: {
                             role: true,
@@ -87,6 +93,13 @@ export type UserData = Prisma.UserGetPayload<{
     select: typeof userSelect;
 }>;
 
+const optionWeights: Record<number, number> = {
+    0: 5,
+    1: 3,
+    2: 1,
+    3: 0,
+};
+
 const ProfilePage = async ({ user }: { user?: UserData }) => {
     if (!user) {
         return (
@@ -94,23 +107,27 @@ const ProfilePage = async ({ user }: { user?: UserData }) => {
         );
     }
 
-    const userDataByRole = user.questionResults.reduce(
+    const radarGraphData = user.questionResults.reduce(
         (acc, questionResult) => {
             questionResult.question.roles.forEach((role) => {
-                if (!acc[role.role]) {
-                    acc[role.role] = {};
-                }
+                const roleName = role.role;
+                const answer = questionResult.answer.option;
+                const weight = optionWeights[answer] ?? 0;
 
-                if (!acc[role.role]![questionResult.answer.option]) {
-                    acc[role.role]![questionResult.answer.option] = 0;
-                }
+                const existingRoleData = acc.find(
+                    (item) => item.role === roleName,
+                );
 
-                acc[role.role]![questionResult.answer.option]++;
+                if (existingRoleData) {
+                    existingRoleData.sum += weight;
+                } else {
+                    acc.push({ role: roleName, sum: weight });
+                }
             });
 
             return acc;
         },
-        {} as Record<string, Record<string, number>>,
+        [] as { role: string; sum: number }[],
     );
 
     const columns: ColumnDef<UserData["questionResults"][0]>[] = [
@@ -124,36 +141,13 @@ const ProfilePage = async ({ user }: { user?: UserData }) => {
         },
     ];
 
-    const aggregatedColumns = [
-        {
-            accessorKey: "role",
-            header: "Role",
-        },
-        {
-            accessorKey: "0",
-            header: "🤗 Expert",
-        },
-        {
-            accessorKey: "1",
-            header: "😏 Competent",
-        },
-        {
-            accessorKey: "2",
-            header: "👷‍♀️ Novice & Would like to learn",
-        },
-        {
-            accessorKey: "3",
-            header: "🤷‍♂️ Novice / Don’t know",
-        },
-    ];
-
     return (
         <div>
             <div key={user.id}>
-                <h2 className="text-center text-2xl font-bold">
+                <h2 className="mb-2 text-center text-2xl font-bold">
                     Profile page for {user.name}
                 </h2>
-                <h3 className="text-center text-lg font-semibold">
+                <h3 className="mb-2 text-center text-lg font-semibold">
                     Preferred communication methods
                     <div className="flex justify-center gap-2">
                         {user.communicationPreferences?.methods.map(
@@ -165,23 +159,15 @@ const ProfilePage = async ({ user }: { user?: UserData }) => {
                         )}
                     </div>
                 </h3>
-                <h3 className="text-center text-lg font-semibold">
+                <h3 className="mb-2 text-center text-lg font-semibold">
                     Aggregated data by role
                 </h3>
-                <DataTable
-                    columns={aggregatedColumns}
-                    data={Object.keys(userDataByRole).map((role) => {
-                        const rowData = userDataByRole[role] ?? {};
-                        return {
-                            role,
-                            "0": rowData["0"] ?? 0,
-                            "1": rowData["1"] ?? 0,
-                            "2": rowData["2"] ?? 0,
-                            "3": rowData["3"] ?? 0,
-                        };
-                    })}
-                />
-                <h3 className="text-center text-lg font-semibold">
+                <div className="mb-4">
+                    <div className="chart-container">
+                        <ProfileRadarChart data={radarGraphData} />
+                    </div>
+                </div>
+                <h3 className="mb-2 text-center text-lg font-semibold">
                     Technology survey results
                 </h3>
                 <DataTable columns={columns} data={user.questionResults} />
