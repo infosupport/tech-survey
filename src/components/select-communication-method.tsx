@@ -2,7 +2,7 @@
 
 import { CommunicationMethod } from "@prisma/client";
 import { type Session } from "next-auth";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type JSX } from "react";
 import { api } from "~/trpc/react";
 import {
     SlackLogo,
@@ -26,7 +26,7 @@ export default function SelectCommunicationMethod({
         CommunicationMethod[]
     >([]);
 
-    const { mutate: setMethodMutate, isLoading: setMethodIsLoading } =
+    const { mutate: setMethodMutate, isPending: setMethodIsLoading } =
         api.survey.setCommunicationMethods.useMutation();
 
     useEffect(() => {

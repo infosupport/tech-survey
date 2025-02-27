@@ -1,5 +1,9 @@
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
+import {
+    createTRPCRouter,
+    protectedProcedure,
+    publicProcedure,
+} from "~/server/api/trpc";
 import { type Role } from "~/models/types";
 import { TRPCClientError } from "@trpc/client";
 import { CommunicationMethod } from "@prisma/client";

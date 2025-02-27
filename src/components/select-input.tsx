@@ -32,7 +32,7 @@ export default function SelectRoles({
     const {
         mutate: setRoleMutate,
         error: setRoleError,
-        isLoading: setRoleIsLoading,
+        isPending: setRoleIsLoading,
     } = api.survey.setRole.useMutation();
     const { mutate: setDefaultRoleMutate, isSuccess: setDefaultRoleIsSuccess } =
         api.survey.setDefaultRole.useMutation();

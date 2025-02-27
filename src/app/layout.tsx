@@ -32,18 +32,13 @@ export const metadata = {
     icons: [{ rel: "icon", url: "/favicon.png" }],
 };
 
-function getNextUrl() {
-    const headersList = headers();
-    const nextUrl = headersList.get("next-url");
-    return nextUrl;
-}
-
 export default async function RootLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
     const session = await getServerAuthSession();
+    const headerList = await headers();
     return (
         <html lang="en" suppressHydrationWarning={true}>
             <body
@@ -63,7 +58,7 @@ export default async function RootLayout({
                         <main className="min-h-screen items-center justify-center">
                             <div className="mx-auto flex flex-wrap items-center justify-between p-4">
                                 {/* only show this back to home button if the getNextUrl is not '/' */}
-                                {getNextUrl() !== "/" && (
+                                {headerList.get("next-url") !== "/" && (
                                     <Link href="/" passHref>
                                         <Button variant="outline">
                                             <ArrowLeftDarkModeFriendly />

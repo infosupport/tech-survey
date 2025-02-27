@@ -56,7 +56,7 @@ const FindTheExpertSearch = async () => {
 };
 
 const FindTheExpertPage = async (context: {
-    searchParams: { role: string; tech: string; unit: string };
+    searchParams: Promise<{ role: string; tech: string; unit: string }>;
 }) => {
     const session = await getServerAuthSession();
 
@@ -73,9 +73,9 @@ const FindTheExpertPage = async (context: {
             </h1>
             {session ? (
                 <ContentSection
-                    role={context.searchParams.role}
-                    tech={context.searchParams.tech}
-                    unit={context.searchParams.unit}
+                    role={(await context.searchParams).role}
+                    tech={(await context.searchParams).tech}
+                    unit={(await context.searchParams).unit}
                 />
             ) : (
                 <LoginSection session={session} />
