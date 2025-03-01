@@ -2,6 +2,8 @@
 
 ## Setup for local development
 
+> When using Nix flakes with direnv integration, skip right ahead to step 5.
+
 1. Install [Rancher](https://rancherdesktop.io/) (or Docker if you prefer/you have a license) and make sure it is running.
 2. Spin up a postgres database with the following command. You need to choose your own password and username:
 ```bash
