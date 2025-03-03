@@ -28,7 +28,6 @@ openssl rand -base64 32
 6. Run the following commands to setup your db locally.
 
 ```bash
-cd prisma
 npm run db:generate
 npm run db:push
 ```
