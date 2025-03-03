@@ -97,6 +97,7 @@ export class SurveyPage {
         .locator(`li:has-text("${roleName}")`)
         .first()
         .locator('input[type="checkbox"]');
+      await this.page.waitForTimeout(1000);
       await roleCheckbox.check();
     }
 
