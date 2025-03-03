@@ -1,6 +1,6 @@
 {
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11";
     systems.url = "github:nix-systems/default";
     devenv.url = "github:cachix/devenv";
   };
@@ -30,9 +30,17 @@ let
                       # https://devenv.sh/basics/
                       # dotenv.enable = false;
 
+                      env = {
+                        PRISMA_QUERY_ENGINE_LIBRARY = "${pkgs.prisma-engines}/lib/libquery_engine.node";
+                        PRISMA_QUERY_ENGINE_BINARY = "${pkgs.prisma-engines}/bin/query-engine";
+                        PRISMA_SCHEMA_ENGINE_BINARY = "${pkgs.prisma-engines}/bin/schema-engine";
+                      };
+
                       # https://devenv.sh/packages/
                       packages = with pkgs; [
                         git
+                        openssl
+                        prisma
                       ];
 
                       # https://devenv.sh/scripts/
