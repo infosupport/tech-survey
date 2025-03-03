@@ -1,8 +1,7 @@
 import { getServerAuthSession } from "~/server/auth";
-import SelectRole from "~/components/select-input";
+import SelectRoles from "~/components/select-input";
 
 import React, { Suspense } from "react";
-import { type Session } from "next-auth";
 import { db } from "~/server/db";
 import RoleSelectionSkeleton from "~/components/loading/role-selection-loader";
 import Buttons from "~/components/additional-buttons-homepage";
@@ -10,6 +9,11 @@ import Link from "next/link";
 
 const Home: React.FC = async () => {
     const session = await getServerAuthSession();
+    const [roles, businessUnits] = await Promise.all([
+        db.role.findMany(),
+        db.businessUnit.findMany(),
+    ]);
+
     return (
         <div>
             <div className="container mx-auto py-16 sm:px-4 sm:py-16 md:px-8 lg:px-16">
@@ -100,7 +104,11 @@ const Home: React.FC = async () => {
                         {session && (
                             <div>
                                 <Suspense fallback={<RoleSelectionSkeleton />}>
-                                    <SelectRoleWrapper session={session} />
+                                    <SelectRoles
+                                        userId={session.user.id}
+                                        roles={roles}
+                                        businessUnits={businessUnits}
+                                    />
                                 </Suspense>
                             </div>
                         )}
@@ -112,50 +120,4 @@ const Home: React.FC = async () => {
         </div>
     );
 };
-
-const SelectRoleWrapper: React.FC<{ session: Session }> = async ({
-    session,
-}) => {
-    const [roles, userRoles, userCommunicationMethods, businessUnits] =
-        await Promise.all([
-            db.role.findMany(),
-            db.user.findUnique({
-                where: {
-                    id: session.user.id,
-                },
-                include: {
-                    roles: true,
-                    businessUnit: true,
-                },
-            }),
-            db.user.findUnique({
-                where: {
-                    id: session.user.id,
-                },
-                include: {
-                    communicationPreferences: true,
-                },
-            }),
-            db.businessUnit.findMany(),
-        ]);
-
-    const userSelectedRoles = userRoles?.roles ?? [];
-    const useSelectedBusinessUnit = userRoles?.businessUnit ?? undefined;
-    const communicationPreferences =
-        userCommunicationMethods?.communicationPreferences;
-    const methods = communicationPreferences?.methods ?? [];
-    const methodStrings = methods.map((method) => method.toString());
-
-    return (
-        <SelectRole
-            session={session}
-            roles={roles}
-            userSelectedRoles={userSelectedRoles}
-            methods={methodStrings}
-            businessUnits={businessUnits}
-            userSelectedBusinessUnit={useSelectedBusinessUnit}
-        />
-    );
-};
-
 export default Home;

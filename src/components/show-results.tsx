@@ -10,7 +10,7 @@ import {
     Tooltip,
 } from "recharts";
 import { type TransformedData } from "~/models/types";
-import { ResultCommons } from "./results";
+import { ResultCommons } from "~/components/results";
 import { idToTextMap } from "~/utils/optionMapping";
 
 const ShowResults = ({ data }: { data: TransformedData }) => {

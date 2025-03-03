@@ -1,6 +1,8 @@
 "use client";
 
 import { type ColumnDef } from "@tanstack/react-table";
+import { ExternalLinkIcon } from "@radix-ui/react-icons";
+import Link from "next/link";
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
@@ -40,6 +42,15 @@ export const aggregateColumns: ColumnDef<AggregatedSurveyResult>[] = [
     {
         accessorKey: "name",
         header: "Name",
+        cell: ({ row }) => {
+            const name = row.original.name.replace(" ", "+");
+            return (
+                <Link href={`/find-the-expert/profile-page?name=${name}`}>
+                    {row.original.name}
+                    <ExternalLinkIcon className="ml-1 inline-block text-blue-600" />
+                </Link>
+            );
+        },
     },
     {
         accessorKey: "communicationPreferences",

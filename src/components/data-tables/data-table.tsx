@@ -18,30 +18,12 @@ import {
 } from "~/components/ui/table";
 import { idToTextMap } from "~/utils/optionMapping";
 import { DataTablePagination } from "~/components/data-tables/data-table-pagination";
-import {
-    SlackLogo,
-    TeamsLogo,
-    EmailLogo,
-    PhoneLogo,
-    SignalLogo,
-    WhatsappLogo,
-} from "~/components/svg";
+import communicationMethodToIcon from "~/components/ui/CommunicationMethodToIcon";
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[];
     data: TData[];
 }
-
-// for communication preferences, we want to show the method as an clickable icon.
-// we need to map the method to an icon
-const communicationMethodToIcon: Record<string, JSX.Element> = {
-    SLACK: <SlackLogo />,
-    EMAIL: <EmailLogo />,
-    PHONE: <PhoneLogo />,
-    SIGNAL: <SignalLogo />,
-    TEAMS: <TeamsLogo />,
-    WHATSAPP: <WhatsappLogo />,
-};
 
 export function DataTable<TData, TValue>({
     columns,

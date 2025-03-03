@@ -1,3 +1,5 @@
+// @ts-check
+import { expect } from "@playwright/test";
 import { type Page } from "playwright";
 
 export class SurveyPage {
@@ -39,10 +41,10 @@ export class SurveyPage {
 
     async navigateToFindTheExpert(role: string) {
         await this.page.goto(
-            `http://localhost:${this.port}/find-the-expert?role=${role}`,
+            `http://localhost:${this.port}/find-the-expert/tech-page?role=${role}`,
         );
         await this.page.waitForURL(
-            `http://localhost:${this.port}/find-the-expert?role=${role}`,
+            `http://localhost:${this.port}/find-the-expert/tech-page?role=${role}`,
         );
         const isTextVisible = await this.page
             .getByText(`Viewing results for role`)
@@ -100,6 +102,7 @@ export class SurveyPage {
                 .locator(`li:has-text("${roleName}")`)
                 .first()
                 .locator('input[type="checkbox"]');
+            await this.page.waitForTimeout(1000);
             await roleCheckbox.check();
         }
 

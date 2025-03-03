@@ -1,16 +1,7 @@
 "use client";
 
 import { type TransformedData } from "~/models/types";
-import ShowResults from "./show-results";
 import { idToTextMap } from "~/utils/optionMapping";
-
-export default function ResultsWrapper({ data }: { data: TransformedData }) {
-    return (
-        <div>
-            <ShowResults data={data} />
-        </div>
-    );
-}
 
 export function ResultCommons({ data }: { data: TransformedData }) {
     const colorPalette = [
