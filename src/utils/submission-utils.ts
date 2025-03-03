@@ -1,16 +1,17 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "~/components/ui/use-toast";
-import type { SurveyResponse } from "~/models/types";
+import type { QuestionResult, SurveyResponse } from "~/models/types";
 import { api } from "~/trpc/react";
+import { useDebouncedCallback } from "use-debounce";
 
-export const useSubmitAnswers = () => {
+export const useSubmitAnswers = (userAnswersForRole: QuestionResult[]) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [currentAnswers, setCurrentAnswers] = useState<SurveyResponse[]>([]);
+    const [currentAnswers, setCurrentAnswers] =
+        useState<QuestionResult[]>(userAnswersForRole);
     const [error, setError] = useState<string | null>(null);
     const submitResponse = api.survey.setQuestionResult.useMutation();
-    const submitAsyncRef = useRef<() => Promise<void>>();
 
     useEffect(() => {
         if (submitResponse.isError) {
@@ -23,49 +24,28 @@ export const useSubmitAnswers = () => {
         }
     }, [submitResponse.isError, submitResponse.error]);
 
-    useEffect(() => {
-        submitAsyncRef.current = async () => {
-            setIsSubmitting(true);
-            try {
-                const mappedResponses = currentAnswers.map(
-                    ({ userId, questionId, answerId }) => ({
-                        userId: userId ?? "",
-                        questionId,
-                        answerId: answerId.toString(),
-                        roleIds: [],
-                    }),
-                );
-
-                await submitResponse.mutateAsync(mappedResponses);
-            } finally {
-                setIsSubmitting(false);
+    const saveAnswer = async (answer: SurveyResponse) => {
+        setIsSubmitting(true);
+        const newAnswer = await submitResponse.mutateAsync(answer);
+        setIsSubmitting(false);
+        setCurrentAnswers((answers) => {
+            const existingAnswer = answers.find(
+                (ans) => ans.id === newAnswer.id,
+            );
+            if (existingAnswer) {
+                return [
+                    ...answers.filter((ans) => ans.id !== newAnswer.id),
+                    newAnswer,
+                ];
+            } else {
+                return [...answers, newAnswer];
             }
-        };
-    }, [submitResponse, currentAnswers]);
-
-    useEffect(() => {
-        const submitAsync = async () => {
-            if (submitAsyncRef.current) {
-                await submitAsyncRef.current();
-            }
-        };
-
-        submitAsync().catch((error) => {
-            throw new Error(String(error));
         });
-    }, [currentAnswers]);
+    };
 
     return {
-        saveAnswer: async (answer: SurveyResponse) => {
-            setCurrentAnswers((answers) => {
-                const updatedAnswers = answers.filter(
-                    (ans) =>
-                        ans.userId !== answer.userId ||
-                        ans.questionId !== answer.questionId,
-                );
-                return [...updatedAnswers, answer];
-            });
-        },
+        // TODO: Debounce gaat over alle calls ipv per antwoord
+        saveAnswer: useDebouncedCallback(saveAnswer, 250),
         isSubmitting,
         currentAnswers,
         error,

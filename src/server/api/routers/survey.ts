@@ -82,15 +82,132 @@ export const surveyRouter = createTRPCRouter({
             return userAnswers;
         }),
 
+    getSurveyQuestionsCompletedPerRole: protectedProcedure
+        .input(z.object({ userId: z.string() }))
+        .query(async ({ ctx, input }) => {
+            const userRolesWithQuestions = await ctx.db.role.findMany({
+                where: {
+                    users: {
+                        some: {
+                            id: input.userId,
+                        },
+                    },
+                },
+                include: {
+                    questions: {
+                        include: {
+                            QuestionResult: {
+                                where: {
+                                    userId: input.userId,
+                                },
+                                select: {
+                                    id: true,
+                                },
+                            },
+                        },
+                    },
+                },
+            });
+
+            const result: Record<
+                string,
+                { totalQuestions: number; answeredQuestions: number }
+            > = {};
+
+            for (const role of userRolesWithQuestions) {
+                const totalQuestions = role.questions.length;
+                const answeredQuestions = role.questions.filter(
+                    (question) => question.QuestionResult.length > 0,
+                ).length;
+
+                result[role.id] = {
+                    totalQuestions,
+                    answeredQuestions,
+                };
+            }
+
+            return result;
+        }),
+
+    getSurveyPageData: protectedProcedure
+        .input(z.object({ userId: z.string(), role: z.string() }))
+        .query(async ({ ctx, input }) => {
+            const roles = await ctx.db.role.findMany({
+                where: {
+                    users: {
+                        some: {
+                            id: input.userId,
+                        },
+                    },
+                },
+            });
+
+            const htmlDecodedRole = decodeURIComponent(
+                input.role.replace(/\+/g, " "),
+            );
+            const questions = await ctx.db.question.findMany({
+                where: {
+                    roles: {
+                        some: {
+                            role: {
+                                equals: htmlDecodedRole,
+                                mode: "insensitive",
+                            },
+                        },
+                    },
+                },
+                include: {
+                    roles: true,
+                    QuestionResult: {
+                        where: {
+                            userId: input.userId,
+                        },
+                        include: {
+                            question: true,
+                        },
+                    },
+                },
+            });
+
+            const answerOptions = await ctx.db.answerOption.findMany();
+
+            const userAnswersForRole = await ctx.db.questionResult.findMany({
+                where: {
+                    userId: input.userId,
+                    question: {
+                        roles: {
+                            some: {
+                                role: {
+                                    equals: htmlDecodedRole,
+                                    mode: "insensitive",
+                                },
+                            },
+                        },
+                    },
+                },
+                include: {
+                    question: {
+                        include: {
+                            roles: true,
+                        },
+                    },
+                },
+            });
+
+            return { questions, answerOptions, roles, userAnswersForRole };
+        }),
+
     setDefaultRole: protectedProcedure
-        .input(z.object({ userId: z.string(), roleIds: z.array(z.string()) }))
+        .input(z.object({ userId: z.string() }))
         .mutation(async ({ ctx, input }) => {
             const user = await ctx.db.user.findUnique({
                 where: {
                     id: input.userId,
                 },
+                select: {
+                    roles: true,
+                },
             });
-            let updatedRoles: Role[] = [];
 
             if (!user) {
                 throw new TRPCClientError("User not found");
@@ -108,30 +225,18 @@ export const surveyRouter = createTRPCRouter({
                 throw new TRPCClientError("Default role not found");
             }
 
+            const userRoles = user.roles;
+
             let hasDefaultRole = false;
             // Check if the default role is already assigned to the user
-            for (const roleIds of input.roleIds) {
-                if (roleIds === defaultRole.id) {
+            for (const role of userRoles) {
+                if (role.id === defaultRole.id) {
                     hasDefaultRole = true;
                 }
             }
 
             if (!hasDefaultRole) {
-                // retrieve the user's roles, based on the role IDs
-
-                if (input.roleIds) {
-                    const userRoles = await ctx.db.role.findMany({
-                        where: {
-                            id: {
-                                in: input.roleIds,
-                            },
-                        },
-                    });
-                    // If the user doesn't have the default role, add it to their roles
-                    updatedRoles = [...userRoles, defaultRole];
-                } else {
-                    updatedRoles = [defaultRole];
-                }
+                const newRoles = userRoles.concat(defaultRole);
 
                 await ctx.db.user.update({
                     where: {
@@ -139,7 +244,7 @@ export const surveyRouter = createTRPCRouter({
                     },
                     data: {
                         roles: {
-                            set: updatedRoles,
+                            set: newRoles,
                         },
                     },
                 });
@@ -325,88 +430,76 @@ export const surveyRouter = createTRPCRouter({
 
     setQuestionResult: protectedProcedure
         .input(
-            z.array(
-                z.object({
-                    userId: z.string(),
-                    questionId: z.string(),
-                    answerId: z.string(),
-                }),
-            ),
+            z.object({
+                userId: z.string(),
+                questionId: z.string(),
+                answerId: z.string(),
+                id: z.string().optional(),
+            }),
         )
         .mutation(async ({ ctx, input }) => {
             try {
-                await Promise.all(
-                    input.map(async (response) => {
-                        const { userId, questionId, answerId } = response;
+                const { userId, questionId, answerId, id } = input;
 
-                        // find the question
-                        const question = await ctx.db.question.findUnique({
+                const [questionExists, answerOptionExists, userExists] =
+                    await Promise.all([
+                        ctx.db.question.count({
                             where: {
                                 id: questionId,
                             },
-                        });
-
-                        if (!question) {
-                            throw new TRPCClientError(
-                                `Question with ID ${questionId} not found`,
-                            );
-                        }
-
-                        // find the answer
-                        const answerOption =
-                            await ctx.db.answerOption.findUnique({
-                                where: {
-                                    id: answerId,
-                                },
-                            });
-
-                        if (!answerOption) {
-                            throw new TRPCClientError(
-                                `Answer with ID ${answerId} not found`,
-                            );
-                        }
-
-                        // find the user
-                        const user = await ctx.db.user.findUnique({
+                        }),
+                        ctx.db.answerOption.count({
+                            where: {
+                                id: answerId,
+                            },
+                        }),
+                        ctx.db.user.count({
                             where: {
                                 id: userId,
                             },
-                        });
+                        }),
+                    ]);
 
-                        if (!user) {
-                            throw new TRPCClientError(
-                                `User with ID ${userId} not found`,
-                            );
-                        }
+                if (questionExists === 0) {
+                    throw new TRPCClientError(
+                        `Question with ID ${questionId} not found`,
+                    );
+                }
+                if (answerOptionExists === 0) {
+                    throw new TRPCClientError(
+                        `Answer with ID ${answerId} not found`,
+                    );
+                }
+                if (userExists === 0) {
+                    throw new TRPCClientError(
+                        `User with ID ${userId} not found`,
+                    );
+                }
 
-                        // find the existing answer
-                        const existingAnswer =
-                            await ctx.db.questionResult.findFirst({
-                                where: {
-                                    userId,
-                                    questionId,
-                                },
-                            });
-
-                        if (existingAnswer) {
-                            // delete the existing answer
-                            await ctx.db.questionResult.delete({
-                                where: {
-                                    id: existingAnswer.id,
-                                },
-                            });
-                        }
-
-                        // create a new answer
-                        await ctx.db.questionResult.create({
-                            data: {
-                                userId,
-                                questionId,
-                                answerId,
-                            },
-                        });
-                    }),
-                );
+                if (id) {
+                    return await ctx.db.questionResult.update({
+                        where: {
+                            id: id,
+                        },
+                        data: {
+                            answerId,
+                        },
+                        include: {
+                            question: true,
+                        },
+                    });
+                } else {
+                    return await ctx.db.questionResult.create({
+                        data: {
+                            userId,
+                            questionId,
+                            answerId,
+                        },
+                        include: {
+                            question: true,
+                        },
+                    });
+                }
             } catch (error) {
                 // eslint-disable-next-line no-console
                 console.error("Error processing answers:", error);

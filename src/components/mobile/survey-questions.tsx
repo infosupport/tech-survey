@@ -21,7 +21,6 @@ import {
     FormMessage,
 } from "~/components/ui/form";
 
-import { type Session } from "next-auth";
 import { idToMoreInfo, idToTextMap } from "~/utils/optionMapping";
 
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
@@ -32,15 +31,15 @@ import { findAnswerId } from "~/utils/survey-utils";
 import { Button } from "../ui/button";
 
 export function MobileSurveyQuestionnaire({
-    session,
-    filteredQuestions,
+    userId,
+    questions,
     answerOptions,
     form,
     saveAnswer,
     currentAnswers,
 }: {
-    session: Session;
-    filteredQuestions: Question[];
+    userId: string;
+    questions: Question[];
     answerOptions: AnswerOption[];
     form: ReturnType<typeof useForm>;
     saveAnswer: (answer: SurveyResponse) => void;
@@ -48,7 +47,7 @@ export function MobileSurveyQuestionnaire({
 }) {
     return (
         <div>
-            {filteredQuestions?.map((question) => (
+            {questions?.map((question) => (
                 <div key={question.id} className="mx-auto w-full">
                     <FormField
                         control={form.control}
@@ -75,8 +74,10 @@ export function MobileSurveyQuestionnaire({
                                                     ) => {
                                                         field.onChange(value);
                                                         saveAnswer({
-                                                            userId: session.user
-                                                                .id,
+                                                            id: question
+                                                                .QuestionResult?.[0]
+                                                                ?.id,
+                                                            userId: userId,
                                                             questionId:
                                                                 question.id,
                                                             answerId: value,

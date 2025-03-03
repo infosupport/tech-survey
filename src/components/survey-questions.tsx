@@ -19,7 +19,6 @@ import {
     FormMessage,
 } from "~/components/ui/form";
 
-import { type Session } from "next-auth";
 import { idToMoreInfo, idToTextMap } from "~/utils/optionMapping";
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 
@@ -37,15 +36,15 @@ import { findAnswerId } from "~/utils/survey-utils";
 import { useEffect, useRef } from "react";
 
 export function SurveyQuestions({
-    session,
-    filteredQuestions,
+    userId,
+    questions,
     answerOptions,
     form,
     saveAnswer,
     currentAnswers,
 }: {
-    session: Session;
-    filteredQuestions: Question[];
+    userId: string;
+    questions: Question[];
     answerOptions: AnswerOption[];
     form: ReturnType<typeof useForm>;
     saveAnswer: (answer: SurveyResponse) => void;
@@ -58,7 +57,7 @@ export function SurveyQuestions({
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
             if (event.key === "ArrowDown") {
-                if (currentRowIndex.current < filteredQuestions.length) {
+                if (currentRowIndex.current < questions.length) {
                     currentRowIndex.current++;
                     focusCell();
                 }
@@ -90,7 +89,7 @@ export function SurveyQuestions({
     }, [
         currentRowIndex,
         currentCellIndex,
-        filteredQuestions.length,
+        questions.length,
         answerOptions.length,
     ]);
 
@@ -173,7 +172,7 @@ export function SurveyQuestions({
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {filteredQuestions?.map((question, questionIndex) => (
+                    {questions?.map((question, questionIndex) => (
                         <FormField
                             control={form.control}
                             name={question.id}
@@ -222,9 +221,10 @@ export function SurveyQuestions({
                                                                     value,
                                                                 );
                                                                 saveAnswer({
-                                                                    userId: session
-                                                                        .user
-                                                                        .id,
+                                                                    id: question
+                                                                        .QuestionResult?.[0]
+                                                                        ?.id,
+                                                                    userId: userId,
                                                                     questionId:
                                                                         question.id,
                                                                     answerId:

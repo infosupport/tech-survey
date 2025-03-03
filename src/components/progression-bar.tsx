@@ -3,8 +3,17 @@ import { Fragment } from "react";
 import { type Section } from "~/models/types";
 import { progressionInfo } from "~/utils/survey-utils";
 
-const ProgressionBar = ({ roles }: { roles: Section[] }) => {
-    const { progressPercentage } = progressionInfo(roles);
+const ProgressionBar = ({
+    roles,
+    percentCompletedPerRole,
+}: {
+    roles: Section[];
+    percentCompletedPerRole: Record<
+        string,
+        { totalQuestions: number; answeredQuestions: number }
+    >;
+}) => {
+    const { progressPercentage } = progressionInfo(percentCompletedPerRole);
 
     return (
         <nav

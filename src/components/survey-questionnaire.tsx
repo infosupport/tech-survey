@@ -6,9 +6,8 @@ import {
     type Question,
     type QuestionResult,
 } from "~/models/types";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { type Session } from "next-auth";
 import { slugify } from "~/utils/slugify";
 
 import ProgressionBar from "./progression-bar";
@@ -16,63 +15,75 @@ import useScreenSize from "./use-screen-size";
 import { MobileSurveyQuestionnaire } from "./mobile/survey-questions";
 import { SurveyQuestions } from "./survey-questions";
 import { MobileProgressionBar } from "./mobile/progression-bar";
-import {
-    useGenerateFormAndSchema,
-    getInitialResponses,
-    getNextHref,
-} from "~/utils/survey-utils";
+import { useGenerateFormAndSchema, getNextHref } from "~/utils/survey-utils";
 import { toast } from "./ui/use-toast";
 import { useSubmitAnswers } from "~/utils/submission-utils";
 import { SpinnerButton } from "./ui/button-spinner";
 import { Form } from "./ui/form";
 import renderNotFoundPage from "~/app/[...not_found]/page";
 import useOnlineStatus from "./use-online-status";
+import { api } from "~/trpc/react";
 
 export function SurveyQuestionnaire({
-    session,
+    userId,
     questions,
     answerOptions,
-    userSelectedRoles,
+    userRoles,
     userAnswersForRole,
 }: {
-    session: Session;
+    userId: string;
     questions: Question[];
     answerOptions: AnswerOption[];
-    userSelectedRoles: Role[];
+    userRoles: Role[];
     userAnswersForRole: QuestionResult[];
 }) {
-    const [selectedRoles] = useState<string[]>(
-        userSelectedRoles.map((role) => role.id),
-    );
     const pathname = usePathname() || "";
+    const router = useRouter();
 
     // get the current role from the url, which is /survey/[role]
-    const currentRole = pathname.split("/").pop() ?? "";
+    const currentRole = decodeURIComponent(
+        pathname.split("/").pop() ?? "",
+    ).toLowerCase();
 
-    const roleExists = userSelectedRoles.some(
-        (role) => slugify(role.role) === currentRole,
+    const roleExists = userRoles.some(
+        (role) => role.role.toLowerCase() === currentRole.toLowerCase(),
     );
 
-    const [responses] = useState(
-        getInitialResponses(userAnswersForRole, currentRole, userSelectedRoles),
+    const currentRoleId = userRoles.find(
+        (role) => role.role.toLowerCase() === currentRole,
+    )?.id;
+
+    const { data } = api.survey.getSurveyQuestionsCompletedPerRole.useQuery(
+        { userId: userId },
+        { enabled: !!userId },
     );
+    const [percentCompletedPerRole, setPercentCompletedPerRole] =
+        useState(data);
 
-    const { saveAnswer, isSubmitting, currentAnswers } = useSubmitAnswers();
+    const [responses] = useState(userAnswersForRole);
 
-    // Dynamically generate the slugToId mapping
-    const slugToId: Record<string, string> = {};
-    userSelectedRoles.forEach((role) => {
-        slugToId[slugify(role.role)] = role.id;
-    });
+    const { saveAnswer, isSubmitting, currentAnswers } =
+        useSubmitAnswers(userAnswersForRole);
 
-    const filteredQuestions = questions.filter(
-        (question) =>
-            question.roleIds?.some(
-                (roleId) => roleId === slugToId[currentRole ?? ""],
-            ) && selectedRoles.includes(slugToId[currentRole ?? ""] ?? ""),
-    );
+    useEffect(() => {
+        if (currentRoleId) {
+            setPercentCompletedPerRole((prevState) => {
+                if (!prevState) return prevState;
+                const updatedState = { ...prevState };
+                if (updatedState[currentRoleId]) {
+                    updatedState[currentRoleId]!.answeredQuestions =
+                        currentAnswers.length;
+                }
+                return updatedState;
+            });
+        }
+    }, [currentAnswers, currentRoleId]);
 
-    const unansweredQuestions = filteredQuestions.filter(
+    useEffect(() => {
+        console.log("percentCompletedPerRole", percentCompletedPerRole);
+    }, [percentCompletedPerRole]);
+
+    const unansweredQuestions = questions.filter(
         (question) =>
             !userAnswersForRole.some(
                 (answer) => answer.question.id === question.id,
@@ -110,47 +121,7 @@ export function SurveyQuestionnaire({
         return renderNotFoundPage();
     }
 
-    // function that check if a user already has more than 1 response for a question
-    function hasAnsweredAllQuestionsForRole(
-        currentAnswers: QuestionResult[],
-        roleId: string,
-        questions: Question[],
-    ) {
-        const totalQuestionsForRole = questions
-            .filter((question) => question.roleIds?.includes(roleId))
-            .map((question) => question.id);
-
-        // Get unique question IDs from totalQuestionsForRole
-        const uniqueQuestionIds = new Set(totalQuestionsForRole);
-
-        // Filter currentAnswersForRole to remove duplicates
-        const currentAnswersForRole = currentAnswers.filter(
-            (answer, index, self) =>
-                self.findIndex((a) => a.question.id === answer.question.id) ===
-                    index && uniqueQuestionIds.has(answer.question.id),
-        );
-
-        const answeredQuestionsForRole = currentAnswersForRole.filter(
-            (answer) => answer.answerId !== undefined,
-        );
-
-        return answeredQuestionsForRole.length >= totalQuestionsForRole.length;
-    }
-
-    function hasAnsweredAllQuestionsForCurrentRole(
-        form: ReturnType<typeof useGenerateFormAndSchema>["form"],
-    ) {
-        const formValues = form.getValues();
-
-        // count the number of undefined values in the form
-        const unansweredQuestions = Object.values(formValues).filter(
-            (value) => value === undefined,
-        );
-
-        return unansweredQuestions.length === 0;
-    }
-
-    const selectedRolesForProgressBar = userSelectedRoles
+    const selectedRolesForProgressBar = userRoles
         .sort((a, b) => {
             const roleA = a.role.toLowerCase();
             const roleB = b.role.toLowerCase();
@@ -160,21 +131,25 @@ export function SurveyQuestionnaire({
 
             return 0;
         })
-        .map((role) => ({
-            id: role.id,
-            href: `/survey/${slugify(role.role)}`,
-            label: role.role,
-            current: slugify(role.role) === currentRole,
-            completed: hasAnsweredAllQuestionsForRole(
-                userAnswersForRole,
-                role.id,
-                questions,
-            ),
-            started: userAnswersForRole.some((answer) =>
-                answer.question.roles?.some((role) => role.id === role.id),
-            ),
-            currentCompleted: hasAnsweredAllQuestionsForCurrentRole(form),
-        }));
+        .map((role) => {
+            const { totalQuestions, answeredQuestions } =
+                percentCompletedPerRole?.[role.id] ?? {
+                    totalQuestions: 0,
+                    answeredQuestions: 0,
+                };
+
+            return {
+                id: role.id,
+                href: `/survey/${encodeURIComponent(role.role)}`,
+                label: role.role,
+                current: role.id === currentRoleId,
+                completed: totalQuestions === answeredQuestions,
+                started: userAnswersForRole.some((answer) =>
+                    answer.question.roles?.some((role) => role.id === role.id),
+                ),
+                currentCompleted: form.formState.isValid,
+            };
+        });
 
     const ProgressionBarComponent =
         screenSize.width < 768 ? MobileProgressionBar : ProgressionBar;
@@ -185,7 +160,7 @@ export function SurveyQuestionnaire({
         event: React.MouseEvent<HTMLButtonElement>,
     ): void {
         // Check if the form is currently valid or all questions have been answered
-        if (!hasAnsweredAllQuestionsForCurrentRole(form)) {
+        if (!form.formState.isValid) {
             // Form is not valid, do not proceed to the next page
             return;
         }
@@ -194,20 +169,22 @@ export function SurveyQuestionnaire({
             event.preventDefault();
             const nextHref = getNextHref(selectedRolesForProgressBar);
             if (nextHref) {
-                window.location.href = nextHref;
+                router.push(nextHref);
             }
         } else {
-            window.location.href = "/thank-you";
+            router.push("/thank-you");
         }
     }
 
     return (
         <div>
-            <ProgressionBarComponent roles={selectedRolesForProgressBar} />
+            <ProgressionBarComponent
+                roles={selectedRolesForProgressBar}
+                percentCompletedPerRole={percentCompletedPerRole ?? {}}
+            />
             <h2 className="mb-4 mt-4 text-2xl font-bold">
-                {userSelectedRoles.find(
-                    (role) => slugify(role.role) === currentRole,
-                )?.role ?? ""}{" "}
+                {userRoles.find((role) => slugify(role.role) === currentRole)
+                    ?.role ?? ""}{" "}
                 questions
             </h2>
             <Form {...form}>
@@ -232,8 +209,8 @@ export function SurveyQuestionnaire({
                     className="grid justify-items-end gap-4 md:grid-cols-1 lg:grid-cols-1"
                 >
                     <QuestionsComponent
-                        session={session}
-                        filteredQuestions={filteredQuestions}
+                        userId={userId}
+                        questions={questions}
                         answerOptions={answerOptions}
                         form={form}
                         saveAnswer={saveAnswer}

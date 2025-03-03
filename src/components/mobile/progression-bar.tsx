@@ -14,9 +14,20 @@ import { CheckIcon, DotFilledIcon } from "@radix-ui/react-icons";
 import { ScrollArea } from "~/components/ui/scroll-area";
 import { progressionInfo } from "~/utils/survey-utils";
 
-const MobileProgressionBar = ({ roles }: { roles: Section[] }) => {
-    const { completedRoles, totalRoles, currentRole, progressPercentage } =
-        progressionInfo(roles);
+const MobileProgressionBar = ({
+    roles,
+    percentCompletedPerRole,
+}: {
+    roles: Section[];
+    percentCompletedPerRole: Record<
+        string,
+        { totalQuestions: number; answeredQuestions: number }
+    >;
+}) => {
+    const { completedRoles, totalRoles, progressPercentage } = progressionInfo(
+        percentCompletedPerRole,
+    );
+    const currentRole = roles.find((role) => role.current);
 
     return (
         <DropdownMenu>
