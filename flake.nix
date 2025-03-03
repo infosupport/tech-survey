@@ -40,7 +40,6 @@ let
                       packages = with pkgs; [
                         git
                         openssl
-                        prisma
                       ];
 
                       # https://devenv.sh/scripts/
