@@ -1,7 +1,6 @@
 "use client";
 
 import { CommunicationMethod } from "@prisma/client";
-import { type Session } from "next-auth";
 import { useEffect, useState } from "react";
 import { api } from "~/trpc/react";
 import {
@@ -11,20 +10,23 @@ import {
     PhoneLogo,
     SignalLogo,
     WhatsappLogo,
-} from "./svg";
+} from "~/components/svg";
 
 export default function SelectCommunicationMethod({
-    session,
+    userId,
     methods,
     setCommunicationMethodIsLoading,
 }: {
-    session: Session;
-    methods: string[];
-    setCommunicationMethodIsLoading: (value: boolean) => void;
+    userId: string;
+    methods: CommunicationMethod[];
+    setCommunicationMethodIsLoading(value: boolean): void;
 }) {
-    const [selectedMethods, setSelectedMethods] = useState<
-        CommunicationMethod[]
-    >([]);
+    const [selectedMethods, setSelectedMethods] =
+        useState<CommunicationMethod[]>(methods);
+
+    useEffect(() => {
+        setSelectedMethods(methods);
+    }, [methods]);
 
     const { mutate: setMethodMutate, isLoading: setMethodIsLoading } =
         api.survey.setCommunicationMethods.useMutation();
@@ -33,17 +35,8 @@ export default function SelectCommunicationMethod({
         setCommunicationMethodIsLoading(setMethodIsLoading);
     }, [setCommunicationMethodIsLoading, setMethodIsLoading]);
 
-    // If we have multiple selected role, we get `"SLACK,SIGNAL,TEAMS"` as a string
-    // We need to split this string into an array of strings
-    useEffect(() => {
-        if (methods.length > 0) {
-            const splitMethods = (methods[0] ?? "").split(",");
-            setSelectedMethods(splitMethods as CommunicationMethod[]);
-        }
-    }, [methods]);
-
     const handleMethodChange = (method: CommunicationMethod) => {
-        let updatedSelection: string[];
+        let updatedSelection: CommunicationMethod[];
 
         if (!selectedMethods.includes(method)) {
             updatedSelection = [...selectedMethods, method];
@@ -51,19 +44,10 @@ export default function SelectCommunicationMethod({
             updatedSelection = selectedMethods.filter((m) => m !== method);
         }
 
-        // remove empty strings
-        updatedSelection = updatedSelection.filter((m) => m !== "");
-
-        // remove duplicates
-        updatedSelection = [...new Set(updatedSelection)];
-
-        const updatedSelectionCommunication =
-            updatedSelection as CommunicationMethod[];
-
-        setSelectedMethods(updatedSelectionCommunication);
+        setSelectedMethods(updatedSelection);
         setMethodMutate({
-            userId: session.user.id,
-            methods: updatedSelectionCommunication,
+            userId: userId,
+            methods: updatedSelection,
         });
     };
 
@@ -101,11 +85,7 @@ export default function SelectCommunicationMethod({
                     >
                         <input
                             type="checkbox"
-                            checked={
-                                selectedMethods.length > 0
-                                    ? selectedMethods.includes(method)
-                                    : methods.includes(method)
-                            }
+                            checked={selectedMethods.includes(method)}
                             onChange={() => handleMethodChange(method)}
                             className={`mr-2 accent-custom-primary`}
                         />
