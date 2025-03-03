@@ -1,5 +1,4 @@
 import { Suspense } from "react";
-import ResultsWrapper from "~/components/results";
 import {
     type QuestionResult,
     type Role,
@@ -15,6 +14,7 @@ import { Login } from "~/components/login";
 import SearchAnonymized from "~/components/ui/search-anonymized";
 import { getServerAuthSession } from "~/server/auth";
 import { getRoles } from "~/utils/role-utils";
+import ShowResults from "~/components/show-results";
 
 export const metadata: Metadata = {
     title: "Results",
@@ -180,7 +180,7 @@ const ShowResultsWrapper = async ({
         }
     });
 
-    return <ResultsWrapper data={transformedData} />;
+    return <ShowResults data={transformedData} />;
 };
 
 export default Results;
