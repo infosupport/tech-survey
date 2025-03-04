@@ -12,7 +12,7 @@ import { ArrowLeftDarkModeFriendly, Download } from "./svg";
 import { type Session } from "next-auth";
 
 const PDFDownloadLink = dynamic(
-    () => import("@react-pdf/renderer").then((mod) => mod.PDFDownloadLink),
+    () => import("~/components/pdf-download-link").then((mod) => mod.default),
     {
         ssr: false,
         loading: () => <p>Loading...</p>,

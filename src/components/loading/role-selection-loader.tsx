@@ -1,4 +1,4 @@
-import ButtonSkeleton from "./button-loader";
+import ButtonSkeleton from "~/components/loading/button-loader";
 
 const RoleSelectionSkeleton = () => {
     return (

@@ -24,9 +24,7 @@ const config = {
     },
     eslint: {
         ignoreDuringBuilds: true,
-    },
-    experimental: {
-        esmExternals: "loose",
+        dirs: ["src", "tests"],
     },
     async headers() {
         return [

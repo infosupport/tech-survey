@@ -1,34 +1,43 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { api } from "~/trpc/react";
-import { type Session } from "next-auth";
 import { type Role } from "~/models/types";
 import Link from "next/link";
-import { ArrowRight, ArrowRightDarkModeFriendly } from "./svg";
-import { toast } from "./ui/use-toast";
-import { ToastAction } from "./ui/toast";
-import SelectCommunicationMethod from "./select-communication-method";
-import { SpinnerButton } from "./ui/button-spinner";
-import type { BusinessUnit } from "@prisma/client";
-import SelectBusinessUnit from "./select-businessunit";
+import { ArrowRight, ArrowRightDarkModeFriendly } from "~/components/svg";
+import { toast } from "~/components/ui/use-toast";
+import { ToastAction } from "~/components/ui/toast";
+import SelectCommunicationMethod from "~/components/select-communication-method";
+import { SpinnerButton } from "~/components/ui/button-spinner";
+import type { BusinessUnit, CommunicationMethod } from "@prisma/client";
+import SelectBusinessUnit from "~/components/select-businessunit";
+import CommunicationPreferencesSelectionSkeleton from "~/components/loading/communication-preferences-selection-loader";
 
-export default function SelectRoles({
-    session,
+function SelectRoles({
+    userId,
     roles,
-    userSelectedRoles,
-    methods,
     businessUnits,
-    userSelectedBusinessUnit,
 }: {
-    session: Session;
+    userId: string;
     roles: Role[];
-    userSelectedRoles: Role[];
-    methods: string[];
     businessUnits: BusinessUnit[];
-    userSelectedBusinessUnit: BusinessUnit | undefined;
 }) {
+    const { data: user, isLoading } = api.survey.getUserInfo.useQuery(
+        { userId: userId },
+        { enabled: !!userId },
+    );
+    const userSelectedRoles = useMemo(() => user?.roles ?? [], [user]);
+    const userSelectedBusinessUnit = user?.businessUnit ?? undefined;
+    const communicationPreferences = user?.communicationPreferences;
+    const [methods, setMethods] = useState<CommunicationMethod[]>(
+        communicationPreferences?.methods ?? [],
+    );
     const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
+
+    useEffect(() => {
+        setMethods(communicationPreferences?.methods ?? []);
+    }, [communicationPreferences]);
+
     const {
         mutate: setRoleMutate,
         error: setRoleError,
@@ -50,7 +59,7 @@ export default function SelectRoles({
                     <ToastAction
                         onClick={() => {
                             setRoleMutate({
-                                userId: session.user.id,
+                                userId: userId,
                                 roleIds: selectedRoles,
                             });
                         }}
@@ -61,27 +70,26 @@ export default function SelectRoles({
                 ),
             });
         }
-    }, [setRoleError, selectedRoles, session.user.id, setRoleMutate]);
+    }, [setRoleError, selectedRoles, userId, setRoleMutate]);
 
     // Initialize selected roles from userSelectedRoles prop
     useEffect(() => {
-        setSelectedRoles(userSelectedRoles.map((role) => role.id));
+        setSelectedRoles(userSelectedRoles?.map((role) => role.id));
     }, [userSelectedRoles]);
 
     const handleRoleToggle = (roleId: string, isDefault: boolean) => {
         if (!isDefault && !setRoleError) {
-            const index = selectedRoles.indexOf(roleId);
             let updatedRoles;
-            if (index === -1) {
-                updatedRoles = [...selectedRoles, roleId];
+            if (selectedRoles.includes(roleId)) {
+                updatedRoles = selectedRoles.filter((role) => role !== roleId);
             } else {
-                updatedRoles = [...selectedRoles];
-                updatedRoles.splice(index, 1);
+                updatedRoles = [...selectedRoles, roleId];
             }
 
             setSelectedRoles(updatedRoles);
+
             setRoleMutate({
-                userId: session.user.id,
+                userId: userId,
                 roleIds: updatedRoles,
             });
         }
@@ -89,7 +97,7 @@ export default function SelectRoles({
 
     const handleSetGeneralRole = () => {
         setDefaultRoleMutate({
-            userId: session.user.id,
+            userId: userId,
             roleIds: selectedRoles,
         });
     };
@@ -146,18 +154,22 @@ export default function SelectRoles({
                 ))}
             </ul>
 
-            <SelectCommunicationMethod
-                session={session}
-                methods={methods}
-                setCommunicationMethodIsLoading={
-                    setCommunicationMethodIsLoading
-                }
-            />
+            {isLoading ? (
+                <CommunicationPreferencesSelectionSkeleton />
+            ) : (
+                <SelectCommunicationMethod
+                    userId={userId}
+                    methods={methods}
+                    setCommunicationMethodIsLoading={
+                        setCommunicationMethodIsLoading
+                    }
+                />
+            )}
 
             <SelectBusinessUnit
                 businessUnits={businessUnits}
                 userSelectedBusinessUnit={userSelectedBusinessUnit}
-                session={session}
+                userId={userId}
             />
 
             <p></p>
@@ -208,3 +220,5 @@ export default function SelectRoles({
         </div>
     );
 }
+
+export default SelectRoles;

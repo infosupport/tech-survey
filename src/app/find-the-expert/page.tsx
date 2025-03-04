@@ -1,111 +1,31 @@
-import type { Metadata } from "next";
-import type { Session } from "next-auth";
+import Link from "next/link";
+import { Button } from "~/components/ui/button";
+import { DesktopIcon, PersonIcon } from "@radix-ui/react-icons";
 
-import { Suspense } from "react";
-import ButtonSkeleton from "~/components/loading/button-loader";
-import { Login } from "~/components/login";
-import ShowDataTable from "~/components/data-tables/show-data-table";
-import { getServerAuthSession } from "~/server/auth";
-import { retrieveAnswersByRole } from "~/utils/data-manipulation";
-import { getRoles } from "~/utils/role-utils";
-import { db } from "~/server/db";
-import ShowTechSearchWrapper from "~/components/ui/show-tech-search-wrapper";
-
-export const metadata: Metadata = {
-    title: "Find the expert",
-};
-
-const LoginSection = ({ session }: { session: Session | null }) => (
-    <>
-        <p className="text-center text-lg">
-            Unable to find experts without logging in.
-        </p>
-        <Login session={session} text={"Log in"} />
-    </>
-);
-
-const ContentSection = ({
-    role,
-    tech,
-    unit,
-}: {
-    role: string;
-    tech: string;
-    unit: string;
-}) => (
-    <>
-        <Suspense fallback={<ButtonSkeleton />}>
-            <FindTheExpertSearch />
-        </Suspense>
-        <Suspense fallback={<ButtonSkeleton />}>
-            <ShowTableWrapper tech={tech} role={role} unit={unit} />
-        </Suspense>
-    </>
-);
-
-const FindTheExpertSearch = async () => {
-    const availableRoles = await getRoles()();
-    const availableUnits = await db.businessUnit.findMany();
-
+const FindTheExpertPage = async () => {
     return (
-        <ShowTechSearchWrapper
-            roles={availableRoles}
-            businessUnits={availableUnits}
-        />
-    );
-};
-
-const FindTheExpertPage = async (context: {
-    searchParams: Promise<{ role: string; tech: string; unit: string }>;
-}) => {
-    const session = await getServerAuthSession();
-
-    return (
-        <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
-            <h1 className="text-center text-5xl font-extrabold tracking-tight">
-                <span className="block text-custom-primary sm:inline">
-                    Info Support
-                </span>
-                <span className="block sm:inline">
-                    {" "}
-                    Tech Survey - Find the expert
-                </span>
-            </h1>
-            {session ? (
-                <ContentSection
-                    role={(await context.searchParams).role}
-                    tech={(await context.searchParams).tech}
-                    unit={(await context.searchParams).unit}
-                />
-            ) : (
-                <LoginSection session={session} />
-            )}
+        <div className="mb-5 mt-5 flex flex-col items-center justify-center gap-6 md:flex-row">
+            <Link href="/find-the-expert/tech-page">
+                <Button
+                    variant="outline"
+                    className="border-2 border-[#bed62f] px-8 py-8 text-lg"
+                    name="Profile page"
+                >
+                    Find by tech
+                    <DesktopIcon className="ml-2 h-6 w-6" />
+                </Button>
+            </Link>
+            <Link href="/find-the-expert/profile-page">
+                <Button
+                    variant="outline"
+                    className="border-2 border-[#bed62f] px-8 py-8 text-lg"
+                    name="Profile page"
+                >
+                    Find by name
+                    <PersonIcon className="ml-2text-9xl h-6 w-6" />
+                </Button>
+            </Link>
         </div>
     );
 };
-
-const ShowTableWrapper = async ({
-    tech,
-    role,
-    unit,
-}: {
-    tech: string;
-    role: string;
-    unit: string;
-}) => {
-    const { dataByRoleAndQuestion, aggregatedDataByRole } =
-        await retrieveAnswersByRole({
-            role,
-            questionText: tech,
-            unit,
-        });
-
-    return (
-        <ShowDataTable
-            dataByRoleAndQuestion={dataByRoleAndQuestion}
-            aggregatedDataByRole={aggregatedDataByRole}
-        />
-    );
-};
-
 export default FindTheExpertPage;
