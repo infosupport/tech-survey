@@ -1,28 +1,34 @@
 {
-  "eslint.rules.customizations": [
-    {
-      "rule": "*",
-      "severity": "warn"
+    "eslint.rules.customizations": [
+        {
+            "rule": "*",
+            "severity": "warn"
+        }
+    ],
+    "cSpell.words": [
+        "clsx",
+        "cmdk",
+        "cuid",
+        "datasource",
+        "datasources",
+        "hookform",
+        "infosupport",
+        "ISKA",
+        "lucide",
+        "nextjs",
+        "Postgre",
+        "radiogroup",
+        "subsubtitle",
+        "superjson",
+        "tailwindcss",
+        "tanstack",
+        "TRPC",
+        "typecheck"
+    ],
+    "[typescript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[typescriptreact]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
     }
-  ],
-  "cSpell.words": [
-    "clsx",
-    "cmdk",
-    "cuid",
-    "datasource",
-    "datasources",
-    "hookform",
-    "infosupport",
-    "ISKA",
-    "lucide",
-    "nextjs",
-    "Postgre",
-    "radiogroup",
-    "subsubtitle",
-    "superjson",
-    "tailwindcss",
-    "tanstack",
-    "TRPC",
-    "typecheck"
-  ]
 }

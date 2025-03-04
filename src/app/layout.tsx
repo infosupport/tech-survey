@@ -12,11 +12,9 @@ import { Login } from "~/components/login";
 import { type Session } from "next-auth";
 import { getServerAuthSession } from "~/server/auth";
 import ButtonSkeleton from "~/components/loading/button-loader";
-import { Button } from "~/components/ui/button";
-import { ArrowLeftDarkModeFriendly } from "~/components/svg";
 import Link from "next/link";
-import { headers } from "next/headers";
 import GithubLink from "~/components/github-link";
+import { HomeLink } from "~/components/home-link";
 
 const inter = Inter({
     subsets: ["latin"],
@@ -38,7 +36,6 @@ export default async function RootLayout({
     children: React.ReactNode;
 }) {
     const session = await getServerAuthSession();
-    const headerList = await headers();
     return (
         <html lang="en" suppressHydrationWarning={true}>
             <body
@@ -57,16 +54,7 @@ export default async function RootLayout({
                     <TRPCReactProvider>
                         <main className="min-h-screen items-center justify-center">
                             <div className="mx-auto flex flex-wrap items-center justify-between p-4">
-                                {/* only show this back to home button if the getNextUrl is not '/' */}
-                                {headerList.get("next-url") !== "/" && (
-                                    <Link href="/" passHref>
-                                        <Button variant="outline">
-                                            <ArrowLeftDarkModeFriendly />
-                                            Home
-                                        </Button>
-                                    </Link>
-                                )}
-
+                                <HomeLink />
                                 <div className="flex-grow"></div>
                                 {session && (
                                     <Suspense fallback={<ButtonSkeleton />}>
