@@ -3,14 +3,7 @@
 import { CommunicationMethod } from "@prisma/client";
 import { useEffect, useState } from "react";
 import { api } from "~/trpc/react";
-import {
-    SlackLogo,
-    TeamsLogo,
-    EmailLogo,
-    PhoneLogo,
-    SignalLogo,
-    WhatsappLogo,
-} from "~/components/svg";
+import communicationMethodToIcon from "~/components/ui/CommunicationMethodToIcon";
 
 export default function SelectCommunicationMethod({
     userId,
@@ -49,15 +42,6 @@ export default function SelectCommunicationMethod({
             userId: userId,
             methods: updatedSelection,
         });
-    };
-
-    const communicationMethodToIcon: Record<string, JSX.Element> = {
-        SLACK: <SlackLogo />,
-        EMAIL: <EmailLogo />,
-        PHONE: <PhoneLogo />,
-        SIGNAL: <SignalLogo />,
-        TEAMS: <TeamsLogo />,
-        WHATSAPP: <WhatsappLogo />,
     };
 
     return (

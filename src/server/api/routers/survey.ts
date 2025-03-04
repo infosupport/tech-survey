@@ -7,6 +7,14 @@ import {
 import { type Role } from "~/models/types";
 import { TRPCClientError } from "@trpc/client";
 import { CommunicationMethod } from "@prisma/client";
+import type { Session } from "next-auth";
+
+// Users can only make requests for themselves
+const checkUserAuthorisation = (session: Session, userId: string) => {
+    if (session.user.id !== userId) {
+        throw new TRPCClientError("User not authorised");
+    }
+};
 
 export const surveyRouter = createTRPCRouter({
     getQuestions: publicProcedure.query(async ({ ctx }) => {
@@ -200,6 +208,7 @@ export const surveyRouter = createTRPCRouter({
     setDefaultRole: protectedProcedure
         .input(z.object({ userId: z.string() }))
         .mutation(async ({ ctx, input }) => {
+            checkUserAuthorisation(ctx.session, input.userId);
             const user = await ctx.db.user.findUnique({
                 where: {
                     id: input.userId,
@@ -259,6 +268,7 @@ export const surveyRouter = createTRPCRouter({
             }),
         )
         .mutation(async ({ ctx, input }) => {
+            checkUserAuthorisation(ctx.session, input.userId);
             const user = await ctx.db.user.findUnique({
                 where: {
                     id: input.userId,
@@ -301,6 +311,7 @@ export const surveyRouter = createTRPCRouter({
         .input(z.object({ userId: z.string(), businessUnitId: z.string() }))
         .mutation(async ({ ctx, input }) => {
             const { userId, businessUnitId } = input;
+            checkUserAuthorisation(ctx.session, userId);
 
             try {
                 const user = await ctx.db.user.findUnique({
@@ -364,6 +375,7 @@ export const surveyRouter = createTRPCRouter({
         .input(z.object({ userId: z.string(), roleIds: z.array(z.string()) }))
         .mutation(async ({ ctx, input }) => {
             const { userId, roleIds } = input;
+            checkUserAuthorisation(ctx.session, userId);
 
             try {
                 // find the user
@@ -438,8 +450,9 @@ export const surveyRouter = createTRPCRouter({
             }),
         )
         .mutation(async ({ ctx, input }) => {
+            const { userId, questionId, answerId, id } = input;
+            checkUserAuthorisation(ctx.session, userId);
             try {
-                const { userId, questionId, answerId, id } = input;
 
                 const [questionExists, answerOptionExists, userExists] =
                     await Promise.all([
