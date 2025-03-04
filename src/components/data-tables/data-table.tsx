@@ -20,8 +20,6 @@ import { idToTextMap } from "~/utils/optionMapping";
 import { DataTablePagination } from "~/components/data-tables/data-table-pagination";
 import communicationMethodToIcon from "~/components/ui/CommunicationMethodToIcon";
 
-import type { JSX } from "react";
-
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[];
     data: TData[];

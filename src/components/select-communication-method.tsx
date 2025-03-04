@@ -1,7 +1,7 @@
 "use client";
 
 import { CommunicationMethod } from "@prisma/client";
-import { useEffect, useState, type JSX } from "react";
+import { useEffect, useState } from "react";
 import { api } from "~/trpc/react";
 import communicationMethodToIcon from "~/components/ui/CommunicationMethodToIcon";
 
