@@ -4,6 +4,8 @@ import { type ColumnDef } from "@tanstack/react-table";
 import { ExternalLinkIcon } from "@radix-ui/react-icons";
 import Link from "next/link";
 
+import type { JSX } from "react";
+
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
 export type SurveyResult = {

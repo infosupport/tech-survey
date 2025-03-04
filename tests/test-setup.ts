@@ -156,7 +156,7 @@ export class TestSetup {
         const token = async () => {
             return jwt.encode({
                 token: payload,
-                secret: process.env.NEXTAUTH_SECRET!,
+                secret: process.env.NEXTAUTH_SECRET ?? "dummy",
             });
         };
 

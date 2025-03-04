@@ -6,6 +6,7 @@
     TeamsLogo,
     WhatsappLogo,
 } from "~/components/svg";
+import { type JSX } from "react";
 
 const communicationMethodToIcon: Record<string, JSX.Element> = {
     SLACK: <SlackLogo />,
