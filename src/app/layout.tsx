@@ -1,4 +1,4 @@
-import "~/styles/globals.css";
+import "/src/styles/globals.css";
 import { ThemeProvider } from "~/components/theme-provider";
 import { Toaster } from "~/components/ui/toaster";
 
@@ -36,7 +36,6 @@ export default async function RootLayout({
     children: React.ReactNode;
 }) {
     const session = await getServerAuthSession();
-
     return (
         <html lang="en" suppressHydrationWarning={true}>
             <body

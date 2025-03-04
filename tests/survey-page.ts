@@ -1,9 +1,8 @@
 // @ts-check
-import { expect } from "@playwright/test";
 import { type Page } from "playwright";
 
 export class SurveyPage {
-    private readonly page: Page;
+    public readonly page: Page;
     private readonly port;
 
     constructor(page: Page, port: number) {
@@ -88,6 +87,8 @@ export class SurveyPage {
         await this.page
             .getByRole("button", { name: "Next", exact: true })
             .click();
+
+        await this.page.waitForTimeout(1000);
     }
 
     async submitAnswers() {
@@ -97,13 +98,14 @@ export class SurveyPage {
     }
 
     async selectRoles(roleNames: readonly string[]) {
+        await this.page.waitForLoadState("networkidle");
         for (const roleName of roleNames) {
             const roleCheckbox = this.page
                 .locator(`li:has-text("${roleName}")`)
                 .first()
                 .locator('input[type="checkbox"]');
-            await this.page.waitForTimeout(1000);
             await roleCheckbox.check();
+            await this.page.waitForTimeout(1000);
         }
 
         // wait for the roles to be selected

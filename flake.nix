@@ -1,6 +1,7 @@
 {
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11";
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
     systems.url = "github:nix-systems/default";
     devenv.url = "github:cachix/devenv";
   };
@@ -19,6 +20,7 @@ let
         (system:
           let
             pkgs = nixpkgs.legacyPackages.${system};
+            upkgs = import inputs.nixpkgs-unstable { system = system; };
           in
           {
             default = 
@@ -34,12 +36,17 @@ let
                         PRISMA_QUERY_ENGINE_LIBRARY = "${pkgs.prisma-engines}/lib/libquery_engine.node";
                         PRISMA_QUERY_ENGINE_BINARY = "${pkgs.prisma-engines}/bin/query-engine";
                         PRISMA_SCHEMA_ENGINE_BINARY = "${pkgs.prisma-engines}/bin/schema-engine";
+                        PLAYWRIGHT_BROWSERS_PATH = "${upkgs.playwright-driver.browsers}";
+                        PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS = true;
+                        PLAYWRIGHT_NODEJS_PATH = "${pkgs.nodejs}/bin/node";
+                        PLAYWRIGHT_LAUNCH_OPTIONS_EXECUTABLE_PATH = "${upkgs.playwright.browsers}/chromium-1134/chrome-linux/chrome";
                       };
 
                       # https://devenv.sh/packages/
-                      packages = with pkgs; [
-                        git
-                        openssl
+                      packages = [
+                        pkgs.git
+                        pkgs.openssl
+                        upkgs.playwright
                       ];
 
                       # https://devenv.sh/scripts/

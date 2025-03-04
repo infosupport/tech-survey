@@ -26,7 +26,6 @@ const config = {
         ignoreDuringBuilds: true,
         dirs: ["src", "tests"],
     },
-    swcMinify: true,
     async headers() {
         return [
             {

@@ -10,7 +10,7 @@ export const useSubmitAnswers = () => {
     const [currentAnswers, setCurrentAnswers] = useState<SurveyResponse[]>([]);
     const [error, setError] = useState<string | null>(null);
     const submitResponse = api.survey.setQuestionResult.useMutation();
-    const submitAsyncRef = useRef<() => Promise<void>>();
+    const submitAsyncRef = useRef<() => Promise<void>>(undefined);
 
     useEffect(() => {
         if (submitResponse.isError) {

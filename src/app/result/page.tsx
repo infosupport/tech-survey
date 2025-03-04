@@ -21,7 +21,7 @@ export const metadata: Metadata = {
 };
 
 const Results = async (context: {
-    searchParams: { role: string; unit: string };
+    searchParams: Promise<{ role: string; unit: string }>;
 }) => {
     const session = await getServerAuthSession();
     return (
@@ -48,8 +48,8 @@ const Results = async (context: {
 
                     <Suspense fallback={<LegendSkeleton />}>
                         <ShowResultsWrapper
-                            role={context.searchParams.role}
-                            unit={context.searchParams.unit}
+                            role={(await context.searchParams).role}
+                            unit={(await context.searchParams).unit}
                         />
                     </Suspense>
                 </>
@@ -158,25 +158,25 @@ const ShowResultsWrapper = async ({
             roles.forEach(({ role: roleName = "" }) => {
                 if (roleName && questionText && roleName == role) {
                     transformedData[roleName] ??= {};
-                    transformedData[roleName]![questionText] ??= {};
+                    transformedData[roleName][questionText] ??= {};
 
                     const answerString =
                         answerOptions.find(({ id }) => id === answerId)
                             ?.option ?? "";
-                    transformedData[roleName]![questionText]![answerString] =
-                        (transformedData[roleName]![questionText]![
+                    transformedData[roleName][questionText][answerString] =
+                        (transformedData[roleName][questionText][
                             answerString
                         ] ?? 0) + 1;
                 }
             });
         } else if (unit != undefined) {
             transformedData[unit] ??= {};
-            transformedData[unit]![questionText] ??= {};
+            transformedData[unit][questionText] ??= {};
 
             const answerString =
                 answerOptions.find(({ id }) => id === answerId)?.option ?? "";
-            transformedData[unit]![questionText]![answerString] =
-                (transformedData[unit]![questionText]![answerString] ?? 0) + 1;
+            transformedData[unit][questionText][answerString] =
+                (transformedData[unit][questionText][answerString] ?? 0) + 1;
         }
     });
 
