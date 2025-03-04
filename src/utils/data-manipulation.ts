@@ -147,14 +147,14 @@ const aggregateDataByRole = (
                 communicationMethods = ["Do not contact"];
             }
 
-            if (!aggregatedDataByRole[roleName]![userId]) {
-                aggregatedDataByRole[roleName]![userId] = {
+            if (!aggregatedDataByRole[roleName][userId]) {
+                aggregatedDataByRole[roleName][userId] = {
                     name: name ?? "Unknown User",
                     communicationPreferences: communicationMethods,
                     counts: [0, 0, 0, 0],
                 };
             }
-            aggregatedDataByRole[roleName]![userId]!.counts[answerValue]++;
+            aggregatedDataByRole[roleName][userId].counts[answerValue]!++;
         }
     }
 
@@ -197,8 +197,8 @@ const initializeRoleAndQuestion = (
     if (!dataByRoleAndQuestion[roleName]) {
         dataByRoleAndQuestion[roleName] = {};
     }
-    if (!dataByRoleAndQuestion[roleName]![questionText]) {
-        dataByRoleAndQuestion[roleName]![questionText] = [];
+    if (!dataByRoleAndQuestion[roleName][questionText]) {
+        dataByRoleAndQuestion[roleName][questionText] = [];
     }
 };
 

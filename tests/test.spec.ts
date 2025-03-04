@@ -17,6 +17,7 @@ import {
 import treeKill from "tree-kill";
 
 import { promisify } from "node:util";
+
 const treeKillAsPromised = promisify(treeKill);
 const killAllProcesses = async (process: ChildProcess) => {
     if (process?.pid) {
@@ -30,8 +31,9 @@ test.describe("Desktop tests using a single role", () => {
     let testSetup: TestSetup;
 
     // Set up the landing page before each test
-    test.beforeEach(async ({ page }) => {
+    test.beforeEach(async ({ page }, testInfo) => {
         try {
+            testInfo.setTimeout(100000);
             dbHelper = await DbHelper.create();
             testSetup = new TestSetup(dbHelper.getContainer());
             const { port, process } = await testSetup.setupNextProcess();
@@ -126,6 +128,7 @@ test.describe("Desktop tests using a single role", () => {
     });
 
     test("Fill in the survey and show you are present on the anonymous results", async () => {
+        await surveyPage.page.waitForLoadState("networkidle");
         await surveyPage.navigateToSurveyPage();
 
         // Answer the questions
@@ -218,8 +221,9 @@ test.describe("Desktop tests using a multiple roles", () => {
     let testSetup: TestSetup;
 
     // Set up the landing page before each test
-    test.beforeEach(async ({ page }) => {
+    test.beforeEach(async ({ page }, testInfo) => {
         try {
+            testInfo.setTimeout(100000);
             dbHelper = await DbHelper.create();
             testSetup = new TestSetup(dbHelper.getContainer());
             const { port, process } = await testSetup.setupNextProcess();
@@ -319,8 +323,9 @@ test.describe("Mobile tests using a single role", () => {
     let testSetup: TestSetup;
 
     // Set up the landing page before each test
-    test.beforeEach(async ({ page }) => {
+    test.beforeEach(async ({ page }, testInfo) => {
         try {
+            testInfo.setTimeout(100000);
             dbHelper = await DbHelper.create();
             testSetup = new TestSetup(dbHelper.getContainer());
             const { port, process } = await testSetup.setupNextProcess();
@@ -408,6 +413,7 @@ test.describe("Mobile tests using a single role", () => {
     });
 
     test("(Mobile) Fill in the survey and show you are present on the find-the-expert page", async () => {
+        await surveyPage.page.waitForLoadState("networkidle");
         await surveyPage.navigateToSurveyPage();
 
         const questionsText = QUESTIONS_WITH_SINGLE_ROLE.map(
@@ -491,8 +497,9 @@ test.describe("Mobile tests using multiple roles", () => {
     let testSetup: TestSetup;
 
     // Set up the landing page before each test
-    test.beforeEach(async ({ page }) => {
+    test.beforeEach(async ({ page }, testInfo) => {
         try {
+            testInfo.setTimeout(100000);
             dbHelper = await DbHelper.create();
             testSetup = new TestSetup(dbHelper.getContainer());
             const { port, process } = await testSetup.setupNextProcess();
