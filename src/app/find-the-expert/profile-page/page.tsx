@@ -176,7 +176,7 @@ const ProfilePage = async ({ user }: { user?: UserData }) => {
     );
 };
 const ProfilePageWrapper = async (context: {
-    searchParams: { name: string };
+    searchParams: Promise<{ name: string }>;
 }) => {
     const session = await getServerAuthSession();
 
@@ -192,7 +192,7 @@ const ProfilePageWrapper = async (context: {
                 </span>
             </h1>
             {session ? (
-                <ContentSection name={context.searchParams.name} />
+                <ContentSection name={(await context.searchParams).name} />
             ) : (
                 <LoginSection session={session} />
             )}

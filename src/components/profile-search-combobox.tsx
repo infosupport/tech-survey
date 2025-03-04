@@ -20,7 +20,7 @@ const ProfileSearchCombobox = forwardRef<
         allUsers: UserData[];
         setValue: UseFormSetValue<{ name: string }>;
     }
->(({ allUsers, setValue, ...props }) => {
+>(({ allUsers, setValue, ...props }, _) => {
     const router = useRouter();
     const path = usePathname();
     const searchParams = useSearchParams();
@@ -94,7 +94,7 @@ const ProfileSearchCombobox = forwardRef<
         <Popover open={open}>
             <PopoverTrigger>
                 <FormControl>
-                    <>
+                    <div>
                         <Label>Name:</Label>
                         <Input
                             {...props}
@@ -110,7 +110,7 @@ const ProfileSearchCombobox = forwardRef<
                             }}
                             onKeyDown={handleKeyDown}
                         />
-                    </>
+                    </div>
                 </FormControl>
             </PopoverTrigger>
             <PopoverContent

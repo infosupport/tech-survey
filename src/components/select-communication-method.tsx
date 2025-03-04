@@ -21,7 +21,7 @@ export default function SelectCommunicationMethod({
         setSelectedMethods(methods);
     }, [methods]);
 
-    const { mutate: setMethodMutate, isLoading: setMethodIsLoading } =
+    const { mutate: setMethodMutate, isPending: setMethodIsLoading } =
         api.survey.setCommunicationMethods.useMutation();
 
     useEffect(() => {
