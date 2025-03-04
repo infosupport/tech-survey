@@ -137,7 +137,7 @@ const ShowTechSearchWrapper = ({
                                 name="tech"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <Label className="text-nowrap" >
+                                        <Label className="text-nowrap">
                                             Viewing results for technology:
                                         </Label>
                                         <FormControl>
