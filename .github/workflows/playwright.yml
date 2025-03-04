@@ -28,8 +28,8 @@ jobs:
             - name: "💅 Prepare"
               run: |
                   cp .env.example .env
-                  DB_PASSWORD=$(openssl rand -base64 12)
-                  sed -i -e "s#:password@#:$DB_PASSWORD@#" .env
+                  secret=$(openssl rand -base64 32)
+                  sed -i "s/NEXTAUTH_SECRET=\"dummy\"/NEXTAUTH_SECRET=\"$secret\"/g" .env
             - name: "🎭 Run Playwright tests"
               run: npx playwright test
             - name: "📤 Upload Artifacts"
