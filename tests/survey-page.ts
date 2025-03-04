@@ -87,6 +87,8 @@ export class SurveyPage {
         await this.page
             .getByRole("button", { name: "Next", exact: true })
             .click();
+
+        await this.page.waitForTimeout(1000);
     }
 
     async submitAnswers() {
