@@ -77,7 +77,7 @@ export class TestSetup {
 
     async setupSessionCookie(page: Page, tokenValue: string): Promise<void> {
         const sessionCookie = {
-            name: "next-auth.session-token",
+            name: "authjs.session-token",
             value: tokenValue,
             domain: "localhost",
             path: "/",
@@ -90,7 +90,7 @@ export class TestSetup {
         const cookies = await page.context().cookies();
         const sessionCookieSet = cookies.some(
             (cookie) =>
-                cookie.name === "next-auth.session-token" &&
+                cookie.name === "authjs.session-token" &&
                 cookie.value === tokenValue,
         );
 
@@ -155,7 +155,7 @@ export class TestSetup {
         const token = async () => {
             return encode({
                 token: payload,
-                salt: "dummy",
+                salt: "authjs.session-token",
                 secret: process.env.AUTH_SECRET ?? "dummy",
             });
         };
