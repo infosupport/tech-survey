@@ -1,18 +1,11 @@
 "use server";
 
-import { api } from "~/trpc/react";
 import { ArrowRight, ArrowRightDarkModeFriendly } from "./svg";
 import { Button } from "./ui/button";
 import Link from "next/link";
+import { HomepageFindTheExpertButton } from "./homepage-find-the-expert-button";
 
 const Buttons = () => {
-    const { mutate: logUsageMetric } =
-        api.usageMetricLogger.logUsageMetric.useMutation();
-
-    const handleLogging = () => {
-        logUsageMetric({ logMessage: "find-the-expert-page-accessed" });
-    };
-
     return (
         <div className="mt-5 flex justify-center">
             <div className="mt-5 flex flex-col items-center gap-6 md:flex-row">
@@ -31,18 +24,7 @@ const Buttons = () => {
                         <ArrowRightDarkModeFriendly />
                     </Button>
                 </Link>
-                <Link href="/find-the-expert?role=General">
-                    <Button
-                        onClick={async () => {
-                            handleLogging();
-                        }}
-                        variant="outline"
-                        className="border-2 border-[#bed62f]"
-                    >
-                        Find the Expert
-                        <ArrowRightDarkModeFriendly />
-                    </Button>
-                </Link>
+                <HomepageFindTheExpertButton />
             </div>
         </div>
     );
