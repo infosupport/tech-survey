@@ -11,7 +11,7 @@
         "db:generate": "prisma generate",
         "db:deploy": "prisma migrate deploy",
         "db:seed": "node prisma/seed.js",
-        "dev": "next dev",
+        "dev": "next dev --turbo",
         "lint": "next lint",
         "lint:fix": "npm run lint -- --fix",
         "start": "node ./node_modules/next/dist/bin/next start",
