@@ -72,8 +72,6 @@ export type SurveyResponse = {
     userId: string;
     questionId: string;
     answerId: string;
-    id: string | undefined;
-    question?: Question;
 };
 
 export type OnlineStatus = "isOnline" | "isOffline" | "isBackOnline";

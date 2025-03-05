@@ -95,6 +95,9 @@ test.describe("Desktop tests using a single role", () => {
         }
 
         await surveyPage.submitAnswers();
+        await surveyPage.page.waitForURL(
+            `http://localhost:${surveyPage.port}/thank-you`,
+        );
         const isUrlCorrect = await surveyPage.checkUrl("thank-you");
         expect(isUrlCorrect).toBe(true);
     });
@@ -123,6 +126,9 @@ test.describe("Desktop tests using a single role", () => {
         await surveyPage.selectAnswerOption(questionsText[0]!, 0);
 
         await surveyPage.submitAnswers();
+        await surveyPage.page.waitForURL(
+            `http://localhost:${surveyPage.port}/thank-you`,
+        );
         const isUrlCorrect = await surveyPage.checkUrl("thank-you");
         expect(isUrlCorrect).toBe(true);
     });
@@ -143,6 +149,9 @@ test.describe("Desktop tests using a single role", () => {
         }
 
         await surveyPage.submitAnswers();
+        await surveyPage.page.waitForURL(
+            `http://localhost:${surveyPage.port}/thank-you`,
+        );
         const isUrlCorrect = await surveyPage.checkUrl("thank-you");
         expect(isUrlCorrect).toBe(true);
 
@@ -170,6 +179,9 @@ test.describe("Desktop tests using a single role", () => {
         }
 
         await surveyPage.submitAnswers();
+        await surveyPage.page.waitForURL(
+            `http://localhost:${surveyPage.port}/thank-you`,
+        );
         const isUrlCorrect = await surveyPage.checkUrl("thank-you");
         expect(isUrlCorrect).toBe(true);
 
@@ -307,6 +319,9 @@ test.describe("Desktop tests using a multiple roles", () => {
 
             if (role === MULTIPLE_ROLES[MULTIPLE_ROLES.length - 1]) {
                 await surveyPage.submitAnswers();
+                await surveyPage.page.waitForURL(
+                    `http://localhost:${surveyPage.port}/thank-you`,
+                );
             } else {
                 await surveyPage.goToNextQuestionsForDifferentRole();
             }
@@ -384,6 +399,9 @@ test.describe("Mobile tests using a single role", () => {
         }
 
         await surveyPage.submitAnswers();
+        await surveyPage.page.waitForURL(
+            `http://localhost:${surveyPage.port}/thank-you`,
+        );
         await surveyPage.checkUrl("thank-you");
     });
 
@@ -408,6 +426,9 @@ test.describe("Mobile tests using a single role", () => {
         await surveyPage.mobileSelectAnswerOption(questionsText[0]!);
 
         await surveyPage.submitAnswers();
+        await surveyPage.page.waitForURL(
+            `http://localhost:${surveyPage.port}/thank-you`,
+        );
         const isUrlCorrect = await surveyPage.checkUrl("thank-you");
         expect(isUrlCorrect).toBe(true);
     });
@@ -424,6 +445,9 @@ test.describe("Mobile tests using a single role", () => {
         }
 
         await surveyPage.submitAnswers();
+        await surveyPage.page.waitForURL(
+            `http://localhost:${surveyPage.port}/thank-you`,
+        );
         const isUrlCorrect = await surveyPage.checkUrl("thank-you");
         expect(isUrlCorrect).toBe(true);
 
@@ -477,6 +501,9 @@ test.describe("Mobile tests using a single role", () => {
             await surveyPage.mobileSelectAnswerOption(question);
         }
         await surveyPage.submitAnswers();
+        await surveyPage.page.waitForURL(
+            `http://localhost:${surveyPage.port}/thank-you`,
+        );
         const isUrlCorrect = await surveyPage.checkUrl("thank-you");
         expect(isUrlCorrect).toBe(true);
 

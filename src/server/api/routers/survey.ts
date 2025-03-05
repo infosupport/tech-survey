@@ -446,14 +446,12 @@ export const surveyRouter = createTRPCRouter({
                 userId: z.string(),
                 questionId: z.string(),
                 answerId: z.string(),
-                id: z.string().optional(),
             }),
         )
         .mutation(async ({ ctx, input }) => {
-            const { userId, questionId, answerId, id } = input;
+            const { userId, questionId, answerId } = input;
             checkUserAuthorisation(ctx.session, userId);
             try {
-
                 const [questionExists, answerOptionExists, userExists] =
                     await Promise.all([
                         ctx.db.question.count({
@@ -489,30 +487,36 @@ export const surveyRouter = createTRPCRouter({
                     );
                 }
 
-                if (id) {
-                    return await ctx.db.questionResult.update({
+                const existingQuestionResult =
+                    await ctx.db.questionResult.findFirst({
                         where: {
-                            id: id,
-                        },
-                        data: {
-                            answerId,
-                        },
-                        include: {
-                            question: true,
+                            userId: userId,
+                            questionId: questionId,
                         },
                     });
-                } else {
-                    return await ctx.db.questionResult.create({
-                        data: {
-                            userId,
-                            questionId,
-                            answerId,
+
+                await ctx.db.questionResult.upsert({
+                    where: {
+                        userId_questionId: {
+                            userId: userId,
+                            questionId: questionId,
                         },
-                        include: {
-                            question: true,
-                        },
-                    });
-                }
+                    },
+                    update: {
+                        answerId: answerId,
+                    },
+                    create: {
+                        userId: userId,
+                        questionId: questionId,
+                        answerId: answerId,
+                    },
+                    include: {
+                        question: true,
+                    },
+                });
+
+                // Return this to update the percentage complete on the client
+                return existingQuestionResult === null;
             } catch (error) {
                 // eslint-disable-next-line no-console
                 console.error("Error processing answers:", error);

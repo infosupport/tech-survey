@@ -53,16 +53,24 @@ export function SurveyQuestionnaire({
         (role) => role.role.toLowerCase() === currentRole,
     )?.id;
 
-    const { data } = api.survey.getSurveyQuestionsCompletedPerRole.useQuery(
-        { userId: userId },
-        { enabled: !!userId },
-    );
+    const { data, isPending } =
+        api.survey.getSurveyQuestionsCompletedPerRole.useQuery(
+            { userId: userId },
+            { enabled: !!userId },
+        );
+
     const [percentCompletedPerRole, setPercentCompletedPerRole] =
         useState(data);
 
+    useEffect(() => {
+        if (!isPending) {
+            setPercentCompletedPerRole(data);
+        }
+    }, [data, isPending]);
+
     const [responses] = useState(userAnswersForRole);
 
-    const { saveAnswer, isSubmitting, currentAnswers } =
+    const { saveAnswer, isSubmitting, amountOfAnsweredQuestions } =
         useSubmitAnswers(userAnswersForRole);
 
     useEffect(() => {
@@ -71,17 +79,13 @@ export function SurveyQuestionnaire({
                 if (!prevState) return prevState;
                 const updatedState = { ...prevState };
                 if (updatedState[currentRoleId]) {
-                    updatedState[currentRoleId]!.answeredQuestions =
-                        currentAnswers.length;
+                    updatedState[currentRoleId].answeredQuestions =
+                        amountOfAnsweredQuestions;
                 }
                 return updatedState;
             });
         }
-    }, [currentAnswers, currentRoleId]);
-
-    useEffect(() => {
-        console.log("percentCompletedPerRole", percentCompletedPerRole);
-    }, [percentCompletedPerRole]);
+    }, [amountOfAnsweredQuestions, currentRoleId]);
 
     const unansweredQuestions = questions.filter(
         (question) =>
@@ -214,7 +218,6 @@ export function SurveyQuestionnaire({
                         answerOptions={answerOptions}
                         form={form}
                         saveAnswer={saveAnswer}
-                        currentAnswers={currentAnswers}
                     />
                     <SpinnerButton
                         type="submit"

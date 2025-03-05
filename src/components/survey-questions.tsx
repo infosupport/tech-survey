@@ -32,7 +32,6 @@ import {
 } from "~/components/ui/table";
 import { InfoCircledIcon } from "@radix-ui/react-icons";
 import { type useForm } from "react-hook-form";
-import { findAnswerId } from "~/utils/survey-utils";
 import { useEffect, useRef } from "react";
 
 export function SurveyQuestions({
@@ -41,14 +40,12 @@ export function SurveyQuestions({
     answerOptions,
     form,
     saveAnswer,
-    currentAnswers,
 }: {
     userId: string;
     questions: Question[];
     answerOptions: AnswerOption[];
     form: ReturnType<typeof useForm>;
     saveAnswer: (answer: SurveyResponse) => void;
-    currentAnswers: SurveyResponse[];
 }) {
     const tableRef = useRef<HTMLTableElement>(null);
     const currentRowIndex = useRef<number>(1);
@@ -202,11 +199,7 @@ export function SurveyQuestions({
                                         >
                                             <label
                                                 className={`${
-                                                    field.value === option.id ||
-                                                    findAnswerId(
-                                                        currentAnswers,
-                                                        question.id,
-                                                    ) === option.id
+                                                    field.value === option.id
                                                         ? "rounded-lg border-2 border-custom-selected "
                                                         : ""
                                                 }flex h-[40px] cursor-pointer items-center justify-center`}
@@ -221,9 +214,6 @@ export function SurveyQuestions({
                                                                     value,
                                                                 );
                                                                 saveAnswer({
-                                                                    id: question
-                                                                        .QuestionResult?.[0]
-                                                                        ?.id,
                                                                     userId: userId,
                                                                     questionId:
                                                                         question.id,
@@ -254,12 +244,7 @@ export function SurveyQuestions({
                                                                     }
                                                                     checked={
                                                                         field.value ===
-                                                                            option.id ||
-                                                                        findAnswerId(
-                                                                            currentAnswers,
-                                                                            question.id,
-                                                                        ) ===
-                                                                            option.id
+                                                                        option.id
                                                                     }
                                                                 />
                                                             </FormControl>

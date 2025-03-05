@@ -27,7 +27,6 @@ import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { type useForm } from "react-hook-form";
-import { findAnswerId } from "~/utils/survey-utils";
 import { Button } from "../ui/button";
 
 export function MobileSurveyQuestionnaire({
@@ -36,14 +35,12 @@ export function MobileSurveyQuestionnaire({
     answerOptions,
     form,
     saveAnswer,
-    currentAnswers,
 }: {
     userId: string;
     questions: Question[];
     answerOptions: AnswerOption[];
     form: ReturnType<typeof useForm>;
     saveAnswer: (answer: SurveyResponse) => void;
-    currentAnswers: SurveyResponse[];
 }) {
     return (
         <div>
@@ -74,9 +71,6 @@ export function MobileSurveyQuestionnaire({
                                                     ) => {
                                                         field.onChange(value);
                                                         saveAnswer({
-                                                            id: question
-                                                                .QuestionResult?.[0]
-                                                                ?.id,
                                                             userId: userId,
                                                             questionId:
                                                                 question.id,
@@ -91,11 +85,7 @@ export function MobileSurveyQuestionnaire({
                                                     <label
                                                         className={`flex cursor-pointer items-center space-x-2 rounded-lg p-2 ${
                                                             field.value ===
-                                                                option.id ||
-                                                            findAnswerId(
-                                                                currentAnswers,
-                                                                question.id,
-                                                            ) === option.id
+                                                            option.id
                                                                 ? "bg-custom-selectedLight dark:bg-custom-selected"
                                                                 : "hover:bg-gray-100 dark:hover:bg-slate-900"
                                                         }`}
@@ -107,12 +97,7 @@ export function MobileSurveyQuestionnaire({
                                                                 }
                                                                 checked={
                                                                     field.value ===
-                                                                        option.id ||
-                                                                    findAnswerId(
-                                                                        currentAnswers,
-                                                                        question.id,
-                                                                    ) ===
-                                                                        option.id
+                                                                    option.id
                                                                 }
                                                             />
                                                         </FormControl>
