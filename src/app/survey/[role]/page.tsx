@@ -1,4 +1,3 @@
-import { getServerAuthSession } from "~/server/auth";
 import { type AnswerOption, type Question } from "~/models/types";
 import { Suspense } from "react";
 import { SurveyQuestionnaire } from "~/components/survey-questionnaire";
@@ -6,6 +5,7 @@ import SurveyQuestionLoader from "~/components/loading/survey-question-loader";
 import { db } from "~/server/db";
 
 import { type Metadata } from "next";
+import { auth } from "~/auth";
 
 export const metadata: Metadata = {
     title: "Survey",
@@ -18,11 +18,7 @@ const SuspenseSurveyData = () => (
 );
 
 const SurveyPage: React.FC = async () => {
-    const session = await getServerAuthSession();
-
-    if (!session) {
-        return <div>Unauthenticated</div>;
-    }
+    const session = (await auth())!;
 
     const [questions, answerOptions, userRoles, userAnswersForRole] =
         await Promise.all([

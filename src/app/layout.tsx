@@ -6,12 +6,7 @@ import { Inter } from "next/font/google";
 
 import { TRPCReactProvider } from "~/trpc/react";
 import { cn } from "~/lib/utils";
-import { Suspense } from "react";
 import { ModeToggle } from "~/components/mode-toggle";
-import { Login } from "~/components/login";
-import { type Session } from "next-auth";
-import { getServerAuthSession } from "~/server/auth";
-import ButtonSkeleton from "~/components/loading/button-loader";
 import Link from "next/link";
 import GithubLink from "~/components/github-link";
 import { HomeLink } from "~/components/home-link";
@@ -35,7 +30,6 @@ export default async function RootLayout({
 }: {
     children: React.ReactNode;
 }) {
-    const session = await getServerAuthSession();
     return (
         <html lang="en" suppressHydrationWarning={true}>
             <body
@@ -56,11 +50,6 @@ export default async function RootLayout({
                             <div className="mx-auto flex flex-wrap items-center justify-between p-4">
                                 <HomeLink />
                                 <div className="flex-grow"></div>
-                                {session && (
-                                    <Suspense fallback={<ButtonSkeleton />}>
-                                        <LoginWrapper session={session} />
-                                    </Suspense>
-                                )}
                                 <ModeToggle />
                                 <GithubLink />
                             </div>
@@ -87,7 +76,3 @@ export default async function RootLayout({
         </html>
     );
 }
-
-const LoginWrapper: React.FC<{ session: Session }> = async ({ session }) => {
-    return <Login session={session} text="Go to survey" />;
-};

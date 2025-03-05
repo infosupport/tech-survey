@@ -7,11 +7,6 @@ export const env = createEnv({
      * isn't built with invalid env vars.
      */
     server: {
-        AZURE_AD_CLIENT_ID: z.string(),
-        AZURE_AD_CLIENT_SECRET: z.string(),
-        AZURE_AD_TENANT_ID: z.string(),
-        NEXTAUTH_SECRET: z.string(),
-        NEXTAUTH_URL: z.string(),
         FRESH_RUN: z.string(),
 
         NODE_ENV: z
@@ -33,11 +28,6 @@ export const env = createEnv({
      * middlewares) or client-side so we need to destruct manually.
      */
     runtimeEnv: {
-        AZURE_AD_CLIENT_ID: process.env.AZURE_AD_CLIENT_ID,
-        AZURE_AD_CLIENT_SECRET: process.env.AZURE_AD_CLIENT_SECRET,
-        AZURE_AD_TENANT_ID: process.env.AZURE_AD_TENANT_ID,
-        NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
-        NEXTAUTH_URL: process.env.NEXTAUTH_URL,
         FRESH_RUN: process.env.FRESH_RUN,
         NODE_ENV: process.env.NODE_ENV,
     },

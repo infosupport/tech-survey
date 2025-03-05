@@ -3,23 +3,18 @@
 import { type Session } from "next-auth";
 import { signIn, signOut } from "next-auth/react";
 import { Button } from "~/components/ui/button";
-import { ArrowRight } from "./svg";
+import { ArrowRightDarkModeFriendly } from "./svg";
 
-export function Login({
-    session,
-    text,
-}: {
-    session?: Session | null;
-    text: string;
-}) {
+export function Login({ session }: { session?: Session | null }) {
     if (!session) {
         return (
             <Button
+                variant="outline"
+                className="ml-2"
                 onClick={() => signIn("azure-ad")}
-                className=" bg-custom-buttonPrimary text-custom-secondary hover:bg-custom-buttonHover dark:bg-custom-buttonPrimary dark:hover:bg-custom-buttonHover"
             >
-                {text}
-                <ArrowRight />
+                Login
+                <ArrowRightDarkModeFriendly />
             </Button>
         );
     }

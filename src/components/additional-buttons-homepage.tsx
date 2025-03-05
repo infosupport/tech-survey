@@ -1,13 +1,11 @@
-"use client";
+"use server";
 
-import type { Session } from "next-auth";
-import { signIn } from "next-auth/react";
 import { api } from "~/trpc/react";
-import { Login } from "./login";
-import { ArrowRightDarkModeFriendly } from "./svg";
+import { ArrowRight, ArrowRightDarkModeFriendly } from "./svg";
 import { Button } from "./ui/button";
+import Link from "next/link";
 
-const Buttons = ({ session }: { session: Session | null }) => {
+const Buttons = () => {
     const { mutate: logUsageMetric } =
         api.usageMetricLogger.logUsageMetric.useMutation();
 
@@ -18,37 +16,33 @@ const Buttons = ({ session }: { session: Session | null }) => {
     return (
         <div className="mt-5 flex justify-center">
             <div className="mt-5 flex flex-col items-center gap-6 md:flex-row">
-                {!session && (
-                    <>
-                        <Login session={session} text="Go to survey" />
-                        <Button
-                            onClick={() =>
-                                signIn("azure-ad", {
-                                    callbackUrl: "/result?role=General",
-                                })
-                            }
-                            variant="outline"
-                            className="border-2 border-[#bed62f]"
-                        >
-                            Show anonymized results
-                            <ArrowRightDarkModeFriendly />
-                        </Button>
-                        <Button
-                            onClick={async () => {
-                                handleLogging();
-                                await signIn("azure-ad", {
-                                    callbackUrl:
-                                        "/find-the-expert?role=General",
-                                });
-                            }}
-                            variant="outline"
-                            className="border-2 border-[#bed62f]"
-                        >
-                            Find the Expert
-                            <ArrowRightDarkModeFriendly />
-                        </Button>
-                    </>
-                )}
+                <Link href="/survey/general">
+                    <Button className="bg-custom-buttonPrimary text-custom-secondary hover:bg-custom-buttonHover dark:bg-custom-buttonPrimary dark:hover:bg-custom-buttonHover">
+                        Go to survey
+                        <ArrowRight />
+                    </Button>
+                </Link>
+                <Link href="/result?role=General">
+                    <Button
+                        variant="outline"
+                        className="border-2 border-[#bed62f]"
+                    >
+                        Show anonymized results
+                        <ArrowRightDarkModeFriendly />
+                    </Button>
+                </Link>
+                <Link href="/find-the-expert?role=General">
+                    <Button
+                        onClick={async () => {
+                            handleLogging();
+                        }}
+                        variant="outline"
+                        className="border-2 border-[#bed62f]"
+                    >
+                        Find the Expert
+                        <ArrowRightDarkModeFriendly />
+                    </Button>
+                </Link>
             </div>
         </div>
     );

@@ -2,8 +2,7 @@ import { type ChildProcess, spawn } from "child_process";
 import { expect, type Page } from "@playwright/test";
 import { SurveyPage } from "./survey-page";
 import { type StartedPostgreSqlContainer } from "@testcontainers/postgresql";
-import type { DefaultJWT } from "next-auth/jwt";
-import jwt from "next-auth/jwt";
+import { encode, type DefaultJWT } from "next-auth/jwt";
 import type { DbHelper } from "./db-helper";
 
 type RoleIdMap = Record<string, string>;
@@ -154,9 +153,10 @@ export class TestSetup {
         };
 
         const token = async () => {
-            return jwt.encode({
+            return encode({
                 token: payload,
-                secret: process.env.NEXTAUTH_SECRET ?? "dummy",
+                salt: "dummy",
+                secret: process.env.AUTH_SECRET ?? "dummy",
             });
         };
 
