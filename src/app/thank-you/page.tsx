@@ -1,7 +1,6 @@
 import { db } from "~/server/db";
 import PdfDownloadButton from "~/components/download-pdf";
 import React, { Suspense } from "react";
-import { getServerAuthSession } from "~/server/auth";
 import {
     type QuestionResult,
     type Question,
@@ -10,17 +9,18 @@ import {
 
 import { type Metadata } from "next";
 import ButtonSkeleton from "~/components/loading/button-loader";
+import { auth } from "~/auth";
 
 export const metadata: Metadata = {
     title: "Thank You",
 };
 
 const ThankYou = async () => {
-    const session = await getServerAuthSession();
+    const session = (await auth())!;
     const userAnswersForRole: QuestionResult[] =
         await db.questionResult.findMany({
             where: {
-                userId: session?.user.id,
+                userId: session.user.id,
             },
             include: {
                 question: {
@@ -35,7 +35,7 @@ const ThankYou = async () => {
 
     const userSelectedRoles = await db.user.findUnique({
         where: {
-            id: session?.user.id,
+            id: session.user.id,
         },
         include: {
             roles: true,
@@ -97,7 +97,7 @@ const ThankYou = async () => {
                     <PdfDownloadButton
                         userAnswersForRole={transformedData}
                         answerOptions={answerOptions}
-                        session={session!}
+                        session={session}
                     />
                 </Suspense>
             </div>

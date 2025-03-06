@@ -1,4 +1,3 @@
-import { getServerAuthSession } from "~/server/auth";
 import SelectUserSurveyPreferences from "~/components/select-input";
 
 import React, { Suspense } from "react";
@@ -6,9 +5,10 @@ import { db } from "~/server/db";
 import RoleSelectionSkeleton from "~/components/loading/role-selection-loader";
 import Buttons from "~/components/additional-buttons-homepage";
 import Link from "next/link";
+import { auth } from "~/auth";
 
 const Home: React.FC = async () => {
-    const session = await getServerAuthSession();
+    const session = await auth();
     const [roles, businessUnits] = await Promise.all([
         db.role.findMany(),
         db.businessUnit.findMany(),
@@ -113,7 +113,7 @@ const Home: React.FC = async () => {
                             </div>
                         )}
 
-                        <Buttons session={session} />
+                        <Buttons />
                     </div>
                 </div>
             </div>

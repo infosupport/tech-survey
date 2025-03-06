@@ -15,7 +15,7 @@ docker run --name tech-survey -e "POSTGRES_USER=dummyusr" -e "POSTGRES_PASSWORD=
 
 3. Copy `.env.example` to `.env` and update the `DATABASE_URL` variable with the username and password you chose in the previous step. The default value is:
    `DATABASE_URL="postgresql://dummyusr:dummypw@localhost/tech-survey`
-4. Create a secret for NEXTAUTH_SECRET by running the following command. Use WSL for this command if you are on Windows.
+4. Create a secret for AUTH_SECRET by running the following command. Use WSL for this command if you are on Windows.
 
 ```bash
 openssl rand -base64 32

@@ -10,9 +10,7 @@ import type { BusinessUnit, Prisma } from "@prisma/client";
 import { type Metadata } from "next";
 import ButtonSkeleton from "~/components/loading/button-loader";
 import LegendSkeleton from "~/components/loading/results-loader";
-import { Login } from "~/components/login";
 import SearchAnonymized from "~/components/ui/search-anonymized";
-import { getServerAuthSession } from "~/server/auth";
 import { getRoles } from "~/utils/role-utils";
 import ShowResults from "~/components/show-results";
 
@@ -23,7 +21,6 @@ export const metadata: Metadata = {
 const Results = async (context: {
     searchParams: Promise<{ role: string; unit: string }>;
 }) => {
-    const session = await getServerAuthSession();
     return (
         <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
             <h1 className="text-center text-5xl font-extrabold tracking-tight">
@@ -32,28 +29,16 @@ const Results = async (context: {
                 </span>
                 <span className="block sm:inline"> Tech Survey - Results</span>
             </h1>
-            {!session && (
-                <>
-                    <p className="text-center text-lg">
-                        Unable to view anonymized results without logging in.
-                    </p>
-                    <Login session={session} text={"Log in"} />
-                </>
-            )}
-            {session && (
-                <>
-                    <Suspense fallback={<ButtonSkeleton />}>
-                        <AnonymousRoleSearch />
-                    </Suspense>
+            <Suspense fallback={<ButtonSkeleton />}>
+                <AnonymousRoleSearch />
+            </Suspense>
 
-                    <Suspense fallback={<LegendSkeleton />}>
-                        <ShowResultsWrapper
-                            role={(await context.searchParams).role}
-                            unit={(await context.searchParams).unit}
-                        />
-                    </Suspense>
-                </>
-            )}
+            <Suspense fallback={<LegendSkeleton />}>
+                <ShowResultsWrapper
+                    role={(await context.searchParams).role}
+                    unit={(await context.searchParams).unit}
+                />
+            </Suspense>
         </div>
     );
 };

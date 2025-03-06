@@ -65,7 +65,7 @@ let
                             ${pkgs.gnused}/bin/sed -i "s/dummyusr/$(head /dev/urandom | tr -dc a-z | head -c 13)/g" .env
                             ${pkgs.gnused}/bin/sed -i "s/dummypw/$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 20)/g" .env
                             secret=$(${pkgs.openssl}/bin/openssl rand -base64 32)
-                            ${pkgs.gnused}/bin/sed -i "s/NEXTAUTH_SECRET=\"dummy\"/NEXTAUTH_SECRET=\"$secret\"/g" .env
+                            ${pkgs.gnused}/bin/sed -i "s/AUTH_SECRET=\"dummy\"/AUTH_SECRET=\"$secret\"/g" .env
                             echo ".env file created"
                         fi
                       '';

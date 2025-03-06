@@ -1,10 +1,7 @@
 import type { Metadata } from "next";
-import type { Session } from "next-auth";
 import type { Prisma } from "@prisma/client";
 import React, { Suspense } from "react";
 import ButtonSkeleton from "~/components/loading/button-loader";
-import { Login } from "~/components/login";
-import { getServerAuthSession } from "~/server/auth";
 import ProfilePageSearch from "~/components/ui/profile-page-search";
 import { db } from "~/server/db";
 import { DataTable } from "~/components/data-tables/data-table";
@@ -15,15 +12,6 @@ import ProfileRadarChart from "~/components/profile-radar-chart";
 export const metadata: Metadata = {
     title: "Find the expert",
 };
-
-const LoginSection = ({ session }: { session: Session | null }) => (
-    <>
-        <p className="text-center text-lg">
-            Unable to search people without logging in.
-        </p>
-        <Login session={session} text={"Log in"} />
-    </>
-);
 
 const ContentSection = async ({ name }: { name: string }) => {
     const users = await db.user.findMany({
@@ -178,8 +166,6 @@ const ProfilePage = async ({ user }: { user?: UserData }) => {
 const ProfilePageWrapper = async (context: {
     searchParams: Promise<{ name: string }>;
 }) => {
-    const session = await getServerAuthSession();
-
     return (
         <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
             <h1 className="text-center text-5xl font-extrabold tracking-tight">
@@ -191,11 +177,7 @@ const ProfilePageWrapper = async (context: {
                     Tech Survey - Profile page
                 </span>
             </h1>
-            {session ? (
-                <ContentSection name={(await context.searchParams).name} />
-            ) : (
-                <LoginSection session={session} />
-            )}
+            <ContentSection name={(await context.searchParams).name} />
         </div>
     );
 };

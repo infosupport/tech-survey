@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { api } from "~/trpc/react";
 import { type Role } from "~/models/types";
 import Link from "next/link";
-import { ArrowRight, ArrowRightDarkModeFriendly } from "~/components/svg";
+import { ArrowRightDarkModeFriendly } from "~/components/svg";
 import SelectCommunicationMethod from "~/components/select-communication-method";
 import { SpinnerButton } from "~/components/ui/button-spinner";
 import type { BusinessUnit, CommunicationMethod } from "@prisma/client";
@@ -109,7 +109,7 @@ function SelectUserSurveyPreferences({
                             className="flex items-center justify-center bg-custom-buttonPrimary text-custom-secondary hover:bg-custom-buttonHover dark:bg-custom-buttonPrimary dark:hover:bg-custom-buttonHover"
                         >
                             <Link href="/survey/general" passHref>
-                                <ArrowRight />
+                                <ArrowRightDarkModeFriendly />
                             </Link>
                         </SpinnerButton>
                     </div>
