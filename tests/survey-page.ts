@@ -3,7 +3,7 @@ import { type Page } from "playwright";
 
 export class SurveyPage {
     public readonly page: Page;
-    private readonly port;
+    public readonly port;
 
     constructor(page: Page, port: number) {
         this.page = page;

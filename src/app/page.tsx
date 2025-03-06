@@ -1,4 +1,4 @@
-import SelectRoles from "~/components/select-input";
+import SelectUserSurveyPreferences from "~/components/select-input";
 
 import React, { Suspense } from "react";
 import { db } from "~/server/db";
@@ -104,7 +104,7 @@ const Home: React.FC = async () => {
                         {session && (
                             <div>
                                 <Suspense fallback={<RoleSelectionSkeleton />}>
-                                    <SelectRoles
+                                    <SelectUserSurveyPreferences
                                         userId={session.user.id}
                                         roles={roles}
                                         businessUnits={businessUnits}

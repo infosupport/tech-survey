@@ -21,34 +21,30 @@ import {
     FormMessage,
 } from "~/components/ui/form";
 
-import { type Session } from "next-auth";
 import { idToMoreInfo, idToTextMap } from "~/utils/optionMapping";
 
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { type useForm } from "react-hook-form";
-import { findAnswerId } from "~/utils/survey-utils";
 import { Button } from "../ui/button";
 
 export function MobileSurveyQuestionnaire({
-    session,
-    filteredQuestions,
+    userId,
+    questions,
     answerOptions,
     form,
     saveAnswer,
-    currentAnswers,
 }: {
-    session: Session;
-    filteredQuestions: Question[];
+    userId: string;
+    questions: Question[];
     answerOptions: AnswerOption[];
     form: ReturnType<typeof useForm>;
     saveAnswer: (answer: SurveyResponse) => void;
-    currentAnswers: SurveyResponse[];
 }) {
     return (
         <div>
-            {filteredQuestions?.map((question) => (
+            {questions?.map((question) => (
                 <div key={question.id} className="mx-auto w-full">
                     <FormField
                         control={form.control}
@@ -75,8 +71,7 @@ export function MobileSurveyQuestionnaire({
                                                     ) => {
                                                         field.onChange(value);
                                                         saveAnswer({
-                                                            userId: session.user
-                                                                .id,
+                                                            userId: userId,
                                                             questionId:
                                                                 question.id,
                                                             answerId: value,
@@ -90,11 +85,7 @@ export function MobileSurveyQuestionnaire({
                                                     <label
                                                         className={`flex cursor-pointer items-center space-x-2 rounded-lg p-2 ${
                                                             field.value ===
-                                                                option.id ||
-                                                            findAnswerId(
-                                                                currentAnswers,
-                                                                question.id,
-                                                            ) === option.id
+                                                            option.id
                                                                 ? "bg-custom-selectedLight dark:bg-custom-selected"
                                                                 : "hover:bg-gray-100 dark:hover:bg-slate-900"
                                                         }`}
@@ -106,12 +97,7 @@ export function MobileSurveyQuestionnaire({
                                                                 }
                                                                 checked={
                                                                     field.value ===
-                                                                        option.id ||
-                                                                    findAnswerId(
-                                                                        currentAnswers,
-                                                                        question.id,
-                                                                    ) ===
-                                                                        option.id
+                                                                    option.id
                                                                 }
                                                             />
                                                         </FormControl>

@@ -22,9 +22,9 @@ openssl rand -base64 32
 ```
 
 5. Ask a co-worker for the Azure credentials or the rights to create an app registration yourself.
-    1. AZURE_AD_CLIENT_SECRET: A secret credential created in an app registration.
-    2. AZURE_AD_CLIENT_ID: The client ID of the app registration.
-    3. AZURE_AD_TENANT_ID: The tenant ID of the Azure AD.
+    1. AUTH_MICROSOFT_ENTRA_ID_SECRET: A secret credential created in an app registration.
+    2. AUTH_MICROSOFT_ENTRA_ID_ID: The client ID of the app registration.
+    3. AUTH_MICROSOFT_ENTRA_ID_ISSUER: The tenant ID of the Azure AD.
 6. Run the following commands to setup your db locally.
 
 ```bash

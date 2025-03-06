@@ -14,9 +14,20 @@ import { CheckIcon, DotFilledIcon } from "@radix-ui/react-icons";
 import { ScrollArea } from "~/components/ui/scroll-area";
 import { progressionInfo } from "~/utils/survey-utils";
 
-const MobileProgressionBar = ({ roles }: { roles: Section[] }) => {
-    const { completedRoles, totalRoles, currentRole, progressPercentage } =
-        progressionInfo(roles);
+const MobileProgressionBar = ({
+    roles,
+    percentCompletedPerRole,
+}: {
+    roles: Section[];
+    percentCompletedPerRole: Record<
+        string,
+        { totalQuestions: number; answeredQuestions: number }
+    >;
+}) => {
+    const { completedRoles, totalRoles, progressPercentage } = progressionInfo(
+        percentCompletedPerRole,
+    );
+    const currentRole = roles.find((role) => role.isCurrent);
 
     return (
         <DropdownMenu>
@@ -33,18 +44,18 @@ const MobileProgressionBar = ({ roles }: { roles: Section[] }) => {
                 <ScrollArea className="w-50 h-72 rounded-md border">
                     {roles.map((section) => (
                         <div key={section.id}>
-                            {section.currentCompleted ? (
+                            {section.isCurrentCompleted ? (
                                 <Link href={section.href}>
                                     <DropdownMenuCheckboxItem
-                                        checked={section.current}
+                                        checked={section.isCurrent}
                                     >
-                                        {section.completed && (
+                                        {section.isCompleted && (
                                             <div className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
                                                 <CheckIcon className="h-4 w-4 text-green-500" />{" "}
                                             </div>
                                         )}
-                                        {section.started &&
-                                        !section.completed ? (
+                                        {section.hasStarted &&
+                                        !section.isCompleted ? (
                                             <div className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
                                                 <DotFilledIcon className="h-4 w-4 text-orange-500" />{" "}
                                             </div>
@@ -54,12 +65,13 @@ const MobileProgressionBar = ({ roles }: { roles: Section[] }) => {
                                 </Link>
                             ) : (
                                 <DropdownMenuCheckboxItem disabled>
-                                    {section.completed && (
+                                    {section.isCompleted && (
                                         <div className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
                                             <CheckIcon className="h-4 w-4 text-green-500" />{" "}
                                         </div>
                                     )}
-                                    {section.started && !section.completed ? (
+                                    {section.hasStarted &&
+                                    !section.isCompleted ? (
                                         <div className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
                                             <DotFilledIcon className="h-4 w-4 text-orange-500" />{" "}
                                         </div>
