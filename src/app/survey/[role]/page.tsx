@@ -17,10 +17,6 @@ const SuspenseSurveyData = async ({
     const session = (await auth())!;
     const role = decodeURIComponent((await params).role.replace(/\+/g, " "));
 
-    if (!session) {
-        return <div>Unauthenticated</div>;
-    }
-
     return (
         <Suspense fallback={<SurveyQuestionLoader />}>
             <SurveyPage userId={session.user.id} currentRole={role} />
