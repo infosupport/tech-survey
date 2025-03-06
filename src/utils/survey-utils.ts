@@ -14,7 +14,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 export function getNextHref(
     selectedRolesForProgressBar: ProgressBar[],
 ): string | undefined {
-    const index = selectedRolesForProgressBar.findIndex((role) => role.current);
+    const index = selectedRolesForProgressBar.findIndex(
+        (role) => role.isCurrent,
+    );
     return selectedRolesForProgressBar[index + 1]?.href;
 }
 

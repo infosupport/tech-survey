@@ -5,23 +5,23 @@ import {
     type AnswerOption,
     type Question,
     type QuestionResult,
+    type Section,
 } from "~/models/types";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { slugify } from "~/utils/slugify";
 
-import ProgressionBar from "./progression-bar";
-import useScreenSize from "./use-screen-size";
-import { MobileSurveyQuestionnaire } from "./mobile/survey-questions";
-import { SurveyQuestions } from "./survey-questions";
-import { MobileProgressionBar } from "./mobile/progression-bar";
+import ProgressionBar from "~/components/progression-bar";
+import useScreenSize from "~/components/use-screen-size";
+import { MobileSurveyQuestionnaire } from "~/components/mobile/survey-questions";
+import { SurveyQuestions } from "~/components/survey-questions";
+import { MobileProgressionBar } from "~/components/mobile/progression-bar";
 import { useGenerateFormAndSchema, getNextHref } from "~/utils/survey-utils";
-import { toast } from "./ui/use-toast";
+import { toast } from "~/components/ui/use-toast";
 import { useSubmitAnswers } from "~/utils/submission-utils";
-import { SpinnerButton } from "./ui/button-spinner";
-import { Form } from "./ui/form";
+import { SpinnerButton } from "~/components/ui/button-spinner";
+import { Form } from "~/components/ui/form";
 import renderNotFoundPage from "~/app/[...not_found]/page";
-import useOnlineStatus from "./use-online-status";
+import useOnlineStatus from "~/components/use-online-status";
 import { api } from "~/trpc/react";
 
 export function SurveyQuestionnaire({
@@ -30,27 +30,23 @@ export function SurveyQuestionnaire({
     answerOptions,
     userRoles,
     userAnswersForRole,
+    currentRole,
 }: {
     userId: string;
     questions: Question[];
     answerOptions: AnswerOption[];
     userRoles: Role[];
     userAnswersForRole: QuestionResult[];
+    currentRole: string;
 }) {
-    const pathname = usePathname() || "";
     const router = useRouter();
-
-    // get the current role from the url, which is /survey/[role]
-    const currentRole = decodeURIComponent(
-        pathname.split("/").pop() ?? "",
-    ).toLowerCase();
 
     const roleExists = userRoles.some(
         (role) => role.role.toLowerCase() === currentRole.toLowerCase(),
     );
 
     const currentRoleId = userRoles.find(
-        (role) => role.role.toLowerCase() === currentRole,
+        (role) => role.role.toLowerCase() === currentRole.toLowerCase(),
     )?.id;
 
     const { data, isPending } =
@@ -78,10 +74,8 @@ export function SurveyQuestionnaire({
             setPercentCompletedPerRole((prevState) => {
                 if (!prevState) return prevState;
                 const updatedState = { ...prevState };
-                if (updatedState[currentRoleId]) {
-                    updatedState[currentRoleId].answeredQuestions =
-                        amountOfAnsweredQuestions;
-                }
+                updatedState[currentRoleId]!.answeredQuestions =
+                    amountOfAnsweredQuestions;
                 return updatedState;
             });
         }
@@ -135,7 +129,7 @@ export function SurveyQuestionnaire({
 
             return 0;
         })
-        .map((role) => {
+        .map((role): Section => {
             const { totalQuestions, answeredQuestions } =
                 percentCompletedPerRole?.[role.id] ?? {
                     totalQuestions: 0,
@@ -146,12 +140,12 @@ export function SurveyQuestionnaire({
                 id: role.id,
                 href: `/survey/${encodeURIComponent(role.role)}`,
                 label: role.role,
-                current: role.id === currentRoleId,
-                completed: totalQuestions === answeredQuestions,
-                started: userAnswersForRole.some((answer) =>
+                isCurrent: role.id === currentRoleId,
+                isCompleted: totalQuestions === answeredQuestions,
+                hasStarted: userAnswersForRole.some((answer) =>
                     answer.question.roles?.some((role) => role.id === role.id),
                 ),
-                currentCompleted: form.formState.isValid,
+                isCurrentCompleted: form.formState.isValid,
             };
         });
 
@@ -187,9 +181,7 @@ export function SurveyQuestionnaire({
                 percentCompletedPerRole={percentCompletedPerRole ?? {}}
             />
             <h2 className="mb-4 mt-4 text-2xl font-bold">
-                {userRoles.find((role) => slugify(role.role) === currentRole)
-                    ?.role ?? ""}{" "}
-                questions
+                <span className="capitalize">{currentRole}</span> questions
             </h2>
             <Form {...form}>
                 <form

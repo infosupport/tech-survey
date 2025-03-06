@@ -9,8 +9,13 @@ export const metadata: Metadata = {
     title: "Survey",
 };
 
-const SuspenseSurveyData = async () => {
+const SuspenseSurveyData = async ({
+    params,
+}: {
+    params: Promise<{ role: string }>;
+}) => {
     const session = await getServerAuthSession();
+    const role = decodeURIComponent((await params).role.replace(/\+/g, " "));
 
     if (!session) {
         return <div>Unauthenticated</div>;
@@ -18,7 +23,7 @@ const SuspenseSurveyData = async () => {
 
     return (
         <Suspense fallback={<SurveyQuestionLoader />}>
-            <SurveyPage userId={session.user.id} />
+            <SurveyPage userId={session.user.id} currentRole={role} />
         </Suspense>
     );
 };

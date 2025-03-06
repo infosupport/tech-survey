@@ -31,7 +31,7 @@ const ProgressionBar = ({
                         <Fragment key={section.id}>
                             {/* Circle with clickable area */}
                             <div className="relative flex items-center justify-center">
-                                {section.currentCompleted ? (
+                                {section.isCurrentCompleted ? (
                                     <Link
                                         type="submit"
                                         href={section.href}
@@ -39,11 +39,11 @@ const ProgressionBar = ({
                                     >
                                         <div
                                             className={`mb-1 h-6 w-6 rounded-full border-2 ${
-                                                section.current
+                                                section.isCurrent
                                                     ? "border-custom-secondary bg-custom-primary dark:border-custom-primary dark:bg-custom-secondary"
-                                                    : section.completed
+                                                    : section.isCompleted
                                                       ? "border-green-500 bg-green-500"
-                                                      : section.started
+                                                      : section.hasStarted
                                                         ? "border-orange-500 bg-orange-500"
                                                         : "border-gray-300"
                                             }`}
@@ -63,11 +63,11 @@ const ProgressionBar = ({
                                     <div>
                                         <div
                                             className={`mb-1 h-6 w-6 rounded-full border-2 ${
-                                                section.current
+                                                section.isCurrent
                                                     ? "border-custom-secondary bg-custom-primary dark:border-custom-primary dark:bg-custom-secondary"
-                                                    : section.completed
+                                                    : section.isCompleted
                                                       ? "border-green-500 bg-green-500"
-                                                      : section.started
+                                                      : section.hasStarted
                                                         ? "border-orange-500 bg-orange-500"
                                                         : "border-gray-300"
                                             }`}
@@ -90,8 +90,8 @@ const ProgressionBar = ({
                             {index !== roles.length - 1 && (
                                 <div
                                     className={`mx-2 h-0.5 flex-1 ${
-                                        section.completed &&
-                                        roles[index + 1]?.completed
+                                        section.isCompleted &&
+                                        roles[index + 1]?.isCompleted
                                             ? "bg-green-500"
                                             : "bg-gray-300"
                                     }`}

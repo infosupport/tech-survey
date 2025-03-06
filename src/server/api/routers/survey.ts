@@ -150,15 +150,12 @@ export const surveyRouter = createTRPCRouter({
                 },
             });
 
-            const htmlDecodedRole = decodeURIComponent(
-                input.role.replace(/\+/g, " "),
-            );
             const questions = await ctx.db.question.findMany({
                 where: {
                     roles: {
                         some: {
                             role: {
-                                equals: htmlDecodedRole,
+                                equals: input.role,
                                 mode: "insensitive",
                             },
                         },
@@ -186,7 +183,7 @@ export const surveyRouter = createTRPCRouter({
                         roles: {
                             some: {
                                 role: {
-                                    equals: htmlDecodedRole,
+                                    equals: input.role,
                                     mode: "insensitive",
                                 },
                             },

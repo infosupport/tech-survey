@@ -42,10 +42,10 @@ export interface Section {
     id: string;
     href: string;
     label: string;
-    current: boolean;
-    completed: boolean;
-    started: boolean;
-    currentCompleted: boolean;
+    isCurrent: boolean;
+    isCompleted: boolean;
+    hasStarted: boolean;
+    isCurrentCompleted: boolean;
 }
 
 export type TransformedData = Record<
@@ -64,7 +64,7 @@ export interface UserAnswer {
 }
 
 export interface ProgressBar {
-    current: boolean;
+    isCurrent: boolean;
     href: string;
 }
 
