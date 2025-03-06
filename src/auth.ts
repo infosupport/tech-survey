@@ -4,6 +4,7 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import NextAuth, { type DefaultSession } from "next-auth";
 
 import { db } from "~/server/db";
+import { env } from "./env";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -51,5 +52,16 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
         strategy: "jwt",
     },
     adapter: PrismaAdapter(db) as Adapter,
-    providers: [MicrosoftEntraID],
+    // We trust Microsoft Entra ID to have securely verified the email address associated with the account
+    // so we allow linking accounts with the same email address.
+    // Automatic account linking on sign in is not secure between arbitrary providers, so if you are using arbitrary providers, this should be set to `false`.
+    // @see https://authjs.dev/reference/core/providers#allowdangerousemailaccountlinking
+    providers: [
+        MicrosoftEntraID({
+            // Issuer isn't auto-populated by the env var yet, so set it manually
+            // See https://github.com/nextauthjs/next-auth/pull/12616
+            issuer: env.AUTH_MICROSOFT_ENTRA_ID_ISSUER,
+            allowDangerousEmailAccountLinking: true,
+        }),
+    ],
 });

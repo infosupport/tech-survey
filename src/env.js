@@ -7,6 +7,8 @@ export const env = createEnv({
      * isn't built with invalid env vars.
      */
     server: {
+        AUTH_MICROSOFT_ENTRA_ID_ISSUER: z.string(),
+
         FRESH_RUN: z.string(),
 
         NODE_ENV: z
@@ -28,6 +30,8 @@ export const env = createEnv({
      * middlewares) or client-side so we need to destruct manually.
      */
     runtimeEnv: {
+        AUTH_MICROSOFT_ENTRA_ID_ISSUER:
+            process.env.AUTH_MICROSOFT_ENTRA_ID_ISSUER,
         FRESH_RUN: process.env.FRESH_RUN,
         NODE_ENV: process.env.NODE_ENV,
     },
