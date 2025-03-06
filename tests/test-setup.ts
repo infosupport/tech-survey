@@ -2,8 +2,7 @@ import { type ChildProcess, spawn } from "child_process";
 import { expect, type Page } from "@playwright/test";
 import { SurveyPage } from "./survey-page";
 import { type StartedPostgreSqlContainer } from "@testcontainers/postgresql";
-import type { DefaultJWT } from "next-auth/jwt";
-import jwt from "next-auth/jwt";
+import { encode, type DefaultJWT } from "next-auth/jwt";
 import type { DbHelper } from "./db-helper";
 
 type RoleIdMap = Record<string, string>;
@@ -78,7 +77,7 @@ export class TestSetup {
 
     async setupSessionCookie(page: Page, tokenValue: string): Promise<void> {
         const sessionCookie = {
-            name: "next-auth.session-token",
+            name: "authjs.session-token",
             value: tokenValue,
             domain: "localhost",
             path: "/",
@@ -91,7 +90,7 @@ export class TestSetup {
         const cookies = await page.context().cookies();
         const sessionCookieSet = cookies.some(
             (cookie) =>
-                cookie.name === "next-auth.session-token" &&
+                cookie.name === "authjs.session-token" &&
                 cookie.value === tokenValue,
         );
 
@@ -154,9 +153,10 @@ export class TestSetup {
         };
 
         const token = async () => {
-            return jwt.encode({
+            return encode({
                 token: payload,
-                secret: process.env.NEXTAUTH_SECRET ?? "dummy",
+                salt: "authjs.session-token",
+                secret: process.env.AUTH_SECRET ?? "dummy",
             });
         };
 

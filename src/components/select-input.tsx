@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from "react";
 import { api } from "~/trpc/react";
 import { type Role } from "~/models/types";
 import Link from "next/link";
-import { ArrowRight, ArrowRightDarkModeFriendly } from "~/components/svg";
+import { ArrowRightDarkModeFriendly } from "~/components/svg";
 import { toast } from "~/components/ui/use-toast";
 import { ToastAction } from "~/components/ui/toast";
 import SelectCommunicationMethod from "~/components/select-communication-method";
@@ -193,7 +193,7 @@ function SelectRoles({
                             className="flex items-center justify-center bg-custom-buttonPrimary text-custom-secondary hover:bg-custom-buttonHover dark:bg-custom-buttonPrimary dark:hover:bg-custom-buttonHover"
                         >
                             <Link href="/survey/general" passHref>
-                                <ArrowRight />
+                                <ArrowRightDarkModeFriendly />
                             </Link>
                         </SpinnerButton>
                     </div>
