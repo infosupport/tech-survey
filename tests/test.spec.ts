@@ -1,7 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { type SurveyPage } from "./survey-page";
 import { DbHelper } from "./db-helper";
-import { type ChildProcess } from "child_process";
 
 import { slugify } from "~/utils/slugify";
 import {
@@ -14,18 +13,8 @@ import {
     TestSetup,
     USER_NAME,
 } from "./test-setup";
-import treeKill from "tree-kill";
 
-import { promisify } from "node:util";
-
-const treeKillAsPromised = promisify(treeKill);
-const killAllProcesses = async (process: ChildProcess) => {
-    if (process?.pid) {
-        await treeKillAsPromised(process.pid);
-    }
-};
 test.describe("Desktop tests using a single role", () => {
-    let nextProcess: ChildProcess;
     let surveyPage: SurveyPage;
     let dbHelper: DbHelper;
     let testSetup: TestSetup;
@@ -36,9 +25,8 @@ test.describe("Desktop tests using a single role", () => {
             testInfo.setTimeout(100000);
             dbHelper = await DbHelper.create();
             testSetup = new TestSetup(dbHelper.getContainer());
-            const { port, process } = await testSetup.setupNextProcess();
-            nextProcess = process;
-            surveyPage = await testSetup.setupSurveyPage(page, port);
+
+            surveyPage = await testSetup.setupSurveyPage(page);
             await testSetup.setupUserAndSession(page, dbHelper);
 
             // Fill the database with what we need for the tests with a single role.
@@ -62,8 +50,6 @@ test.describe("Desktop tests using a single role", () => {
             if (sessionCookie) {
                 await page.context().clearCookies();
             }
-
-            await killAllProcesses(nextProcess);
         } finally {
             await dbHelper.getContainer().stop();
             await page.close();
@@ -95,9 +81,7 @@ test.describe("Desktop tests using a single role", () => {
         }
 
         await surveyPage.submitAnswers();
-        await surveyPage.page.waitForURL(
-            `http://localhost:${surveyPage.port}/thank-you`,
-        );
+        await surveyPage.page.waitForURL("/thank-you");
         const isUrlCorrect = await surveyPage.checkUrl("thank-you");
         expect(isUrlCorrect).toBe(true);
     });
@@ -126,9 +110,7 @@ test.describe("Desktop tests using a single role", () => {
         await surveyPage.selectAnswerOption(questionsText[0]!, 0);
 
         await surveyPage.submitAnswers();
-        await surveyPage.page.waitForURL(
-            `http://localhost:${surveyPage.port}/thank-you`,
-        );
+        await surveyPage.page.waitForURL("/thank-you");
         const isUrlCorrect = await surveyPage.checkUrl("thank-you");
         expect(isUrlCorrect).toBe(true);
     });
@@ -149,9 +131,7 @@ test.describe("Desktop tests using a single role", () => {
         }
 
         await surveyPage.submitAnswers();
-        await surveyPage.page.waitForURL(
-            `http://localhost:${surveyPage.port}/thank-you`,
-        );
+        await surveyPage.page.waitForURL("/thank-you");
         const isUrlCorrect = await surveyPage.checkUrl("thank-you");
         expect(isUrlCorrect).toBe(true);
 
@@ -179,9 +159,7 @@ test.describe("Desktop tests using a single role", () => {
         }
 
         await surveyPage.submitAnswers();
-        await surveyPage.page.waitForURL(
-            `http://localhost:${surveyPage.port}/thank-you`,
-        );
+        await surveyPage.page.waitForURL("/thank-you");
         const isUrlCorrect = await surveyPage.checkUrl("thank-you");
         expect(isUrlCorrect).toBe(true);
 
@@ -227,7 +205,6 @@ test.describe("Desktop tests using a single role", () => {
 });
 
 test.describe("Desktop tests using a multiple roles", () => {
-    let nextProcess: ChildProcess;
     let surveyPage: SurveyPage;
     let dbHelper: DbHelper;
     let testSetup: TestSetup;
@@ -238,9 +215,8 @@ test.describe("Desktop tests using a multiple roles", () => {
             testInfo.setTimeout(100000);
             dbHelper = await DbHelper.create();
             testSetup = new TestSetup(dbHelper.getContainer());
-            const { port, process } = await testSetup.setupNextProcess();
-            nextProcess = process;
-            surveyPage = await testSetup.setupSurveyPage(page, port);
+
+            surveyPage = await testSetup.setupSurveyPage(page);
             await testSetup.setupUserAndSession(page, dbHelper);
 
             await testSetup.createMultipleRoleSurvey(dbHelper);
@@ -261,7 +237,7 @@ test.describe("Desktop tests using a multiple roles", () => {
             await page.context().clearCookies();
         }
         await page.close();
-        await killAllProcesses(nextProcess);
+
         await dbHelper.getContainer().stop();
     });
 
@@ -319,9 +295,7 @@ test.describe("Desktop tests using a multiple roles", () => {
 
             if (role === MULTIPLE_ROLES[MULTIPLE_ROLES.length - 1]) {
                 await surveyPage.submitAnswers();
-                await surveyPage.page.waitForURL(
-                    `http://localhost:${surveyPage.port}/thank-you`,
-                );
+                await surveyPage.page.waitForURL("/thank-you");
             } else {
                 await surveyPage.goToNextQuestionsForDifferentRole();
             }
@@ -332,7 +306,6 @@ test.describe("Desktop tests using a multiple roles", () => {
 });
 
 test.describe("Mobile tests using a single role", () => {
-    let nextProcess: ChildProcess;
     let surveyPage: SurveyPage;
     let dbHelper: DbHelper;
     let testSetup: TestSetup;
@@ -343,9 +316,8 @@ test.describe("Mobile tests using a single role", () => {
             testInfo.setTimeout(100000);
             dbHelper = await DbHelper.create();
             testSetup = new TestSetup(dbHelper.getContainer());
-            const { port, process } = await testSetup.setupNextProcess();
-            nextProcess = process;
-            surveyPage = await testSetup.setupSurveyPage(page, port);
+
+            surveyPage = await testSetup.setupSurveyPage(page);
             await testSetup.setupUserAndSession(page, dbHelper);
 
             // Fill the database with what we need for the tests with a single role.
@@ -369,8 +341,6 @@ test.describe("Mobile tests using a single role", () => {
             if (sessionCookie) {
                 await page.context().clearCookies();
             }
-
-            await killAllProcesses(nextProcess);
         } finally {
             await dbHelper.getContainer().stop();
             await page.close();
@@ -399,9 +369,7 @@ test.describe("Mobile tests using a single role", () => {
         }
 
         await surveyPage.submitAnswers();
-        await surveyPage.page.waitForURL(
-            `http://localhost:${surveyPage.port}/thank-you`,
-        );
+        await surveyPage.page.waitForURL("/thank-you");
         await surveyPage.checkUrl("thank-you");
     });
 
@@ -426,9 +394,7 @@ test.describe("Mobile tests using a single role", () => {
         await surveyPage.mobileSelectAnswerOption(questionsText[0]!);
 
         await surveyPage.submitAnswers();
-        await surveyPage.page.waitForURL(
-            `http://localhost:${surveyPage.port}/thank-you`,
-        );
+        await surveyPage.page.waitForURL("/thank-you");
         const isUrlCorrect = await surveyPage.checkUrl("thank-you");
         expect(isUrlCorrect).toBe(true);
     });
@@ -445,9 +411,7 @@ test.describe("Mobile tests using a single role", () => {
         }
 
         await surveyPage.submitAnswers();
-        await surveyPage.page.waitForURL(
-            `http://localhost:${surveyPage.port}/thank-you`,
-        );
+        await surveyPage.page.waitForURL("/thank-you");
         const isUrlCorrect = await surveyPage.checkUrl("thank-you");
         expect(isUrlCorrect).toBe(true);
 
@@ -501,9 +465,7 @@ test.describe("Mobile tests using a single role", () => {
             await surveyPage.mobileSelectAnswerOption(question);
         }
         await surveyPage.submitAnswers();
-        await surveyPage.page.waitForURL(
-            `http://localhost:${surveyPage.port}/thank-you`,
-        );
+        await surveyPage.page.waitForURL("/thank-you");
         const isUrlCorrect = await surveyPage.checkUrl("thank-you");
         expect(isUrlCorrect).toBe(true);
 
@@ -518,7 +480,6 @@ test.describe("Mobile tests using a single role", () => {
 });
 
 test.describe("Mobile tests using multiple roles", () => {
-    let nextProcess: ChildProcess;
     let surveyPage: SurveyPage;
     let dbHelper: DbHelper;
     let testSetup: TestSetup;
@@ -529,9 +490,8 @@ test.describe("Mobile tests using multiple roles", () => {
             testInfo.setTimeout(100000);
             dbHelper = await DbHelper.create();
             testSetup = new TestSetup(dbHelper.getContainer());
-            const { port, process } = await testSetup.setupNextProcess();
-            nextProcess = process;
-            surveyPage = await testSetup.setupSurveyPage(page, port);
+
+            surveyPage = await testSetup.setupSurveyPage(page);
             await testSetup.setupUserAndSession(page, dbHelper);
 
             // Fill the database with what we need for the tests with a single role.
@@ -555,8 +515,6 @@ test.describe("Mobile tests using multiple roles", () => {
             if (sessionCookie) {
                 await page.context().clearCookies();
             }
-
-            await killAllProcesses(nextProcess);
         } finally {
             await dbHelper.getContainer().stop();
             await page.close();

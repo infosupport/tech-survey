@@ -23,13 +23,17 @@ jobs:
                   node-version: lts/*
             - name: "🔧 Install dependencies"
               run: npm ci
+            - name: "🐳 Start PostgreSQL Container and Set Env Vars"
+              run: npx tsx ./tests/setup-database.ts
             - name: "🌐 Install Playwright Browsers"
               run: npx playwright install --with-deps
             - name: "💅 Prepare"
               run: |
-                  cp .env.example .env
+                  cp .env.example .env 
             - name: "🎭 Run Playwright tests"
-              run: npx playwright test
+              env:
+                DATABASE_URL: ${{ env.DATABASE_URL }}
+              run: npx tsx ./tests/test-database.ts
             - name: "📤 Upload Artifacts"
               uses: actions/upload-artifact@v4
               if: always()

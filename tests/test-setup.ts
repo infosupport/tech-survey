@@ -1,4 +1,3 @@
-import { type ChildProcess, spawn } from "child_process";
 import { expect, type Page } from "@playwright/test";
 import { SurveyPage } from "./survey-page";
 import { type StartedPostgreSqlContainer } from "@testcontainers/postgresql";
@@ -36,43 +35,8 @@ export class TestSetup {
         this.container = container;
     }
 
-    async setupNextProcess(): Promise<{ port: number; process: ChildProcess }> {
-        return new Promise<{ port: number; process: ChildProcess }>(
-            (res, rej) => {
-                const nextProcess = spawn(
-                    "npm",
-                    ["run", "dev", "--", "--port", "0"],
-                    {
-                        cwd: this.cwd,
-                        shell: true,
-                        stdio: "pipe",
-                        env: {
-                            ...process.env,
-                            DATABASE_URL: this.container!.getConnectionUri(),
-                        },
-                    },
-                );
-                nextProcess.stdout.on("data", (chunk: Buffer) => {
-                    const str = chunk.toString();
-                    process.stdout.write(str);
-                    const portMatch = /local:\s*http:\/\/.+:(\d+)/gim.exec(str);
-                    if (portMatch) {
-                        res({
-                            port: parseInt(portMatch[1]!),
-                            process: nextProcess,
-                        });
-                    }
-                });
-                nextProcess.stderr.on("data", (chunk: Buffer) => {
-                    process.stderr.write(chunk);
-                });
-                nextProcess.on("error", (err) => rej(err));
-            },
-        );
-    }
-
-    async setupSurveyPage(page: Page, port: number): Promise<SurveyPage> {
-        return new SurveyPage(page, port);
+    async setupSurveyPage(page: Page): Promise<SurveyPage> {
+        return new SurveyPage(page);
     }
 
     async setupSessionCookie(page: Page, tokenValue: string): Promise<void> {
