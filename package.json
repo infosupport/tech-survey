@@ -16,7 +16,8 @@
         "lint:fix": "npm run lint -- --fix",
         "start": "node ./node_modules/next/dist/bin/next start",
         "typecheck": "tsc --noEmit",
-        "test": "playwright test"
+        "test": "playwright test",
+        "test:db": "tsx tests/test.ts"
     },
     "prisma": {
         "seed": "node prisma/seed.js"
