@@ -1,5 +1,6 @@
 ﻿import { DbHelper } from "./db-helper";
 import * as fs from "fs";
+import {TestSetup} from "./test-setup";
 
 async function setupDatabase() {
     console.log("Starting DbHelper.create()"); // Log start
@@ -19,12 +20,12 @@ async function setupDatabase() {
 
     const username = dbHelper.getContainer().getUsername();
     const password = dbHelper.getContainer().getPassword();
-    const host = "postgres";
+    const host = dbHelper.getContainer().getHost();
     const port = dbHelper.getContainer().getPort();
     const database = dbHelper.getContainer().getDatabase();
 
     const envVars = {
-        DATABASE_URL: `postgresql://${username}:${password}@127.0.0.1:${port}/${database}`,
+        DATABASE_URL: `postgresql://${username}:${password}@${host}:${port}/${database}`,
     };
 
     for (const [key, value] of Object.entries(envVars)) {
@@ -38,8 +39,11 @@ async function setupDatabase() {
 
     // Add a delay to ensure database is ready
     console.log("Waiting 5 seconds for database to initialize...");
-    await new Promise((resolve) => setTimeout(resolve, 5000)); // 5 seconds delay
+    await new Promise((resolve) => setTimeout(resolve, 30000)); // 5 seconds delay
     console.log("Wait complete.");
+    const testSetup = new TestSetup(dbHelper.getContainer());
+
+    await testSetup.createSingleRoleSurvey(dbHelper);
 }
 
 setupDatabase().catch((error) => {
