@@ -1,6 +1,7 @@
 ﻿import { DbHelper } from "./db-helper";
 import * as fs from "fs";
 import { TestSetup } from "./test-setup";
+import {PrismaClient} from "@prisma/client";
 
 async function setupDatabase() {
     console.log("Starting DbHelper.create()"); // Log start
@@ -50,6 +51,31 @@ async function setupDatabase() {
 
     const ans = await dbHelper.getAnswerOptions();
     console.log("Answer options:", ans);
+
+    const client = new PrismaClient({
+        datasources: {
+            db: {
+                url: process.env.DATABASE_URL,
+            },
+        },
+        log: [
+            {
+                emit: "event",
+                level: "query",
+            },
+        ],
+    });
+
+    try {
+        await client.$connect();
+        const answers = await client.answerOption.findMany();
+        console.log("Answer options in test:", answers);
+    } catch (error) {
+        console.error("Error fetching answers:", error);
+        throw error; // Re-throw to fail the step
+    } finally {
+        await client.$disconnect(); // Disconnect Prisma client
+    }
 }
 
 setupDatabase().catch((error) => {
