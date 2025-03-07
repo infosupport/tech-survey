@@ -42,20 +42,6 @@ const getCurrentSurveyPageDataHelper = async (
         return null;
     }
 
-    const questions = await db.question.findMany({
-        where: {
-            surveyId,
-            roles: {
-                some: {
-                    role: {
-                        equals: input.role,
-                        mode: "insensitive",
-                    },
-                },
-            },
-        },
-    });
-
     const survey = (await db.survey.findUnique({
         where: {
             id: surveyId,
