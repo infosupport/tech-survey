@@ -14,17 +14,21 @@ async function setupDatabase() {
     }
 
     const dbContainer = dbHelper.getContainer();
-    const connectionUri = dbContainer.getConnectionUri();
-    console.log("Generated DATABASE_URL:", connectionUri); // Log the generated URL
+    // Construct DATABASE_URL using network alias and container port
+    const username = dbContainer.getUsername();
+    const password = dbContainer.getPassword();
+    const databaseName = dbContainer.getDatabase();
+    const containerPort = 5432; // PostgreSQL default container port
+    const hostAlias = "postgres"; // Network alias
+    const connectionUri = `postgresql://${username}:${password}@${hostAlias}:${containerPort}/${databaseName}`;
+    console.log("Generated DATABASE_URL (using alias):", connectionUri); // Log the generated URL
 
-    const username = dbHelper.getContainer().getUsername();
-    const password = dbHelper.getContainer().getPassword();
     const host = dbHelper.getContainer().getHost();
     const port = dbHelper.getContainer().getPort();
     const database = dbHelper.getContainer().getDatabase();
 
     const envVars = {
-        DATABASE_URL: `postgresql://${username}:${password}@${host}:${port}/${database}`,
+        DATABASE_URL: connectionUri, //`postgresql://${username}:${password}@${host}:${port}/${database}`,
     };
 
     for (const [key, value] of Object.entries(envVars)) {

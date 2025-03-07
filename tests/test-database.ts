@@ -1,9 +1,8 @@
-﻿import { DbHelper } from "./db-helper";
-import * as fs from "fs";
-import { TestSetup } from "./test-setup";
-import { PrismaClient } from "@prisma/client";
+﻿import { PrismaClient } from "@prisma/client";
 
 async function testDatabase() {
+    console.log("DATABASE_URL in test-database:", process.env.DATABASE_URL); // Log DATABASE_URL
+
     const client = new PrismaClient({
         datasources: {
             db: {
@@ -18,8 +17,15 @@ async function testDatabase() {
         ],
     });
 
-    const answers = await client.answerOption.findMany();
-    console.log("Answer options:", answers);
+    try {
+        const answers = await client.answerOption.findMany();
+        console.log("Answer options in test:", answers);
+    } catch (error) {
+        console.error("Error fetching answers:", error);
+        throw error; // Re-throw to fail the step
+    } finally {
+        await client.$disconnect(); // Disconnect Prisma client
+    }
 }
 
 testDatabase().catch((error) => {
