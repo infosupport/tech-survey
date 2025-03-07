@@ -23,13 +23,13 @@ jobs:
                   node-version: lts/*
             - name: "🔧 Install dependencies"
               run: npm ci
+            - name: "🐳 Start PostgreSQL Container and Set Env Vars"
+              run: npx tsx tests/testcontainers-setup.ts
             - name: "🌐 Install Playwright Browsers"
               run: npx playwright install --with-deps
             - name: "💅 Prepare"
               run: |
-                  cp .env.example .env
-            - name: "🐳 Start PostgreSQL Container and Set Env Vars"
-              run: npx tsx ./tests/testcontainers-setup.ts      
+                  cp .env.example .env 
             - name: "🎭 Run Playwright tests"
               run: npx playwright test
             - name: "📤 Upload Artifacts"
