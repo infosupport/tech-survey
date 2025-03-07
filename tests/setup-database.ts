@@ -1,6 +1,6 @@
 ﻿import { DbHelper } from "./db-helper";
 import * as fs from "fs";
-import {TestSetup} from "./test-setup";
+import { TestSetup } from "./test-setup";
 
 async function setupDatabase() {
     console.log("Starting DbHelper.create()"); // Log start
@@ -16,7 +16,6 @@ async function setupDatabase() {
     const dbContainer = dbHelper.getContainer();
     const connectionUri = dbContainer.getConnectionUri();
     console.log("Generated DATABASE_URL:", connectionUri); // Log the generated URL
-
 
     const username = dbHelper.getContainer().getUsername();
     const password = dbHelper.getContainer().getPassword();
@@ -44,6 +43,9 @@ async function setupDatabase() {
     const testSetup = new TestSetup(dbHelper.getContainer());
 
     await testSetup.createSingleRoleSurvey(dbHelper);
+
+    const ans = await dbHelper.getAnswerOptions();
+    console.log("Answer options:", ans);
 }
 
 setupDatabase().catch((error) => {
