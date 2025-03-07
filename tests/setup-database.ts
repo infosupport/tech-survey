@@ -1,7 +1,11 @@
 ﻿import { DbHelper } from "./db-helper";
 import * as fs from "fs";
 import { TestSetup } from "./test-setup";
-import {PrismaClient} from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
+import { exec } from "child_process";
+import util from "util";
+
+const execAsync = util.promisify(exec);
 
 async function setupDatabase() {
     console.log("Starting DbHelper.create()"); // Log start
@@ -23,6 +27,23 @@ async function setupDatabase() {
     const hostAlias = dbContainer.getHost();
     const connectionUri = `postgresql://${username}:${password}@${hostAlias}:${containerPort}/${databaseName}?connect_timeout=300`;
     console.log("Generated DATABASE_URL (using alias):", connectionUri); // Log the generated URL
+    console.log("Program", dbHelper.getContainer().getConnectionUri());
+
+    let hostIp = "localhost"; // Default to localhost in case IP retrieval fails
+    try {
+        // Attempt to get the IP address of the default network interface (often eth0)
+        const { stdout, stderr } = await execAsync(
+            "hostname -I | awk '{print $1}'",
+        );
+        if (stderr) {
+            console.error("Error getting host IP:", stderr);
+        } else {
+            hostIp = stdout.trim();
+            console.log("--- DEBUG: Forcefully retrieved host IP ---", hostIp);
+        }
+    } catch (error) {
+        console.error("Error executing hostname command:", error);
+    }
 
     const host = dbHelper.getContainer().getHost();
     const port = dbHelper.getContainer().getPort();
