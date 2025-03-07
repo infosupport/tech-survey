@@ -30,7 +30,7 @@ export default defineConfig({
     reporter: [["list", { printSteps: true }], ["html"]],
 
     webServer: {
-        command: "npm run test",
+        command: "npm run dev",
         url: baseURL,
         timeout: 120 * 1000,
         reuseExistingServer: !process.env.CI,
