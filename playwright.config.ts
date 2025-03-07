@@ -10,43 +10,59 @@ import { defineConfig, devices } from "@playwright/test";
  * See https://playwright.dev/docs/test-configuration.
  */
 
+// Use process.env.PORT by default and fallback to port 3000
+const PORT = process.env.PORT ?? 4567;
+
+// Set webServer.url and use.baseURL with the location of the WebServer respecting the correct set port
+const baseURL = `http://localhost:${PORT}`;
+
 export default defineConfig({
-  testDir: "./tests",
-  /* Run tests in files in parallel */
-  fullyParallel: true,
-  /* Fail the build on CI if you accidentally left test.only in the source code. */
-  forbidOnly: !!process.env.CI,
-  /* Retry on CI only */
-  retries: process.env.CI ? 2 : 0,
-  /* Opt out of parallel tests on CI. */
-  workers: 1,
-  /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: [["list", { printSteps: true }], ["html"]],
-  /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
-  use: {
-    /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-    trace: "on-first-retry",
-  },
+    testDir: "./tests",
+    /* Run tests in files in parallel */
+    fullyParallel: true,
+    /* Fail the build on CI if you accidentally left test.only in the source code. */
+    forbidOnly: !!process.env.CI,
+    /* Retry on CI only */
+    retries: process.env.CI ? 2 : 0,
+    /* Opt out of parallel tests on CI. */
+    workers: 1,
+    /* Reporter to use. See https://playwright.dev/docs/test-reporters */
+    reporter: [["list", { printSteps: true }], ["html"]],
 
-  /* Configure projects for major browsers */
-  projects: [
-    {
-      name: "chromium",
-      grepInvert: /(Mobile)/,
-      use: {
-        ...devices["Desktop Chrome"],
-      },
+    webServer: {
+        command: "npm run test:db",
+        url: baseURL,
+        timeout: 120 * 1000,
+        reuseExistingServer: !process.env.CI,
+        env: {
+            NODE_ENV: "test",
+        },
     },
 
-    // Mobile devices
-    {
-      name: "android",
-      grep: /(Mobile)/,
-      use: {
-        ...devices["Pixel 5"],
-      },
+    /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
+    use: {
+        baseURL,
+        /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
+        trace: "retry-with-trace",
     },
-  ],
 
-  /* No webserver config, webserver is started within the tests */
+    /* Configure projects for major browsers */
+    projects: [
+        {
+            name: "chromium",
+            grepInvert: /(Mobile)/,
+            use: {
+                ...devices["Desktop Chrome"],
+            },
+        },
+
+        // Mobile devices
+        {
+            name: "android",
+            grep: /(Mobile)/,
+            use: {
+                ...devices["Pixel 5"],
+            },
+        },
+    ],
 });

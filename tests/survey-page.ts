@@ -1,18 +1,15 @@
-// @ts-check
 import { type Page } from "playwright";
 
 export class SurveyPage {
     public readonly page: Page;
-    public readonly port;
 
-    constructor(page: Page, port: number) {
+    constructor(page: Page) {
         this.page = page;
-        this.port = port;
     }
 
     async navigateToLandingPage() {
-        await this.page.goto(`http://localhost:${this.port}`);
-        await this.page.waitForURL(`http://localhost:${this.port}`);
+        await this.page.goto(`/`);
+        await this.page.waitForURL(`/`);
         const headingElement = this.page.getByRole("heading", {
             name: "Select Roles",
         });
@@ -21,16 +18,12 @@ export class SurveyPage {
     }
 
     async checkUrl(path: string) {
-        return this.page.url() === `http://localhost:${this.port}/${path}`;
+        return this.page.url() === `/${path}`;
     }
 
     async navigateToAnonymousResults(role: string): Promise<boolean> {
-        await this.page.goto(
-            `http://localhost:${this.port}/result?role=${role}`,
-        );
-        await this.page.waitForURL(
-            `http://localhost:${this.port}/result?role=${role}`,
-        );
+        await this.page.goto(`/result?role=${role}`);
+        await this.page.waitForURL(`/result?role=${role}`);
 
         const isTextVisible = await this.page
             .getByText(`Viewing results for role:`)
@@ -39,12 +32,8 @@ export class SurveyPage {
     }
 
     async navigateToFindTheExpert(role: string) {
-        await this.page.goto(
-            `http://localhost:${this.port}/find-the-expert/tech-page?role=${role}`,
-        );
-        await this.page.waitForURL(
-            `http://localhost:${this.port}/find-the-expert/tech-page?role=${role}`,
-        );
+        await this.page.goto(`/find-the-expert/tech-page?role=${role}`);
+        await this.page.waitForURL(`/find-the-expert/tech-page?role=${role}`);
         const isTextVisible = await this.page
             .getByText(`Viewing results for role`)
             .isVisible();
@@ -129,9 +118,7 @@ export class SurveyPage {
         await this.page
             .getByRole("button", { name: "Go to survey", exact: true })
             .click();
-        await this.page.waitForURL(
-            `http://localhost:${this.port}/survey/general`,
-        );
+        await this.page.waitForURL(`/survey/general`);
     }
 
     async checkProgressionBarForRoles(roles: readonly string[]) {
