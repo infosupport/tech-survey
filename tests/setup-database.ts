@@ -1,5 +1,5 @@
 ﻿import { DbHelper } from "./db-helper";
-import * as fs from 'fs';
+import * as fs from "fs";
 
 const dbHelper = await DbHelper.create();
 
