@@ -17,5 +17,4 @@ for (const [key, value] of Object.entries(envVars)) {
     fs.appendFileSync(githubEnvPath, `${key}=${value}\n`, { encoding: "utf8" });
 }
 
-console.log("Look here", dbHelper.getContainer().getConnectionUri());
 process.env.DATABASE_URL = dbHelper.getContainer().getConnectionUri();

@@ -14,7 +14,7 @@ import { defineConfig, devices } from "@playwright/test";
 const PORT = process.env.PORT ?? 4567;
 
 // Set webServer.url and use.baseURL with the location of the WebServer respecting the correct set port
-const baseURL = `http://localhost:${PORT}`;
+const baseURL = `http://localhost:4567`;
 
 export default defineConfig({
     testDir: "./tests",
@@ -30,13 +30,10 @@ export default defineConfig({
     reporter: [["list", { printSteps: true }], ["html"]],
 
     webServer: {
-        command: "npm run test:db",
+        command: "npm run dev -- -p 4567",
         url: baseURL,
         timeout: 30 * 1000,
         reuseExistingServer: !process.env.CI,
-        env: {
-            NODE_ENV: "test",
-        },
     },
 
     /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */

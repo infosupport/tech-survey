@@ -21,7 +21,6 @@ test.describe("Desktop tests using a single role", () => {
 
     // Set up the landing page before each test
     test.beforeEach(async ({ page }, testInfo) => {
-        console.log("And look at this:", process.env.DATABASE_URL);
         try {
             testInfo.setTimeout(100000);
             dbHelper = await DbHelper.create();
