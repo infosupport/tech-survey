@@ -25,6 +25,7 @@ import useOnlineStatus from "~/components/use-online-status";
 import { api } from "~/trpc/react";
 
 export function SurveyQuestionnaire({
+    surveyId,
     userId,
     questions,
     answerOptions,
@@ -32,6 +33,7 @@ export function SurveyQuestionnaire({
     userAnswersForRole,
     currentRole,
 }: {
+    surveyId: string;
     userId: string;
     questions: Question[];
     answerOptions: AnswerOption[];
@@ -51,7 +53,7 @@ export function SurveyQuestionnaire({
 
     const { data, isPending } =
         api.survey.getSurveyQuestionsCompletedPerRole.useQuery(
-            { userId: userId },
+            { surveyId, userId },
             { enabled: !!userId },
         );
 

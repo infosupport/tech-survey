@@ -73,6 +73,7 @@ export class DbHelper {
         const survey = await this.getClient().survey.create({
             data: {
                 surveyName: surveyName,
+                surveyDate: new Date(2025, 0, 1),
             },
         });
         return survey.id;

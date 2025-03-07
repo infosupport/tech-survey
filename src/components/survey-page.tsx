@@ -11,7 +11,7 @@ function SurveyPage({
     userId: string;
     currentRole: string;
 }) {
-    const { data: surveyData } = api.survey.getSurveyPageData.useQuery(
+    const { data: surveyData } = api.survey.getCurrentSurveyPageData.useQuery(
         { userId: userId, role: currentRole },
         { enabled: !!userId },
     );
@@ -30,8 +30,9 @@ function SurveyPage({
     return (
         <div className="container flex h-full flex-col items-center justify-center gap-12 px-4 py-16">
             <SurveyQuestionnaire
+                surveyId={surveyData.survey.id}
                 userId={userId}
-                questions={surveyData.questions}
+                questions={surveyData.survey.questions}
                 answerOptions={surveyData.answerOptions}
                 userRoles={surveyData?.roles ?? []}
                 userAnswersForRole={surveyData.userAnswersForRole}

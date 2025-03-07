@@ -4,9 +4,8 @@ import {
     protectedProcedure,
     publicProcedure,
 } from "~/server/api/trpc";
-import { type Role } from "~/models/types";
 import { TRPCClientError } from "@trpc/client";
-import { CommunicationMethod } from "@prisma/client";
+import { CommunicationMethod, PrismaClient } from "@prisma/client";
 import type { Session } from "next-auth";
 
 // Users can only make requests for themselves
@@ -16,45 +15,119 @@ const checkUserAuthorisation = (session: Session, userId: string) => {
     }
 };
 
-export const surveyRouter = createTRPCRouter({
-    getQuestions: publicProcedure.query(async ({ ctx }) => {
-        // get all questions and also the roles associated with each question
-        const questions = await ctx.db.question.findMany({
-            include: {
-                roles: true,
+const getLatestSurveyIdHelper = async (db: PrismaClient) => {
+    const survey = await db.survey.findFirst({
+        orderBy: {
+            surveyDate: "desc",
+        },
+    });
+    return survey?.id ?? null;
+};
+
+type GetCurrentSurveyPageDataInput = z.infer<
+    typeof GetCurrentSurveyPageDataInput
+>;
+const GetCurrentSurveyPageDataInput = z.object({
+    userId: z.string(),
+    role: z.string(),
+});
+
+const getCurrentSurveyPageDataHelper = async (
+    db: PrismaClient,
+    input: GetCurrentSurveyPageDataInput,
+) => {
+    const surveyId = await getLatestSurveyIdHelper(db);
+
+    if (surveyId === null) {
+        return null;
+    }
+
+    const questions = await db.question.findMany({
+        where: {
+            surveyId,
+            roles: {
+                some: {
+                    role: {
+                        equals: input.role,
+                        mode: "insensitive",
+                    },
+                },
             },
-        });
-        return questions;
-    }),
+        },
+    });
 
-    getAnswerOptions: publicProcedure.query(async ({ ctx }) => {
-        const answerOptions = await ctx.db.answerOption.findMany();
-        return answerOptions;
-    }),
-
-    getRoles: publicProcedure.query(async ({ ctx }) => {
-        const roles = await ctx.db.role.findMany();
-        return roles;
-    }),
-
-    getUserSelectedRoles: protectedProcedure
-        .input(z.object({ userId: z.string() }))
-        .query(async ({ ctx, input }) => {
-            const user = await ctx.db.user.findUnique({
+    const survey = (await db.survey.findUnique({
+        where: {
+            id: surveyId,
+        },
+        include: {
+            questions: {
                 where: {
+                    roles: {
+                        some: {
+                            role: {
+                                equals: input.role,
+                                mode: "insensitive",
+                            },
+                        },
+                    },
+                },
+                include: {
+                    QuestionResult: {
+                        where: {
+                            userId: input.userId,
+                        },
+                        include: {
+                            question: true,
+                        },
+                    },
+                },
+            },
+        },
+    }))!;
+
+    const roles = await db.role.findMany({
+        where: {
+            users: {
+                some: {
                     id: input.userId,
                 },
+            },
+        },
+    });
+
+    const answerOptions = await db.answerOption.findMany();
+
+    const userAnswersForRole = await db.questionResult.findMany({
+        where: {
+            userId: input.userId,
+            question: {
+                roles: {
+                    some: {
+                        role: {
+                            equals: input.role,
+                            mode: "insensitive",
+                        },
+                    },
+                },
+            },
+        },
+        include: {
+            question: {
                 include: {
                     roles: true,
                 },
-            });
+            },
+        },
+    });
 
-            if (!user) {
-                throw new TRPCClientError("User not found");
-            }
+    return { survey, answerOptions, roles, userAnswersForRole };
+};
 
-            return user.roles as Role[];
-        }),
+export const surveyRouter = createTRPCRouter({
+    getLatestSurveyId: publicProcedure.query(async ({ ctx }) => {
+        getLatestSurveyIdHelper(ctx.db);
+    }),
 
     getUserInfo: protectedProcedure
         .input(z.object({ userId: z.string() }))
@@ -91,7 +164,7 @@ export const surveyRouter = createTRPCRouter({
         }),
 
     getSurveyQuestionsCompletedPerRole: protectedProcedure
-        .input(z.object({ userId: z.string() }))
+        .input(z.object({ surveyId: z.string(), userId: z.string() }))
         .query(async ({ ctx, input }) => {
             const userRolesWithQuestions = await ctx.db.role.findMany({
                 where: {
@@ -103,6 +176,9 @@ export const surveyRouter = createTRPCRouter({
                 },
                 include: {
                     questions: {
+                        where: {
+                            surveyId: input.surveyId,
+                        },
                         include: {
                             QuestionResult: {
                                 where: {
@@ -137,69 +213,10 @@ export const surveyRouter = createTRPCRouter({
             return result;
         }),
 
-    getSurveyPageData: protectedProcedure
-        .input(z.object({ userId: z.string(), role: z.string() }))
+    getCurrentSurveyPageData: protectedProcedure
+        .input(GetCurrentSurveyPageDataInput)
         .query(async ({ ctx, input }) => {
-            const roles = await ctx.db.role.findMany({
-                where: {
-                    users: {
-                        some: {
-                            id: input.userId,
-                        },
-                    },
-                },
-            });
-
-            const questions = await ctx.db.question.findMany({
-                where: {
-                    roles: {
-                        some: {
-                            role: {
-                                equals: input.role,
-                                mode: "insensitive",
-                            },
-                        },
-                    },
-                },
-                include: {
-                    roles: true,
-                    QuestionResult: {
-                        where: {
-                            userId: input.userId,
-                        },
-                        include: {
-                            question: true,
-                        },
-                    },
-                },
-            });
-
-            const answerOptions = await ctx.db.answerOption.findMany();
-
-            const userAnswersForRole = await ctx.db.questionResult.findMany({
-                where: {
-                    userId: input.userId,
-                    question: {
-                        roles: {
-                            some: {
-                                role: {
-                                    equals: input.role,
-                                    mode: "insensitive",
-                                },
-                            },
-                        },
-                    },
-                },
-                include: {
-                    question: {
-                        include: {
-                            roles: true,
-                        },
-                    },
-                },
-            });
-
-            return { questions, answerOptions, roles, userAnswersForRole };
+            return getCurrentSurveyPageDataHelper(ctx.db, input);
         }),
 
     setDefaultRole: protectedProcedure

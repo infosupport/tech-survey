@@ -27,6 +27,7 @@ model Survey {
     id         String     @id @default(cuid())
     surveyName String     @unique
     questions  Question[]
+    surveyDate DateTime   @db.Date
 }
 
 model Role {
