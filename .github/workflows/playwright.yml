@@ -24,7 +24,7 @@ jobs:
             - name: "🔧 Install dependencies"
               run: npm ci
             - name: "🐳 Start PostgreSQL Container and Set Env Vars"
-              run: npx tsx tests/testcontainers-setup.ts
+              run: npx tsx ./tests/setup-database.ts
             - name: "🌐 Install Playwright Browsers"
               run: npx playwright install --with-deps
             - name: "💅 Prepare"
