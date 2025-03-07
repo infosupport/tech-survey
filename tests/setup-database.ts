@@ -21,7 +21,7 @@ const port = dbHelper.getContainer().getPort();
 const database = dbHelper.getContainer().getDatabase();
 
 const envVars = {
-    DATABASE_URL: `postgresL//${username}:${password}@${host}:${port}/${database}`,
+    DATABASE_URL: `postgresql://${username}:${password}@${host}:${port}/${database}`,
 };
 
 for (const [key, value] of Object.entries(envVars)) {
