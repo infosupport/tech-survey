@@ -34,6 +34,9 @@ export default defineConfig({
         url: baseURL,
         timeout: 30 * 1000,
         reuseExistingServer: !process.env.CI,
+        env: {
+            DATABASE_URL: "postgresql://test:test@localhost:32769/test",
+        },
     },
 
     /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
