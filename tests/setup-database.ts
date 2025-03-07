@@ -1,31 +1,48 @@
 ﻿import { DbHelper } from "./db-helper";
 import * as fs from "fs";
 
-const dbHelper = await DbHelper.create();
-console.log(dbHelper.getContainer().getDatabase());
-console.log(dbHelper.getContainer().getPort());
-console.log(dbHelper.getContainer().getHost());
-console.log(dbHelper.getContainer().getUsername());
-console.log(dbHelper.getContainer().getPassword());
+async function setupDatabase() {
+    console.log("Starting DbHelper.create()"); // Log start
+    const dbHelper = await DbHelper.create();
+    console.log("DbHelper.create() finished"); // Log finish
 
-const githubEnvPath = process.env.GITHUB_ENV;
-if (!githubEnvPath) {
-    console.error("GITHUB_ENV environment variable not found.");
+    const githubEnvPath = process.env.GITHUB_ENV;
+    if (!githubEnvPath) {
+        console.error("GITHUB_ENV environment variable not found.");
+        process.exit(1);
+    }
+
+    const dbContainer = dbHelper.getContainer();
+    const connectionUri = dbContainer.getConnectionUri();
+    console.log("Generated DATABASE_URL:", connectionUri); // Log the generated URL
+
+
+    const username = dbHelper.getContainer().getUsername();
+    const password = dbHelper.getContainer().getPassword();
+    const host = "postgres";
+    const port = dbHelper.getContainer().getPort();
+    const database = dbHelper.getContainer().getDatabase();
+
+    const envVars = {
+        DATABASE_URL: `postgresql://${username}:${password}@127.0.0.1:${port}/${database}`,
+    };
+
+    for (const [key, value] of Object.entries(envVars)) {
+        fs.appendFileSync(githubEnvPath, `${key}=${value}\n`, {
+            encoding: "utf8",
+        });
+    }
+
+    process.env.DATABASE_URL = connectionUri;
+    console.log("DATABASE_URL set in process.env:", process.env.DATABASE_URL); // Verify in process.env
+
+    // Add a delay to ensure database is ready
+    console.log("Waiting 5 seconds for database to initialize...");
+    await new Promise((resolve) => setTimeout(resolve, 5000)); // 5 seconds delay
+    console.log("Wait complete.");
+}
+
+setupDatabase().catch((error) => {
+    console.error("Error in setup-database.ts:", error);
     process.exit(1);
-}
-
-const username = dbHelper.getContainer().getUsername();
-const password = dbHelper.getContainer().getPassword();
-const host = "postgres";
-const port = dbHelper.getContainer().getPort();
-const database = dbHelper.getContainer().getDatabase();
-
-const envVars = {
-    DATABASE_URL: `postgresql://${username}:${password}@${host}:${port}/${database}`,
-};
-
-for (const [key, value] of Object.entries(envVars)) {
-    fs.appendFileSync(githubEnvPath, `${key}=${value}\n`, { encoding: "utf8" });
-}
-
-process.env.DATABASE_URL = dbHelper.getContainer().getConnectionUri();
+});
