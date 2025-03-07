@@ -23,7 +23,7 @@ async function setupDatabase() {
     const username = dbContainer.getUsername();
     const password = dbContainer.getPassword();
     const databaseName = dbContainer.getDatabase();
-    const containerPort = 5432; // PostgreSQL default container port
+    const containerPort = dbContainer.getPort();
     const hostAlias = dbContainer.getHost();
     const connectionUri = `postgresql://${username}:${password}@${hostAlias}:${containerPort}/${databaseName}?connect_timeout=300`;
     console.log("Generated DATABASE_URL (using alias):", connectionUri); // Log the generated URL
