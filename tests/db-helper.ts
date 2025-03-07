@@ -16,6 +16,9 @@ export class DbHelper {
     static async create(): Promise<DbHelper> {
         const dbHelper = new DbHelper();
         dbHelper.container = await new PostgreSqlContainer()
+            .withUsername("test")
+            .withPassword("test")
+            .withDatabase("test")
             .withNetworkAliases("postgres")
             .start();
         dbHelper.client = await dbHelper.setupDatabase();
