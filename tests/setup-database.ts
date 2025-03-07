@@ -24,12 +24,9 @@ async function setupDatabase() {
     const password = dbContainer.getPassword();
     const databaseName = dbContainer.getDatabase();
     const containerPort = dbContainer.getPort();
-    const hostAlias = dbContainer.getHost();
-    const connectionUri = `postgresql://${username}:${password}@${hostAlias}:${containerPort}/${databaseName}?connect_timeout=300`;
-    console.log("Generated DATABASE_URL (using alias):", connectionUri); // Log the generated URL
     console.log("Program", dbHelper.getContainer().getConnectionUri());
 
-    let hostIp = "localhost"; // Default to localhost in case IP retrieval fails
+    let hostIp = dbContainer.getHost(); // Default to localhost in case IP retrieval fails
     try {
         // Attempt to get the IP address of the default network interface (often eth0)
         const { stdout, stderr } = await execAsync(
@@ -44,6 +41,9 @@ async function setupDatabase() {
     } catch (error) {
         console.error("Error executing hostname command:", error);
     }
+    const hostAlias = hostIp;
+    const connectionUri = `postgresql://${username}:${password}@${hostAlias}:${containerPort}/${databaseName}?connect_timeout=300`;
+    console.log("Generated DATABASE_URL (using alias):", connectionUri); // Log the generated URL
 
     const host = dbHelper.getContainer().getHost();
     const port = dbHelper.getContainer().getPort();
@@ -76,7 +76,7 @@ async function setupDatabase() {
     const client = new PrismaClient({
         datasources: {
             db: {
-                url: process.env.DATABASE_URL,
+                url: connectionUri,
             },
         },
         log: [
