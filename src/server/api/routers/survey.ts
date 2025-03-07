@@ -5,7 +5,7 @@ import {
     publicProcedure,
 } from "~/server/api/trpc";
 import { TRPCClientError } from "@trpc/client";
-import { CommunicationMethod, PrismaClient } from "@prisma/client";
+import { CommunicationMethod, type PrismaClient } from "@prisma/client";
 import type { Session } from "next-auth";
 
 // Users can only make requests for themselves
@@ -112,7 +112,7 @@ const getCurrentSurveyPageDataHelper = async (
 
 export const surveyRouter = createTRPCRouter({
     getLatestSurveyId: publicProcedure.query(async ({ ctx }) => {
-        getLatestSurveyIdHelper(ctx.db);
+        return await getLatestSurveyIdHelper(ctx.db);
     }),
 
     getUserInfo: protectedProcedure
