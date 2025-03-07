@@ -18,6 +18,7 @@ async function testDatabase() {
     });
 
     try {
+        await client.$connect();
         const answers = await client.answerOption.findMany();
         console.log("Answer options in test:", answers);
     } catch (error) {

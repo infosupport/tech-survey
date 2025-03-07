@@ -31,6 +31,8 @@ jobs:
               run: |
                   cp .env.example .env 
             - name: "🎭 Run Playwright tests"
+              env:
+                DATABASE_URL: ${{ env.DATABASE_URL }}
               run: npx tsx ./tests/test-database.ts
             - name: "📤 Upload Artifacts"
               uses: actions/upload-artifact@v4
