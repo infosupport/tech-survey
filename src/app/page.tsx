@@ -8,6 +8,7 @@ import Link from "next/link";
 import { auth } from "~/auth";
 
 const Home: React.FC = async () => {
+    console.log("This is the last one to look at", process.env.DATABASE_URL);
     const session = await auth();
     const [roles, businessUnits] = await Promise.all([
         db.role.findMany(),
