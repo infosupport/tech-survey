@@ -93,6 +93,7 @@ async function main() {
         where: { surveyName: "Info Support Tech Survey - 2024" },
         create: {
             surveyName: "Info Support Tech Survey - 2024",
+            surveyDate: new Date(2024, 0, 1),
         },
         update: {},
     });
