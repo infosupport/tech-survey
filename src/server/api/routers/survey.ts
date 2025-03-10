@@ -8,19 +8,21 @@ import { checkUserAuthorization } from "./shared";
 
 export const surveysRouter = createTRPCRouter({
     getLatestSurveyId: publicProcedure.query(async ({ ctx }) => {
-        return await ctx.db.surveys.getLatestSurveyId();
+        return await ctx.prismaClient.surveys.getLatestSurveyId();
     }),
 
     getUserAnswersWithRoles: protectedProcedure
         .input(z.object({ userId: z.string() }))
         .query(async ({ ctx, input }) => {
-            return await ctx.db.surveys.getUserAnswersWithRoles(input.userId);
+            return await ctx.prismaClient.surveys.getUserAnswersWithRoles(
+                input.userId,
+            );
         }),
 
     getSurveyQuestionsCompletedPerRole: protectedProcedure
         .input(z.object({ surveyId: z.string(), userId: z.string() }))
         .query(async ({ ctx, input }) => {
-            return await ctx.db.surveys.getSurveyQuestionsCompletedPerRole(
+            return await ctx.prismaClient.surveys.getSurveyQuestionsCompletedPerRole(
                 input.surveyId,
                 input.userId,
             );
@@ -34,7 +36,7 @@ export const surveysRouter = createTRPCRouter({
             }),
         )
         .query(async ({ ctx, input }) => {
-            return ctx.db.surveys.getCurrentSurveyPageData(
+            return ctx.prismaClient.surveys.getCurrentSurveyPageData(
                 input.userId,
                 input.role,
             );
@@ -50,7 +52,7 @@ export const surveysRouter = createTRPCRouter({
         .mutation(async ({ ctx, input }) => {
             const { userId, questionId, answerId } = input;
             checkUserAuthorization(ctx.session, userId);
-            return await ctx.db.questionResults.setQuestionResultForUser(
+            return await ctx.prismaClient.questionResults.setQuestionResultForUser(
                 userId,
                 questionId,
                 answerId,

@@ -5,18 +5,18 @@ import { CommunicationMethod } from "~/prisma";
 
 export const usersRouter = createTRPCRouter({
     getUsers: protectedProcedure.query(async ({ ctx }) => {
-        return await ctx.db.users.getUsers();
+        return await ctx.prismaClient.users.getUsers();
     }),
     getUserInfo: protectedProcedure
         .input(z.object({ userId: z.string() }))
         .query(async ({ ctx, input }) => {
-            return await ctx.db.users.getUserInfo(input.userId);
+            return await ctx.prismaClient.users.getUserInfo(input.userId);
         }),
     setDefaultRoleForUser: protectedProcedure
         .input(z.object({ userId: z.string() }))
         .mutation(async ({ ctx, input }) => {
             checkUserAuthorization(ctx.session, input.userId);
-            await ctx.db.users.setDefaultRoleForUser(input.userId);
+            await ctx.prismaClient.users.setDefaultRoleForUser(input.userId);
         }),
     setCommunicationMethodsForUser: protectedProcedure
         .input(
@@ -27,7 +27,7 @@ export const usersRouter = createTRPCRouter({
         )
         .mutation(async ({ ctx, input }) => {
             checkUserAuthorization(ctx.session, input.userId);
-            await ctx.db.users.setCommunicationMethodsForUser(
+            await ctx.prismaClient.users.setCommunicationMethodsForUser(
                 input.userId,
                 input.methods,
             );
@@ -36,7 +36,7 @@ export const usersRouter = createTRPCRouter({
         .input(z.object({ userId: z.string(), businessUnitId: z.string() }))
         .mutation(async ({ ctx, input }) => {
             checkUserAuthorization(ctx.session, input.userId);
-            await ctx.db.users.setBusinessUnitForUser(
+            await ctx.prismaClient.users.setBusinessUnitForUser(
                 input.userId,
                 input.businessUnitId,
             );
@@ -44,13 +44,13 @@ export const usersRouter = createTRPCRouter({
     getRolesForUser: protectedProcedure
         .input(z.object({ userId: z.string() }))
         .query(async ({ ctx, input }) => {
-            return await ctx.db.users.getRolesForUser(input.userId);
+            return await ctx.prismaClient.users.getRolesForUser(input.userId);
         }),
     setRolesForUser: protectedProcedure
         .input(z.object({ userId: z.string(), roleIds: z.array(z.string()) }))
         .mutation(async ({ ctx, input }) => {
             const { userId, roleIds } = input;
             checkUserAuthorization(ctx.session, userId);
-            await ctx.db.users.setRolesForUser(userId, roleIds);
+            await ctx.prismaClient.users.setRolesForUser(userId, roleIds);
         }),
 });

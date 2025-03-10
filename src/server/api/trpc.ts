@@ -30,7 +30,7 @@ export const createTRPCContext = async (opts: { headers: Headers }) => {
     const session = await auth();
 
     return {
-        db: prismaClient,
+        prismaClient,
         session,
         ...opts,
     };
