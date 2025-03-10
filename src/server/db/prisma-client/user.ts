@@ -1,5 +1,9 @@
-import type { CommunicationMethod, Prisma, PrismaDbClient } from "~/prisma";
-import type { PrismaClient } from ".";
+import type {
+    CommunicationMethod,
+    Prisma,
+    PrismaClient,
+    PrismaDbClient,
+} from "~/prisma";
 import { TRPCClientError } from "@trpc/client";
 
 export class UserPrismaClient {

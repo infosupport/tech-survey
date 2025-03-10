@@ -1,9 +1,9 @@
 "use client";
 
 import { api } from "~/trpc/react";
-import { ArrowRightDarkModeFriendly } from "./svg";
-import { Button } from "./ui/button";
 import Link from "next/link";
+import { Button } from "~/components/ui/button";
+import { ArrowRightDarkModeFriendly } from "~/components/svg";
 
 export const HomepageFindTheExpertButton = () => {
     const { mutate: logUsageMetric } =

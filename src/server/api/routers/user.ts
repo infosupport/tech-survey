@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import { checkUserAuthorization } from "./shared";
 import { CommunicationMethod } from "~/prisma";
+import { checkUserAuthorization } from "~/server/api/routers/shared";
 
 export const usersRouter = createTRPCRouter({
     getUsers: protectedProcedure.query(async ({ ctx }) => {

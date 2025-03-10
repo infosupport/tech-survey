@@ -35,6 +35,7 @@
         /* Path Aliases */
         "baseUrl": ".",
         "paths": {
+            "~/tests/*": ["./tests/*"],
             "~/*": ["./src/*"]
         }
     },

@@ -1,9 +1,9 @@
 import MicrosoftEntraID from "@auth/core/providers/microsoft-entra-id";
 import NextAuth, { type DefaultSession } from "next-auth";
 
-import { env } from "./env";
-import { prismaClient } from "./server/db";
-import type { IPrismaAdapterService } from "./server/db/prisma-client";
+import { env } from "~/env";
+import { prismaClient } from "~/server/db";
+import type { IPrismaAdapterService } from "~/server/db/prisma-client";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`

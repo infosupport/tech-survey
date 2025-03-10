@@ -4,7 +4,7 @@ import {
     protectedProcedure,
     publicProcedure,
 } from "~/server/api/trpc";
-import { checkUserAuthorization } from "./shared";
+import { checkUserAuthorization } from "~/server/api/routers/shared";
 
 export const surveysRouter = createTRPCRouter({
     getLatestSurveyId: publicProcedure.query(async ({ ctx }) => {

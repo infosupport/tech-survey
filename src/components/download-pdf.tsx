@@ -8,8 +8,8 @@ import { type AnswerOption, type PdfTransformedData } from "~/models/types";
 import dynamic from "next/dynamic";
 import { Button } from "~/components/ui/button";
 import Link from "next/link";
-import { ArrowLeftDarkModeFriendly, Download } from "./svg";
 import type { Session } from "next-auth";
+import { ArrowLeftDarkModeFriendly, Download } from "~/components/svg";
 
 const PDFDownloadLink = dynamic(
     () => import("~/components/pdf-download-link").then((mod) => mod.default),

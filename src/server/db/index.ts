@@ -1,5 +1,4 @@
-import { PrismaDbClient } from "~/prisma";
-import { PrismaClient } from "./prisma-client";
+import { PrismaClient, PrismaDbClient } from "~/prisma";
 
 import { env } from "~/env";
 

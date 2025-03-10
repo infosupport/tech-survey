@@ -1,13 +1,13 @@
 import type { PrismaDbClient } from "~/prisma";
-import { UserPrismaClient } from "./user";
-import { SurveyPrismaClient } from "./survey";
-import { BusinessUnitPrismaClient } from "./businessUnit";
-import { RolePrismaClient } from "./role";
-import { QuestionResultPrismaClient } from "./questionResult";
-import { AnswerOptionPrismaClient } from "./answerOption";
-import { UsageMetricPrismaClient } from "./usageMetric";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import type { Adapter } from "@auth/core/adapters";
+import { AnswerOptionPrismaClient } from "~/server/db/prisma-client/answerOption";
+import { BusinessUnitPrismaClient } from "~/server/db/prisma-client/businessUnit";
+import { QuestionResultPrismaClient } from "~/server/db/prisma-client/questionResult";
+import { RolePrismaClient } from "~/server/db/prisma-client/role";
+import { SurveyPrismaClient } from "~/server/db/prisma-client/survey";
+import { UsageMetricPrismaClient } from "~/server/db/prisma-client/usageMetric";
+import { UserPrismaClient } from "~/server/db/prisma-client/user";
 
 export class PrismaClient {
     #db: PrismaDbClient;

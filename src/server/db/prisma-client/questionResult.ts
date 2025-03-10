@@ -1,5 +1,4 @@
-import type { Prisma, PrismaDbClient } from "~/prisma";
-import type { PrismaClient } from ".";
+import type { Prisma, PrismaClient, PrismaDbClient } from "~/prisma";
 import { TRPCClientError } from "@trpc/client";
 
 export class QuestionResultPrismaClient {

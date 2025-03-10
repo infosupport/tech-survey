@@ -33,5 +33,6 @@
     },
     "[prisma]": {
         "editor.defaultFormatter": "Prisma.prisma"
-    }
+    },
+    "typescript.preferences.importModuleSpecifier": "non-relative"
 }

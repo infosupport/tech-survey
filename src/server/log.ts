@@ -1,6 +1,6 @@
-import { createTRPCRouter, publicProcedure } from "./api/trpc";
+import { prismaClient } from "~/server/db";
 import { z } from "zod";
-import { prismaClient } from "./db";
+import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 
 export const usageMetricLogger = createTRPCRouter({
     logUsageMetric: publicProcedure
