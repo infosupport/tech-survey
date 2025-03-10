@@ -16,6 +16,8 @@
         "noImplicitThis": true,
         "noImplicitOverride": true,
         "noPropertyAccessFromIndexSignature": true,
+        "allowUnreachableCode": false,
+        "forceConsistentCasingInFileNames": true,
 
         /* Strictness */
         "strict": true,
