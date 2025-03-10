@@ -14,7 +14,7 @@ export const HomepageFindTheExpertButton = () => {
     };
 
     return (
-        <Link href="/find-the-expert?role=General">
+        <Link href="/find-the-expert">
             <Button
                 onClick={async () => {
                     handleLogging();
