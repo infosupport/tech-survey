@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
-import { idToTextMap } from "~/utils/optionMapping";
+import { idToTextMap } from "~/utils/option-mapping";
 import { type AnswerOption, type PdfTransformedData } from "~/models/types";
 
 import dynamic from "next/dynamic";

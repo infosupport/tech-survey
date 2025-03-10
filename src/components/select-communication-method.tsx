@@ -3,7 +3,7 @@
 import { CommunicationMethod } from "~/prisma";
 import { useEffect, useState } from "react";
 import { api } from "~/trpc/react";
-import communicationMethodToIcon from "~/components/ui/CommunicationMethodToIcon";
+import communicationMethodToIcon from "~/components/ui/communication-method-to-icon";
 
 export default function SelectCommunicationMethod({
     userId,

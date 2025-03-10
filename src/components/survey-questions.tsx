@@ -19,7 +19,7 @@ import {
     FormMessage,
 } from "~/components/ui/form";
 
-import { idToMoreInfo, idToTextMap } from "~/utils/optionMapping";
+import { idToMoreInfo, idToTextMap } from "~/utils/option-mapping";
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 
 import {

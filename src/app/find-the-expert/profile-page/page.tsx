@@ -5,7 +5,7 @@ import ProfilePageSearch from "~/components/ui/profile-page-search";
 import { prismaClient } from "~/server/db";
 import { DataTable } from "~/components/data-tables/data-table";
 import type { ColumnDef } from "@tanstack/react-table";
-import communicationMethodToIcon from "~/components/ui/CommunicationMethodToIcon";
+import communicationMethodToIcon from "~/components/ui/communication-method-to-icon";
 import ProfileRadarChart from "~/components/profile-radar-chart";
 import type { ProfilePageUserData } from "~/server/db/prisma-client/user";
 
