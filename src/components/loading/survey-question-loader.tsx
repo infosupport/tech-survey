@@ -1,3 +1,4 @@
+import NavigationSkeleton from "~/components/loading/progression-bar-loader";
 import { Skeleton } from "~/components/ui/skeleton";
 import {
     Table,
@@ -7,7 +8,6 @@ import {
     TableHeader,
     TableRow,
 } from "~/components/ui/table";
-import NavigationSkeleton from "./progression-bar-loader";
 
 export default function SurveyQuestionLoader() {
     const answerOptions = [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }];

@@ -1,5 +1,5 @@
 // @ts-check
-import { PrismaClient } from "@prisma/client";
+import { PrismaDbClient } from "~/prisma";
 import {
     PostgreSqlContainer,
     type StartedPostgreSqlContainer,
@@ -8,7 +8,7 @@ import { exec } from "child_process";
 import { promisify } from "util";
 
 export class DbHelper {
-    private client: PrismaClient | null = null;
+    private client: PrismaDbClient | null = null;
     private container: StartedPostgreSqlContainer | null = null;
     private readonly execAsync = promisify(exec);
     private readonly cwd = new URL("..", import.meta.url);
@@ -20,7 +20,7 @@ export class DbHelper {
         return dbHelper;
     }
 
-    private getClient(): PrismaClient {
+    private getClient(): PrismaDbClient {
         if (!this.client) {
             throw new Error("PrismaClient has not been initialized");
         }
@@ -34,7 +34,7 @@ export class DbHelper {
         return this.container;
     }
 
-    async setupDatabase(): Promise<PrismaClient> {
+    async setupDatabase(): Promise<PrismaDbClient> {
         await this.execAsync("npm run db:push", {
             env: {
                 ...process.env,
@@ -43,7 +43,7 @@ export class DbHelper {
             cwd: this.cwd,
             encoding: "utf-8",
         });
-        const client = new PrismaClient({
+        const client = new PrismaDbClient({
             datasources: {
                 db: {
                     url: this.container!.getConnectionUri(),
@@ -73,6 +73,7 @@ export class DbHelper {
         const survey = await this.getClient().survey.create({
             data: {
                 surveyName: surveyName,
+                surveyDate: new Date(2025, 0, 1),
             },
         });
         return survey.id;
@@ -117,11 +118,13 @@ export class DbHelper {
             return answerOptionExists.id;
         }
 
-        await this.getClient().answerOption.create({
-            data: {
-                option: option,
-            },
-        });
+        return (
+            await this.getClient().answerOption.create({
+                data: {
+                    option: option,
+                },
+            })
+        ).id;
     }
 
     async createRole(roleName: string) {

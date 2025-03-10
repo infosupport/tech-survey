@@ -11,7 +11,7 @@ import {
 } from "recharts";
 import { type TransformedData } from "~/models/types";
 import { ResultCommons } from "~/components/results";
-import { idToTextMap } from "~/utils/optionMapping";
+import { idToTextMap } from "~/utils/option-mapping";
 
 const ShowResults = ({ data }: { data: TransformedData }) => {
     const { uniqueDataKeys, dataKeyColors, CustomTooltip } = ResultCommons({

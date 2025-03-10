@@ -16,9 +16,9 @@ import {
     TableHeader,
     TableRow,
 } from "~/components/ui/table";
-import { idToTextMap } from "~/utils/optionMapping";
+import { idToTextMap } from "~/utils/option-mapping";
 import { DataTablePagination } from "~/components/data-tables/data-table-pagination";
-import communicationMethodToIcon from "~/components/ui/CommunicationMethodToIcon";
+import communicationMethodToIcon from "~/components/ui/communication-method-to-icon";
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[];

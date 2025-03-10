@@ -1,4 +1,4 @@
-import type { BusinessUnit } from "@prisma/client";
+import type { BusinessUnit } from "~/prisma";
 import { useState } from "react";
 import { api } from "~/trpc/react";
 
@@ -12,7 +12,7 @@ export default function SelectBusinessUnit({
     userSelectedBusinessUnit: BusinessUnit | undefined;
 }) {
     const { mutate: setBusinessUnit } =
-        api.survey.setBusinessUnit.useMutation();
+        api.users.setBusinessUnitForUser.useMutation();
     const [selectedUnit, setSelectedUnit] = useState<string | undefined>(
         userSelectedBusinessUnit?.id,
     );

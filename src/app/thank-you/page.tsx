@@ -1,11 +1,7 @@
-import { db } from "~/server/db";
+import { prismaClient } from "~/server/db";
 import PdfDownloadButton from "~/components/download-pdf";
 import React, { Suspense } from "react";
-import {
-    type QuestionResult,
-    type Question,
-    type AnswerOption,
-} from "~/models/types";
+import { type QuestionResult, type Question } from "~/models/types";
 
 import { type Metadata } from "next";
 import ButtonSkeleton from "~/components/loading/button-loader";
@@ -18,34 +14,20 @@ export const metadata: Metadata = {
 const ThankYou = async () => {
     const session = (await auth())!;
     const userAnswersForRole: QuestionResult[] =
-        await db.questionResult.findMany({
-            where: {
-                userId: session.user.id,
-            },
-            include: {
-                question: {
-                    include: {
-                        roles: true,
-                    },
-                },
-            },
-        });
+        await prismaClient.questionResults.getRecentQuestionResultsWithRolesByUserId(
+            session.user.id,
+        );
 
-    const answerOptions: AnswerOption[] = await db.answerOption.findMany();
+    const answerOptions = await prismaClient.answerOptions.getAll();
 
-    const userSelectedRoles = await db.user.findUnique({
-        where: {
-            id: session.user.id,
-        },
-        include: {
-            roles: true,
-        },
-    });
+    const selectedRoles = await prismaClient.users.getRolesForUser(
+        session.user.id,
+    );
 
     // Update the userAnswersForRole object such that a question only includes the roles of the selected roles of the user.
     for (const userAnswer of userAnswersForRole) {
         userAnswer.question.roles = userAnswer.question.roles?.filter((role) =>
-            userSelectedRoles?.roles.some(
+            selectedRoles?.roles.some(
                 (selectedRole) => selectedRole.id === role.id,
             ),
         );

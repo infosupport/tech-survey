@@ -1,25 +1,23 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormField, FormItem } from "~/components/ui/form";
 import { z } from "zod";
-import type { UserData } from "~/app/find-the-expert/profile-page/page";
 
 import ProfileSearchCombobox from "~/components/profile-search-combobox";
+import type { GetUsersData } from "~/server/db/prisma-client/user";
 
 const formSchema = z.object({
     name: z.string().trim(),
 });
 type FormSchema = z.infer<typeof formSchema>;
 
-const ProfilePageSearch = ({ allUsers }: { allUsers: UserData[] }) => {
-    const searchParams = useSearchParams();
+const ProfilePageSearch = ({ users }: { users: GetUsersData[] }) => {
     const form = useForm<FormSchema>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            name: searchParams.get("name") ?? "",
+            name: "",
         },
     });
     const { setValue } = form;
@@ -42,7 +40,7 @@ const ProfilePageSearch = ({ allUsers }: { allUsers: UserData[] }) => {
                                     <FormItem>
                                         <ProfileSearchCombobox
                                             {...field}
-                                            allUsers={allUsers}
+                                            users={users}
                                             setValue={setValue}
                                         />
                                     </FormItem>

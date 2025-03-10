@@ -1,89 +1,9 @@
-import type { Prisma } from "@prisma/client";
 import type {
     DataByRoleAndQuestion,
     AggregatedDataByRole,
     Role,
 } from "~/models/types";
-import { db } from "~/server/db";
-
-type QuestionResultWithRelations = Prisma.QuestionResultGetPayload<{
-    include: {
-        question: {
-            include: {
-                roles: true;
-            };
-        };
-        user: {
-            select: {
-                id: true;
-                name: true;
-                communicationPreferences: {
-                    select: { methods: true };
-                };
-                roles: {
-                    select: { role: true };
-                };
-            };
-        };
-        answer: {
-            select: {
-                id: true;
-                option: true;
-            };
-        };
-    };
-}>;
-
-export const retrieveAnswersByRole = async ({
-    role,
-    questionText,
-    unit,
-}: {
-    role?: string;
-    questionText?: string;
-    unit?: string;
-}) => {
-    const where = buildWhereClause({ role, questionText, unit });
-
-    const questionResults = await db.questionResult.findMany({
-        where,
-        include: {
-            question: {
-                include: {
-                    roles: true,
-                },
-            },
-            user: {
-                select: {
-                    id: true,
-                    name: true,
-                    communicationPreferences: {
-                        select: { methods: true },
-                    },
-                    roles: {
-                        select: { role: true },
-                    },
-                },
-            },
-            answer: {
-                select: {
-                    id: true,
-                    option: true,
-                },
-            },
-        },
-    });
-
-    const dataByRoleAndQuestion = groupDataByRoleAndQuestion(questionResults);
-
-    let aggregatedDataByRole = aggregateDataByRole(questionResults);
-    aggregatedDataByRole = sortResults(aggregatedDataByRole);
-
-    return {
-        dataByRoleAndQuestion,
-        aggregatedDataByRole,
-    };
-};
+import type { Prisma } from "~/prisma";
 
 const sortResults = (aggregatedDataByRole: AggregatedDataByRole) => {
     const sortedAggregatedDataByRole: AggregatedDataByRole = {};
@@ -113,7 +33,7 @@ const sortResults = (aggregatedDataByRole: AggregatedDataByRole) => {
 const getRoleName = (role: Role) => role.role || "Unknown Role";
 
 const aggregateDataByRole = (
-    questionResults: QuestionResultWithRelations[],
+    questionResults: GetAnswersByRoleQuestionResultWithRelations[],
 ) => {
     const aggregatedDataByRole: AggregatedDataByRole = {};
 
@@ -162,7 +82,7 @@ const aggregateDataByRole = (
 };
 
 const groupDataByRoleAndQuestion = (
-    questionResults: QuestionResultWithRelations[],
+    questionResults: GetAnswersByRoleQuestionResultWithRelations[],
 ) => {
     const dataByRoleAndQuestion: DataByRoleAndQuestion = {};
 
@@ -207,7 +127,7 @@ const pushUserData = (
     dataByRoleAndQuestion: DataByRoleAndQuestion,
     roleName: string,
     questionText: string,
-    entry: QuestionResultWithRelations,
+    entry: GetAnswersByRoleQuestionResultWithRelations,
 ): void => {
     let communicationMethod: string[] =
         entry.user.communicationPreferences?.methods ?? [];
@@ -243,55 +163,47 @@ const sortUserData = (
     });
 };
 
-export interface FetchUserAnswersParams {
-    role?: string;
-    questionText?: string;
-    unit?: string;
-}
+export const getAnswerDataByRole = (
+    questionResultsByRole: GetAnswersByRoleQuestionResultWithRelations[],
+) => {
+    const dataByRoleAndQuestion = groupDataByRoleAndQuestion(
+        questionResultsByRole,
+    );
 
-const buildWhereClause = ({
-    role,
-    questionText,
-    unit,
-}: FetchUserAnswersParams) => {
-    const questionWhere: Prisma.QuestionWhereInput = {};
+    let aggregatedDataByRole = aggregateDataByRole(questionResultsByRole);
+    aggregatedDataByRole = sortResults(aggregatedDataByRole);
 
-    // Only select the role that is selected. This ensures we don't have to filter out the roles later
-    if (role) {
-        questionWhere.roles = {
-            some: {
-                role: {
-                    equals: role,
-                    mode: "insensitive",
-                },
-            },
-        };
-    }
-
-    if (questionText) {
-        questionWhere.questionText = {
-            contains: questionText,
-            mode: "insensitive",
-        };
-    }
-
-    const userWhere: Prisma.UserWhereInput = {};
-
-    if (unit) {
-        userWhere.businessUnit = {
-            unit: {
-                equals: unit,
-                mode: "insensitive",
-            },
-        };
-    }
-
-    const where: Prisma.QuestionResultWhereInput = {};
-    if (Object.keys(questionWhere).length > 0) {
-        where.question = questionWhere;
-    }
-    if (Object.keys(userWhere).length > 0) {
-        where.user = userWhere;
-    }
-    return where;
+    return {
+        dataByRoleAndQuestion,
+        aggregatedDataByRole,
+    };
 };
+
+type GetAnswersByRoleQuestionResultWithRelations =
+    Prisma.QuestionResultGetPayload<{
+        include: {
+            question: {
+                include: {
+                    roles: true;
+                };
+            };
+            user: {
+                select: {
+                    id: true;
+                    name: true;
+                    communicationPreferences: {
+                        select: { methods: true };
+                    };
+                    roles: {
+                        select: { role: true };
+                    };
+                };
+            };
+            answer: {
+                select: {
+                    id: true;
+                    option: true;
+                };
+            };
+        };
+    }>;

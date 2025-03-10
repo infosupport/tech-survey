@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { Button } from "./ui/button";
-import { ArrowLeftDarkModeFriendly } from "./svg";
 import { usePathname } from "next/navigation";
+import { ArrowLeftDarkModeFriendly } from "~/components/svg";
+import { Button } from "~/components/ui/button";
 
 export const HomeLink = () => {
     const currentPathName = usePathname();

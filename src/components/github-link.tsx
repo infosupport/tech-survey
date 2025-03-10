@@ -1,7 +1,7 @@
 "use client";
 
-import { GithubLogo } from "./svg";
-import { Button } from "./ui/button";
+import { GithubLogo } from "~/components/svg";
+import { Button } from "~/components/ui/button";
 
 const GitHubLink = () => {
     return (
