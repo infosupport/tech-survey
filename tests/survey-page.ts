@@ -1,5 +1,6 @@
 // @ts-check
 import { type Page } from "playwright";
+import { expect } from "@playwright/test";
 
 export class SurveyPage {
     public readonly page: Page;
@@ -13,18 +14,16 @@ export class SurveyPage {
     async navigateToLandingPage() {
         await this.page.goto(`http://localhost:${this.port}`);
         await this.page.waitForURL(`http://localhost:${this.port}`);
-        const headingElement = this.page.getByRole("heading", {
+        return this.page.getByRole("heading", {
             name: "Select Roles",
         });
-        await this.page.reload();
-        return headingElement;
     }
 
     async checkUrl(path: string) {
-        return this.page.url() === `http://localhost:${this.port}/${path}`;
+        expect(this.page.url()).toBe(`http://localhost:${this.port}/${path}`);
     }
 
-    async navigateToAnonymousResults(role: string): Promise<boolean> {
+    async navigateToAnonymousResults(role: string) {
         await this.page.goto(
             `http://localhost:${this.port}/result?role=${role}`,
         );
@@ -32,10 +31,9 @@ export class SurveyPage {
             `http://localhost:${this.port}/result?role=${role}`,
         );
 
-        const isTextVisible = await this.page
-            .getByText(`Viewing results for role:`)
-            .isVisible();
-        return isTextVisible;
+        await expect(
+            this.page.getByText(`Viewing results for role:`),
+        ).toBeVisible();
     }
 
     async navigateToFindTheExpert(role: string) {
@@ -45,50 +43,43 @@ export class SurveyPage {
         await this.page.waitForURL(
             `http://localhost:${this.port}/find-the-expert/tech-page?role=${role}`,
         );
-        const isTextVisible = await this.page
-            .getByText(`Viewing results for role`)
-            .isVisible();
-        return isTextVisible;
+
+        await expect(
+            this.page.getByText(`Viewing results for role`),
+        ).toBeVisible();
     }
 
     async checkAnonymousResultsIsNotEmpty() {
         // we should not see '404 Not Found' on the page
-        return this.page.isHidden("text=404");
+        await expect(this.page.getByText("404")).toBeHidden();
     }
 
-    async checkUserIsPresentInFindTheExpertPage(
-        name: string,
-        shouldShowContactOptions: boolean,
-    ): Promise<{ isUserVisible: boolean; isDoNotContactVisible: boolean }> {
+    async checkUserIsPresentInFindTheExpertPage(name: string) {
+        await expect(
+            this.page.getByRole("cell", { name: name }).first(),
+        ).toBeVisible();
+    }
+
+    async checkDoNotContactIsPresentInFindTheExpertPage() {
         const doNotContact = "Do not contact";
 
-        const isUserVisible = await this.page
-            .getByRole("cell", { name: name })
-            .first()
-            .isVisible();
+        await expect(
+            this.page.getByRole("cell", { name: doNotContact }).first(),
+        ).toBeVisible();
+    }
 
-        let isDoNotContactVisible = false;
-        if (shouldShowContactOptions) {
-            isDoNotContactVisible = await this.page
-                .getByRole("cell", { name: doNotContact })
-                .first()
-                .isHidden();
-        } else {
-            isDoNotContactVisible = await this.page
-                .getByRole("cell", { name: doNotContact })
-                .first()
-                .isVisible();
-        }
+    async checkDoNotContactIsHiddenInFindTheExpertPage() {
+        const doNotContact = "Do not contact";
 
-        return { isUserVisible, isDoNotContactVisible };
+        await expect(
+            this.page.getByRole("cell", { name: doNotContact }).first(),
+        ).toBeHidden();
     }
 
     async goToNextQuestionsForDifferentRole() {
         await this.page
             .getByRole("button", { name: "Next", exact: true })
             .click();
-
-        await this.page.waitForTimeout(1000);
     }
 
     async submitAnswers() {
@@ -105,11 +96,7 @@ export class SurveyPage {
                 .first()
                 .locator('input[type="checkbox"]');
             await roleCheckbox.check();
-            await this.page.waitForTimeout(1000);
         }
-
-        // wait for the roles to be selected
-        await this.page.waitForTimeout(1000);
     }
 
     async selectCommunicationPreferences(preferences: readonly string[]) {
@@ -120,9 +107,6 @@ export class SurveyPage {
                 .locator('input[type="checkbox"]');
             await preferenceCheckbox.check();
         }
-
-        // wait for the roles to be selected
-        await this.page.waitForTimeout(1000);
     }
 
     async navigateToSurveyPage() {
