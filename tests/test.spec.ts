@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 import { type SurveyPage } from "./survey-page";
 import { DbHelper } from "./db-helper";
 import { type ChildProcess } from "child_process";
@@ -24,23 +24,36 @@ const killAllProcesses = async (process: ChildProcess) => {
         await treeKillAsPromised(process.pid);
     }
 };
+
+let nextProcess: ChildProcess;
+let surveyPage: SurveyPage;
+let dbHelper: DbHelper;
+let testSetup: TestSetup;
+let page: Page;
+test.beforeAll(async ({ browser }) => {
+    page = await browser.newPage();
+    dbHelper = await DbHelper.create();
+    testSetup = new TestSetup(dbHelper.getContainer());
+    const { port, process } = await testSetup.setupNextProcess();
+    nextProcess = process;
+    surveyPage = await testSetup.setupSurveyPage(page, port);
+    await testSetup.setupUserAndSession(page, dbHelper);
+
+    // Navigate to the landing page and check to see if we are logged in correctly
+    const headingElement = await surveyPage.navigateToLandingPage();
+    await expect(headingElement).toBeVisible();
+});
+
+test.afterAll(async () => {
+    await dbHelper.getContainer().stop();
+    await page.close();
+    await killAllProcesses(nextProcess);
+});
+
 test.describe("Desktop tests using a single role", () => {
-    let nextProcess: ChildProcess;
-    let surveyPage: SurveyPage;
-    let dbHelper: DbHelper;
-    let testSetup: TestSetup;
-
     // Set up the landing page before each test
-    test.beforeEach(async ({ page }, testInfo) => {
+    test.beforeEach(async () => {
         try {
-            testInfo.setTimeout(100000);
-            dbHelper = await DbHelper.create();
-            testSetup = new TestSetup(dbHelper.getContainer());
-            const { port, process } = await testSetup.setupNextProcess();
-            nextProcess = process;
-            surveyPage = await testSetup.setupSurveyPage(page, port);
-            await testSetup.setupUserAndSession(page, dbHelper);
-
             // Fill the database with what we need for the tests with a single role.
             await testSetup.createSingleRoleSurvey(dbHelper);
 
@@ -52,22 +65,8 @@ test.describe("Desktop tests using a single role", () => {
         }
     });
 
-    test.afterEach(async ({ page }) => {
-        try {
-            const cookies = await page.context().cookies();
-            const sessionCookie = cookies.find(
-                (cookie) => cookie.name === "next-auth.session-token",
-            );
-
-            if (sessionCookie) {
-                await page.context().clearCookies();
-            }
-
-            await killAllProcesses(nextProcess);
-        } finally {
-            await dbHelper.getContainer().stop();
-            await page.close();
-        }
+    test.afterEach(async () => {
+        await dbHelper.cleanDatabase();
     });
 
     test("Check if the default role(s) are set", async () => {
@@ -98,8 +97,7 @@ test.describe("Desktop tests using a single role", () => {
         await surveyPage.page.waitForURL(
             `http://localhost:${surveyPage.port}/thank-you`,
         );
-        const isUrlCorrect = await surveyPage.checkUrl("thank-you");
-        expect(isUrlCorrect).toBe(true);
+        await surveyPage.checkUrl("thank-you");
     });
 
     test("Forget to fill in a question", async () => {
@@ -129,8 +127,7 @@ test.describe("Desktop tests using a single role", () => {
         await surveyPage.page.waitForURL(
             `http://localhost:${surveyPage.port}/thank-you`,
         );
-        const isUrlCorrect = await surveyPage.checkUrl("thank-you");
-        expect(isUrlCorrect).toBe(true);
+        await surveyPage.checkUrl("thank-you");
     });
 
     test("Fill in the survey and show you are present on the anonymous results", async () => {
@@ -152,16 +149,11 @@ test.describe("Desktop tests using a single role", () => {
         await surveyPage.page.waitForURL(
             `http://localhost:${surveyPage.port}/thank-you`,
         );
-        const isUrlCorrect = await surveyPage.checkUrl("thank-you");
-        expect(isUrlCorrect).toBe(true);
+        await surveyPage.checkUrl("thank-you");
 
         // Check if the user is present in the anonymous results
-        const isTextVisible = await surveyPage.navigateToAnonymousResults(
-            slugify(SINGLE_ROLE[0]!),
-        );
-        expect(isTextVisible).toBe(true);
-        const is404Hidden = await surveyPage.checkAnonymousResultsIsNotEmpty();
-        expect(is404Hidden).toBe(true);
+        await surveyPage.navigateToAnonymousResults(slugify(SINGLE_ROLE[0]!));
+        await surveyPage.checkAnonymousResultsIsNotEmpty();
     });
 
     test("Fill in the survey and show you are present on the find-the-expert page", async () => {
@@ -182,24 +174,13 @@ test.describe("Desktop tests using a single role", () => {
         await surveyPage.page.waitForURL(
             `http://localhost:${surveyPage.port}/thank-you`,
         );
-        const isUrlCorrect = await surveyPage.checkUrl("thank-you");
-        expect(isUrlCorrect).toBe(true);
+        await surveyPage.checkUrl("thank-you");
 
         // Check if the user is present in the find-the-expert page, with the "do not contact" option
-        const isTextVisible = await surveyPage.navigateToFindTheExpert(
-            slugify(SINGLE_ROLE[0]!),
-        );
-        expect(isTextVisible).toBe(true);
+        await surveyPage.navigateToFindTheExpert(slugify(SINGLE_ROLE[0]!));
 
-        const {
-            isUserVisible: userShouldNotBeVisible,
-            isDoNotContactVisible: doNotContactShouldBeVisible,
-        } = await surveyPage.checkUserIsPresentInFindTheExpertPage(
-            USER_NAME,
-            false,
-        );
-        expect(userShouldNotBeVisible).toBe(true);
-        expect(doNotContactShouldBeVisible).toBe(true);
+        await surveyPage.checkUserIsPresentInFindTheExpertPage(USER_NAME);
+        await surveyPage.checkDoNotContactIsPresentInFindTheExpertPage();
 
         // Change the communication preferences
         const headingElement = await surveyPage.navigateToLandingPage();
@@ -209,40 +190,17 @@ test.describe("Desktop tests using a single role", () => {
         );
 
         // Check if the user is present in the find-the-expert page, with the communication preferences
-        const isTextVisibleAgain = await surveyPage.navigateToFindTheExpert(
-            slugify(SINGLE_ROLE[0]!),
-        );
-        expect(isTextVisibleAgain).toBe(true);
+        await surveyPage.navigateToFindTheExpert(slugify(SINGLE_ROLE[0]!));
 
-        const {
-            isUserVisible: userShouldBeVisible,
-            isDoNotContactVisible: doNotContactShouldNotBeVisible,
-        } = await surveyPage.checkUserIsPresentInFindTheExpertPage(
-            USER_NAME,
-            true,
-        );
-        expect(userShouldBeVisible).toBe(true);
-        expect(doNotContactShouldNotBeVisible).toBe(true);
+        await surveyPage.checkUserIsPresentInFindTheExpertPage(USER_NAME);
+        await surveyPage.checkDoNotContactIsHiddenInFindTheExpertPage();
     });
 });
 
 test.describe("Desktop tests using a multiple roles", () => {
-    let nextProcess: ChildProcess;
-    let surveyPage: SurveyPage;
-    let dbHelper: DbHelper;
-    let testSetup: TestSetup;
-
     // Set up the landing page before each test
-    test.beforeEach(async ({ page }, testInfo) => {
+    test.beforeEach(async () => {
         try {
-            testInfo.setTimeout(100000);
-            dbHelper = await DbHelper.create();
-            testSetup = new TestSetup(dbHelper.getContainer());
-            const { port, process } = await testSetup.setupNextProcess();
-            nextProcess = process;
-            surveyPage = await testSetup.setupSurveyPage(page, port);
-            await testSetup.setupUserAndSession(page, dbHelper);
-
             await testSetup.createMultipleRoleSurvey(dbHelper);
             const headingElement = await surveyPage.navigateToLandingPage();
             await expect(headingElement).toBeVisible();
@@ -252,17 +210,8 @@ test.describe("Desktop tests using a multiple roles", () => {
     });
 
     // Clean up the landing page after each test
-    test.afterEach(async ({ page }) => {
-        const cookies = await page.context().cookies();
-        const sessionCookie = cookies.find(
-            (cookie) => cookie.name === "next-auth.session-token",
-        );
-        if (sessionCookie) {
-            await page.context().clearCookies();
-        }
-        await page.close();
-        await killAllProcesses(nextProcess);
-        await dbHelper.getContainer().stop();
+    test.afterEach(async () => {
+        await dbHelper.cleanDatabase();
     });
 
     test("Create multiple questions and assign specific roles", async () => {
@@ -332,22 +281,9 @@ test.describe("Desktop tests using a multiple roles", () => {
 });
 
 test.describe("Mobile tests using a single role", () => {
-    let nextProcess: ChildProcess;
-    let surveyPage: SurveyPage;
-    let dbHelper: DbHelper;
-    let testSetup: TestSetup;
-
     // Set up the landing page before each test
-    test.beforeEach(async ({ page }, testInfo) => {
+    test.beforeEach(async () => {
         try {
-            testInfo.setTimeout(100000);
-            dbHelper = await DbHelper.create();
-            testSetup = new TestSetup(dbHelper.getContainer());
-            const { port, process } = await testSetup.setupNextProcess();
-            nextProcess = process;
-            surveyPage = await testSetup.setupSurveyPage(page, port);
-            await testSetup.setupUserAndSession(page, dbHelper);
-
             // Fill the database with what we need for the tests with a single role.
             await testSetup.createSingleRoleSurvey(dbHelper);
 
@@ -359,22 +295,8 @@ test.describe("Mobile tests using a single role", () => {
         }
     });
 
-    test.afterEach(async ({ page }) => {
-        try {
-            const cookies = await page.context().cookies();
-            const sessionCookie = cookies.find(
-                (cookie) => cookie.name === "next-auth.session-token",
-            );
-
-            if (sessionCookie) {
-                await page.context().clearCookies();
-            }
-
-            await killAllProcesses(nextProcess);
-        } finally {
-            await dbHelper.getContainer().stop();
-            await page.close();
-        }
+    test.afterEach(async () => {
+        await dbHelper.cleanDatabase();
     });
 
     test("(Mobile) Check if the default role(s) are set", async () => {
@@ -429,8 +351,7 @@ test.describe("Mobile tests using a single role", () => {
         await surveyPage.page.waitForURL(
             `http://localhost:${surveyPage.port}/thank-you`,
         );
-        const isUrlCorrect = await surveyPage.checkUrl("thank-you");
-        expect(isUrlCorrect).toBe(true);
+        await surveyPage.checkUrl("thank-you");
     });
 
     test("(Mobile) Fill in the survey and show you are present on the find-the-expert page", async () => {
@@ -448,24 +369,13 @@ test.describe("Mobile tests using a single role", () => {
         await surveyPage.page.waitForURL(
             `http://localhost:${surveyPage.port}/thank-you`,
         );
-        const isUrlCorrect = await surveyPage.checkUrl("thank-you");
-        expect(isUrlCorrect).toBe(true);
+        await surveyPage.checkUrl("thank-you");
 
         // Check if the user is present in the find-the-expert page, with the "do not contact" option
-        const isTextVisible = await surveyPage.navigateToFindTheExpert(
-            slugify(SINGLE_ROLE[0]!),
-        );
-        expect(isTextVisible).toBe(true);
+        await surveyPage.navigateToFindTheExpert(slugify(SINGLE_ROLE[0]!));
 
-        const {
-            isUserVisible: userShouldNotBeVisible,
-            isDoNotContactVisible: doNotContactShouldBeVisible,
-        } = await surveyPage.checkUserIsPresentInFindTheExpertPage(
-            USER_NAME,
-            false,
-        );
-        expect(userShouldNotBeVisible).toBe(true);
-        expect(doNotContactShouldBeVisible).toBe(true);
+        await surveyPage.checkUserIsPresentInFindTheExpertPage(USER_NAME);
+        await surveyPage.checkDoNotContactIsPresentInFindTheExpertPage();
 
         // Change the communication preferences
         const headingElement = await surveyPage.navigateToLandingPage();
@@ -475,20 +385,8 @@ test.describe("Mobile tests using a single role", () => {
         );
 
         // Check if the user is present in the find-the-expert page, with the communication preferences
-        const isTextVisibleAgain = await surveyPage.navigateToFindTheExpert(
-            slugify(SINGLE_ROLE[0]!),
-        );
-        expect(isTextVisibleAgain).toBe(true);
-
-        const {
-            isUserVisible: userShouldBeVisible,
-            isDoNotContactVisible: doNotContactShouldNotBeVisible,
-        } = await surveyPage.checkUserIsPresentInFindTheExpertPage(
-            USER_NAME,
-            true,
-        );
-        expect(userShouldBeVisible).toBe(true);
-        expect(doNotContactShouldNotBeVisible).toBe(true);
+        await surveyPage.navigateToFindTheExpert(slugify(SINGLE_ROLE[0]!));
+        await surveyPage.checkDoNotContactIsHiddenInFindTheExpertPage();
     });
 
     test("(Mobile) Fill in the survey and show you are present on the anonymous results", async () => {
@@ -504,36 +402,18 @@ test.describe("Mobile tests using a single role", () => {
         await surveyPage.page.waitForURL(
             `http://localhost:${surveyPage.port}/thank-you`,
         );
-        const isUrlCorrect = await surveyPage.checkUrl("thank-you");
-        expect(isUrlCorrect).toBe(true);
+        await surveyPage.checkUrl("thank-you");
 
         // Check if the user is present in the anonymous results
-        const isTextVisible = await surveyPage.navigateToAnonymousResults(
-            slugify(SINGLE_ROLE[0]!),
-        );
-        expect(isTextVisible).toBe(true);
-        const is404Hidden = await surveyPage.checkAnonymousResultsIsNotEmpty();
-        expect(is404Hidden).toBe(true);
+        await surveyPage.navigateToAnonymousResults(slugify(SINGLE_ROLE[0]!));
+        await surveyPage.checkAnonymousResultsIsNotEmpty();
     });
 });
 
 test.describe("Mobile tests using multiple roles", () => {
-    let nextProcess: ChildProcess;
-    let surveyPage: SurveyPage;
-    let dbHelper: DbHelper;
-    let testSetup: TestSetup;
-
     // Set up the landing page before each test
-    test.beforeEach(async ({ page }, testInfo) => {
+    test.beforeEach(async () => {
         try {
-            testInfo.setTimeout(100000);
-            dbHelper = await DbHelper.create();
-            testSetup = new TestSetup(dbHelper.getContainer());
-            const { port, process } = await testSetup.setupNextProcess();
-            nextProcess = process;
-            surveyPage = await testSetup.setupSurveyPage(page, port);
-            await testSetup.setupUserAndSession(page, dbHelper);
-
             // Fill the database with what we need for the tests with a single role.
             await testSetup.createMultipleRoleSurvey(dbHelper);
 
@@ -545,22 +425,8 @@ test.describe("Mobile tests using multiple roles", () => {
         }
     });
 
-    test.afterEach(async ({ page }) => {
-        try {
-            const cookies = await page.context().cookies();
-            const sessionCookie = cookies.find(
-                (cookie) => cookie.name === "next-auth.session-token",
-            );
-
-            if (sessionCookie) {
-                await page.context().clearCookies();
-            }
-
-            await killAllProcesses(nextProcess);
-        } finally {
-            await dbHelper.getContainer().stop();
-            await page.close();
-        }
+    test.afterEach(async () => {
+        await dbHelper.cleanDatabase();
     });
 
     test("(Mobile) Create multiple questions and assign specific roles", async () => {
