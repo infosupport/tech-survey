@@ -15,7 +15,7 @@ function SelectRoles({
     userRoles: Role[];
 }) {
     const { mutate: setRoleMutate, error: setRoleError } =
-        api.survey.setRole.useMutation();
+        api.users.setRolesForUser.useMutation();
 
     const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
     const userSelectedRoles = useMemo(() => userRoles ?? [], [userRoles]);

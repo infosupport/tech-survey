@@ -156,7 +156,7 @@ export class TestSetup {
             return encode({
                 token: payload,
                 salt: "authjs.session-token",
-                secret: process.env.AUTH_SECRET ?? "dummy",
+                secret: process.env["AUTH_SECRET"] ?? "dummy",
             });
         };
 

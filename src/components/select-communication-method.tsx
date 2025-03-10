@@ -1,6 +1,6 @@
 "use client";
 
-import { CommunicationMethod } from "@prisma/client";
+import { CommunicationMethod } from "~/prisma";
 import { useEffect, useState } from "react";
 import { api } from "~/trpc/react";
 import communicationMethodToIcon from "~/components/ui/CommunicationMethodToIcon";
@@ -22,7 +22,7 @@ export default function SelectCommunicationMethod({
     }, [methods]);
 
     const { mutate: setMethodMutate, isPending: setMethodIsLoading } =
-        api.survey.setCommunicationMethods.useMutation();
+        api.users.setCommunicationMethodsForUser.useMutation();
 
     useEffect(() => {
         setCommunicationMethodIsLoading(setMethodIsLoading);

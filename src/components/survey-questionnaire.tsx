@@ -52,7 +52,7 @@ export function SurveyQuestionnaire({
     )?.id;
 
     const { data, isPending } =
-        api.survey.getSurveyQuestionsCompletedPerRole.useQuery(
+        api.surveys.getSurveyQuestionsCompletedPerRole.useQuery(
             { surveyId, userId },
             { enabled: !!userId },
         );

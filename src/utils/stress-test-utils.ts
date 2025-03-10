@@ -1,8 +1,22 @@
 import { type Session } from "next-auth";
-import { db } from "~/server/db";
+import { env } from "~/env";
+import { PrismaDbClient } from "~/prisma";
+
+const createPrismaClient = () =>
+    new PrismaDbClient({
+        log: ["error"],
+    });
+
+const globalForPrisma = globalThis as unknown as {
+    prisma: ReturnType<typeof createPrismaClient> | undefined;
+};
+
+const db = globalForPrisma.prisma ?? createPrismaClient();
+
+if (env.NODE_ENV !== "production") globalForPrisma.prisma = db;
 
 export async function createNewUserAndSession(): Promise<Session | null> {
-    if (process.env.STRESS_TEST !== "true") return null;
+    if (process.env["STRESS_TEST"] !== "true") return null;
 
     // select all users with email starting with 'test-'
     const users = await db.user.findMany({

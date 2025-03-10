@@ -11,7 +11,7 @@ function SurveyPage({
     userId: string;
     currentRole: string;
 }) {
-    const { data: surveyData } = api.survey.getCurrentSurveyPageData.useQuery(
+    const { data: surveyData } = api.surveys.getCurrentSurveyPageData.useQuery(
         { userId: userId, role: currentRole },
         { enabled: !!userId },
     );
