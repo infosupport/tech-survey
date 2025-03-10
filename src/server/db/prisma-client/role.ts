@@ -1,5 +1,5 @@
 import type { PrismaDbClient } from "~/prisma";
-import { PrismaClient } from ".";
+import type { PrismaClient } from ".";
 
 export class RolePrismaClient {
     // @ts-expect-error - Might be used in the future

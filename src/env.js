@@ -33,7 +33,7 @@ export const env = createEnv({
         AUTH_MICROSOFT_ENTRA_ID_ISSUER:
             process.env["AUTH_MICROSOFT_ENTRA_ID_ISSUER"],
         FRESH_RUN: process.env["FRESH_RUN"],
-        NODE_ENV: process.env["NODE_ENV"],
+        NODE_ENV: process.env.NODE_ENV,
     },
     /**
      * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

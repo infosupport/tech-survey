@@ -1,5 +1,5 @@
 import type { PrismaDbClient } from "~/prisma";
-import { PrismaClient } from ".";
+import type { PrismaClient } from ".";
 
 export class SurveyPrismaClient {
     #prismaClient: PrismaClient;

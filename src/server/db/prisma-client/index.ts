@@ -33,7 +33,7 @@ export class PrismaClient {
     /// Converts the PrismaClient to an Adapter
     /// only compile-time private because it's not meant to be used
     /// outside of this class except in `auth.ts`.
-    // @ts-expect-error
+    // @ts-expect-error - Used in src/auth.ts
     private toPrismaAdapter() {
         return PrismaAdapter(this.#db) as Adapter;
     }
