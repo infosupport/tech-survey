@@ -164,6 +164,7 @@ const PrivacyPage = () => {
                                         return {
                                             name: rowData?.name ?? "",
                                             email: question,
+                                            id: rowData?.id ?? "",
                                             communicationPreferences:
                                                 rowData?.communicationPreferences ??
                                                 [],
