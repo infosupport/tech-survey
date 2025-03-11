@@ -1,33 +1,71 @@
 import type { Metadata } from "next";
-import type { Prisma } from "@prisma/client";
 import React, { Suspense } from "react";
 import ButtonSkeleton from "~/components/loading/button-loader";
 import ProfilePageSearch from "~/components/ui/profile-page-search";
-import { db } from "~/server/db";
+import { prismaClient } from "~/server/db";
 import { DataTable } from "~/components/data-tables/data-table";
 import type { ColumnDef } from "@tanstack/react-table";
-import communicationMethodToIcon from "~/components/ui/CommunicationMethodToIcon";
+import communicationMethodToIcon from "~/components/ui/communication-method-to-icon";
 import ProfileRadarChart from "~/components/profile-radar-chart";
+import type { ProfilePageUserData } from "~/server/db/prisma-client/user";
 
-export const metadata: Metadata = {
-    title: "Find the expert",
+const staticTitle = "Find the expert - Tech Survey";
+
+const buildStaticMetadata = (): Metadata => {
+    return {
+        title: staticTitle,
+    };
 };
 
-const ContentSection = async ({ name }: { name: string }) => {
-    const users = await db.user.findMany({
-        select: userSelect,
-    });
+const buildTitle = (userName: string | null): string => {
+    if (userName === null) {
+        return staticTitle;
+    }
 
-    const selectedUser = users.find((user) => user.name === name);
+    return `${userName} - ${staticTitle}`;
+};
+
+export async function generateMetadata({
+    searchParams,
+}: {
+    searchParams: Promise<{ userId?: string }>;
+}): Promise<Metadata> {
+    const userId = (await searchParams).userId;
+    if (!userId) {
+        return buildStaticMetadata();
+    }
+
+    const user = await prismaClient.users.getUserById(userId);
+    if (!user) {
+        return buildStaticMetadata();
+    }
+
+    return {
+        title: buildTitle(user.name),
+        openGraph: {
+            title: buildTitle(user.name),
+        },
+    };
+}
+
+const ContentSection = async ({ userId }: { userId?: string }) => {
+    const users = await prismaClient.users.getUsers();
+    const selectedUser = userId
+        ? await prismaClient.users.getProfilePageUserById(userId)
+        : null;
+    const currentSurveyId = await prismaClient.surveys.getLatestSurveyId();
 
     return (
         <>
             <Suspense fallback={<ButtonSkeleton />}>
-                <ProfilePageSearch allUsers={users} />
+                <ProfilePageSearch users={users} />
             </Suspense>
             <Suspense fallback={<ButtonSkeleton />}>
-                {name ? (
-                    <ProfilePage user={selectedUser} />
+                {selectedUser !== null ? (
+                    <ProfilePage
+                        currentSurveyId={currentSurveyId}
+                        user={selectedUser}
+                    />
                 ) : (
                     <h3 className="text-center text-lg font-semibold">
                         Type a name to start searching
@@ -38,49 +76,6 @@ const ContentSection = async ({ name }: { name: string }) => {
     );
 };
 
-const userSelect = {
-    name: true,
-    id: true,
-    questionResults: {
-        orderBy: {
-            answer: {
-                option: "asc",
-            },
-        },
-        select: {
-            answer: {
-                select: {
-                    option: true,
-                },
-            },
-            question: {
-                select: {
-                    questionText: true,
-                    survey: {
-                        select: {
-                            surveyName: true,
-                        },
-                    },
-                    roles: {
-                        select: {
-                            role: true,
-                        },
-                    },
-                },
-            },
-        },
-    },
-    communicationPreferences: {
-        select: {
-            methods: true,
-        },
-    },
-} satisfies Prisma.UserSelect;
-
-export type UserData = Prisma.UserGetPayload<{
-    select: typeof userSelect;
-}>;
-
 const optionWeights: Record<number, number> = {
     0: 5,
     1: 3,
@@ -88,7 +83,13 @@ const optionWeights: Record<number, number> = {
     3: 0,
 };
 
-const ProfilePage = async ({ user }: { user?: UserData }) => {
+const ProfilePage = async ({
+    currentSurveyId,
+    user,
+}: {
+    currentSurveyId: string | null;
+    user?: ProfilePageUserData;
+}) => {
     if (!user) {
         return (
             <h3 className="text-center text-lg font-semibold">No user found</h3>
@@ -118,7 +119,7 @@ const ProfilePage = async ({ user }: { user?: UserData }) => {
         [] as { role: string; sum: number }[],
     );
 
-    const columns: ColumnDef<UserData["questionResults"][0]>[] = [
+    const columns: ColumnDef<ProfilePageUserData["questionResults"][0]>[] = [
         {
             accessorKey: "question.questionText",
             header: "Name",
@@ -158,13 +159,18 @@ const ProfilePage = async ({ user }: { user?: UserData }) => {
                 <h3 className="mb-2 text-center text-lg font-semibold">
                     Technology survey results
                 </h3>
-                <DataTable columns={columns} data={user.questionResults} />
+                <DataTable
+                    columns={columns}
+                    data={user.questionResults.filter(
+                        (qr) => qr.question.survey.id === currentSurveyId,
+                    )}
+                />
             </div>
         </div>
     );
 };
 const ProfilePageWrapper = async (context: {
-    searchParams: Promise<{ name: string }>;
+    searchParams: Promise<{ userId: string }>;
 }) => {
     return (
         <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
@@ -177,7 +183,7 @@ const ProfilePageWrapper = async (context: {
                     Tech Survey - Profile page
                 </span>
             </h1>
-            <ContentSection name={(await context.searchParams).name} />
+            <ContentSection userId={(await context.searchParams).userId} />
         </div>
     );
 };

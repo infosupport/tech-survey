@@ -1,21 +1,21 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import type { BusinessUnit } from "@prisma/client";
+import type { BusinessUnit } from "~/prisma";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import type { Role } from "~/models/types";
-import { Form, FormControl, FormField, FormItem } from "./form";
-import { Label } from "./label";
+import { Form, FormControl, FormField, FormItem } from "~/components/ui/form";
+import { Label } from "~/components/ui/label";
 import {
     Select,
     SelectContent,
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from "./select";
+} from "~/components/ui/select";
 
 const formSchema = z.object({
     role: z.string(),

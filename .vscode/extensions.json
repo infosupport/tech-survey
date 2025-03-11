@@ -1,7 +1,8 @@
 {
-  "recommendations": [
-    "esbenp.prettier-vscode",
-    "streetsidesoftware.code-spell-checker",
-    "ms-playwright.playwright"
-  ]
+    "recommendations": [
+        "esbenp.prettier-vscode",
+        "streetsidesoftware.code-spell-checker",
+        "ms-playwright.playwright",
+        "prisma.prisma"
+    ]
 }

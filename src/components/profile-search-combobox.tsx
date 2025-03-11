@@ -10,24 +10,24 @@ import { Label } from "~/components/ui/label";
 import { Input } from "~/components/ui/input";
 import { forwardRef, useEffect, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import type { UserData } from "~/app/find-the-expert/profile-page/page";
 import type { UseFormSetValue } from "react-hook-form";
 import type { KeyboardEvent } from "react";
+import type { GetUsersData } from "~/server/db/prisma-client/user";
 
 const ProfileSearchCombobox = forwardRef<
     HTMLInputElement,
     {
-        allUsers: UserData[];
+        users: GetUsersData[];
         setValue: UseFormSetValue<{ name: string }>;
     }
->(({ allUsers, setValue, ...props }, _) => {
+>(({ users, setValue, ...props }, _) => {
     const router = useRouter();
     const path = usePathname();
     const searchParams = useSearchParams();
 
     const [open, setOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState(
-        searchParams.get("name") ?? "",
+        searchParams.get("userId") ?? "",
     );
     const [highlightedIndex, setHighlightedIndex] = useState(-1);
 
@@ -51,10 +51,10 @@ const ProfileSearchCombobox = forwardRef<
         };
     }, [inputRef]);
 
-    const updateURL = (name: string) => {
+    const updateURL = (userId: string) => {
         const params = new URLSearchParams();
-        if (name) params.set("name", name);
-        router.push(`${path}?${params.toString()}`);
+        if (userId) params.set("userId", userId);
+        router.replace(`${path}?${params.toString()}`);
     };
     const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
         if (e.key === "ArrowDown") {
@@ -69,7 +69,7 @@ const ProfileSearchCombobox = forwardRef<
         } else if (e.key === "Enter") {
             if (highlightedIndex !== -1) {
                 e.preventDefault();
-                handleUserSelect(filteredUsers[highlightedIndex]!.name ?? "");
+                handleUserSelect(filteredUsers[highlightedIndex]!);
             } else if (open) {
                 setOpen(false);
             }
@@ -79,15 +79,15 @@ const ProfileSearchCombobox = forwardRef<
         }
     };
 
-    const handleUserSelect = (userName: string) => {
-        setValue("name", userName);
-        setSearchTerm(userName);
-        updateURL(userName);
+    const handleUserSelect = (user: GetUsersData) => {
+        setValue("name", user.name ?? "");
+        setSearchTerm(user.id);
+        updateURL(user.id);
         setOpen(false);
         setHighlightedIndex(-1);
     };
 
-    const filteredUsers = allUsers.filter((user) =>
+    const filteredUsers = users.filter((user) =>
         user.name?.toLowerCase().includes(searchTerm.toLowerCase()),
     );
     return (
@@ -122,7 +122,7 @@ const ProfileSearchCombobox = forwardRef<
                         <div
                             key={user.id}
                             className={`p-2 hover:bg-accent ${highlightedIndex === index ? "bg-accent" : ""} relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-2 pr-8 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50`}
-                            onClick={() => handleUserSelect(user.name ?? "")}
+                            onClick={() => handleUserSelect(user)}
                         >
                             {user.name}
                         </div>

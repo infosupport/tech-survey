@@ -2,10 +2,10 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import ButtonSkeleton from "~/components/loading/button-loader";
 import ShowDataTable from "~/components/data-tables/show-data-table";
-import { retrieveAnswersByRole } from "~/utils/data-manipulation";
-import { getRoles } from "~/utils/role-utils";
-import { db } from "~/server/db";
+import { sortRoles } from "~/utils/role-utils";
+import { prismaClient } from "~/server/db";
 import ShowTechSearchWrapper from "~/components/ui/show-tech-search-wrapper";
+import { getAnswerDataByRole } from "~/utils/data-manipulation";
 
 export const metadata: Metadata = {
     title: "Find the expert",
@@ -31,8 +31,8 @@ const ContentSection = ({
 );
 
 const FindTheExpertSearch = async () => {
-    const availableRoles = await getRoles()();
-    const availableUnits = await db.businessUnit.findMany();
+    const availableRoles = sortRoles(await prismaClient.roles.getAll());
+    const availableUnits = await prismaClient.businessUnits.getAll();
 
     return (
         <ShowTechSearchWrapper
@@ -70,16 +70,17 @@ const ShowTableWrapper = async ({
     role,
     unit,
 }: {
-    tech: string;
-    role: string;
-    unit: string;
+    tech?: string;
+    role?: string;
+    unit?: string;
 }) => {
+    const results = await prismaClient.questionResults.getQuestionResultsByRole(
+        role ?? null,
+        tech ?? null,
+        unit ?? null,
+    );
     const { dataByRoleAndQuestion, aggregatedDataByRole } =
-        await retrieveAnswersByRole({
-            role,
-            questionText: tech,
-            unit,
-        });
+        getAnswerDataByRole(results);
 
     return (
         <ShowDataTable

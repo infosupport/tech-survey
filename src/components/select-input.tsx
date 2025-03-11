@@ -7,7 +7,7 @@ import Link from "next/link";
 import { ArrowRightDarkModeFriendly } from "~/components/svg";
 import SelectCommunicationMethod from "~/components/select-communication-method";
 import { SpinnerButton } from "~/components/ui/button-spinner";
-import type { BusinessUnit, CommunicationMethod } from "@prisma/client";
+import type { BusinessUnit, CommunicationMethod } from "~/prisma";
 import SelectBusinessUnit from "~/components/select-businessunit";
 import CommunicationPreferencesSelectionSkeleton from "~/components/loading/communication-preferences-selection-loader";
 import { useRouter } from "next/navigation";
@@ -22,7 +22,7 @@ function SelectUserSurveyPreferences({
     roles: Role[];
     businessUnits: BusinessUnit[];
 }) {
-    const { data: user, isLoading } = api.survey.getUserInfo.useQuery(
+    const { data: user, isLoading } = api.users.getUserInfo.useQuery(
         { userId: userId },
         { enabled: !!userId },
     );
@@ -37,7 +37,7 @@ function SelectUserSurveyPreferences({
     }, [communicationPreferences]);
 
     const { mutate: setDefaultRoleMutate, isSuccess: setDefaultRoleIsSuccess } =
-        api.survey.setDefaultRole.useMutation();
+        api.users.setDefaultRoleForUser.useMutation();
     const { mutate: logUsageMetric } =
         api.usageMetricLogger.logUsageMetric.useMutation();
     const router = useRouter();

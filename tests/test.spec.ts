@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
-import { type SurveyPage } from "./survey-page";
-import { DbHelper } from "./db-helper";
+import { type SurveyPage } from "~/tests/survey-page";
+import { DbHelper } from "~/tests/db-helper";
 import { type ChildProcess } from "child_process";
 
 import { slugify } from "~/utils/slugify";
@@ -13,7 +13,7 @@ import {
     SINGLE_ROLE,
     TestSetup,
     USER_NAME,
-} from "./test-setup";
+} from "~/tests/test-setup";
 import treeKill from "tree-kill";
 
 import { promisify } from "node:util";

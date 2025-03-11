@@ -1,7 +1,7 @@
 "use client";
 
 import { type TransformedData } from "~/models/types";
-import { idToTextMap } from "~/utils/optionMapping";
+import { idToTextMap } from "~/utils/option-mapping";
 
 export function ResultCommons({ data }: { data: TransformedData }) {
     const colorPalette = [

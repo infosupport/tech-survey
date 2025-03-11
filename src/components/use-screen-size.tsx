@@ -18,23 +18,23 @@ const useScreenSize = () => {
         };
 
         // Check if window is defined before adding event listener
-        if (typeof window !== "undefined") {
-            const storedWidth = localStorage.getItem("screenWidth");
-            const storedHeight = localStorage.getItem("screenHeight");
-
-            setScreenSize({
-                width: storedWidth ? parseInt(storedWidth) : window.innerWidth,
-                height: storedHeight
-                    ? parseInt(storedHeight)
-                    : window.innerHeight,
-            });
-            window.addEventListener("resize", handleResize);
-
-            // Clean up the event listener when the component unmounts
-            return () => {
-                window.removeEventListener("resize", handleResize);
-            };
+        if (typeof window === "undefined") {
+            return;
         }
+
+        const storedWidth = localStorage.getItem("screenWidth");
+        const storedHeight = localStorage.getItem("screenHeight");
+
+        setScreenSize({
+            width: storedWidth ? parseInt(storedWidth) : window.innerWidth,
+            height: storedHeight ? parseInt(storedHeight) : window.innerHeight,
+        });
+        window.addEventListener("resize", handleResize);
+
+        // Clean up the event listener when the component unmounts
+        return () => {
+            window.removeEventListener("resize", handleResize);
+        };
     }, []);
 
     return screenSize;

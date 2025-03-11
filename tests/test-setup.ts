@@ -1,9 +1,9 @@
 import { type ChildProcess, spawn } from "child_process";
 import { expect, type Page } from "@playwright/test";
-import { SurveyPage } from "./survey-page";
+import { SurveyPage } from "~/tests/survey-page";
 import { type StartedPostgreSqlContainer } from "@testcontainers/postgresql";
 import { encode, type DefaultJWT } from "next-auth/jwt";
-import type { DbHelper } from "./db-helper";
+import type { DbHelper } from "~/tests/db-helper";
 
 type RoleIdMap = Record<string, string>;
 export const SURVEY_NAME = Object.freeze("Survey");
@@ -156,7 +156,7 @@ export class TestSetup {
             return encode({
                 token: payload,
                 salt: "authjs.session-token",
-                secret: process.env.AUTH_SECRET ?? "dummy",
+                secret: process.env["AUTH_SECRET"] ?? "dummy",
             });
         };
 

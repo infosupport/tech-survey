@@ -1,10 +1,10 @@
 "use server";
 
-import { ArrowRight, ArrowRightDarkModeFriendly } from "./svg";
-import { Button } from "./ui/button";
+import { HomepageFindTheExpertButton } from "~/components/homepage-find-the-expert-button";
 import Link from "next/link";
-import { HomepageFindTheExpertButton } from "./homepage-find-the-expert-button";
 import { auth } from "~/auth";
+import { Button } from "~/components/ui/button";
+import { ArrowRight, ArrowRightDarkModeFriendly } from "~/components/svg";
 
 const Buttons = async () => {
     const session = await auth();
