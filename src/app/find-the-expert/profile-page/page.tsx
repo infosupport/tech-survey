@@ -113,6 +113,7 @@ const ProfilePage = async ({
                     roleData = {
                         role: roleName,
                     } as ProfileRadarChartRoleData;
+                    roleData[surveyName] = 0;
                     acc.push(roleData);
                 }
 
