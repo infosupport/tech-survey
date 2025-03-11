@@ -142,7 +142,7 @@ const ProfilePage = async ({
                 <h2 className="mb-2 text-center text-2xl font-bold">
                     Profile page for {user.name}
                 </h2>
-                <h3 className="mb-2 text-center text-lg font-semibold">
+                <h3 className="text-center text-lg font-semibold">
                     Preferred communication methods
                     <div className="flex justify-center gap-2">
                         {user.communicationPreferences?.methods.map(
@@ -154,7 +154,13 @@ const ProfilePage = async ({
                         )}
                     </div>
                 </h3>
-                <h3 className="mb-2 text-center text-lg font-semibold">
+                {(user.communicationPreferences === null ||
+                    user.communicationPreferences!.methods.length === 0) && (
+                    <p className="text-center">
+                        No communication methods selected.
+                    </p>
+                )}
+                <h3 className="mb-2 mt-4 text-center text-lg font-semibold">
                     Aggregated data by role
                 </h3>
                 <div className="mb-4">

@@ -45,6 +45,10 @@ function ProfileRadarChart({ roleData, surveyNames }: ProfileRadarChartProps) {
         [surveyNames],
     );
 
+    if (roleData.length === 0 || surveyNames.length === 0) {
+        return <h1 className="text-center">No results.</h1>;
+    }
+
     return (
         <ResponsiveContainer width="100%" height={400}>
             <RadarChart
