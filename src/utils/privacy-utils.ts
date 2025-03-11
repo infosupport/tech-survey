@@ -4,6 +4,7 @@ export const aggregatedDataByRole: Record<
         string,
         {
             name: string;
+            id: string;
             communicationPreferences: string[];
             counts: number[];
         }
@@ -12,11 +13,13 @@ export const aggregatedDataByRole: Record<
     role1: {
         question1: {
             name: "John Doe",
+            id: "1",
             communicationPreferences: ["SLACK", "EMAIL", "WHATSAPP"],
             counts: [1, 2, 3, 4],
         },
         question2: {
             name: "Jane Doe",
+            id: "2",
             communicationPreferences: ["SIGNAL", "PHONE", "TEAMS"],
             counts: [2, 3, 4, 5],
         },

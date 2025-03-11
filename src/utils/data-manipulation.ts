@@ -57,7 +57,7 @@ const aggregateDataByRole = (
                 10,
             );
 
-            const { name, communicationPreferences } = entry.user;
+            const { name, communicationPreferences, id } = entry.user;
             let communicationMethods: string[] =
                 communicationPreferences?.methods ?? [];
             if (
@@ -70,6 +70,7 @@ const aggregateDataByRole = (
             if (!aggregatedDataByRole[roleName][userId]) {
                 aggregatedDataByRole[roleName][userId] = {
                     name: name ?? "Unknown User",
+                    id: id,
                     communicationPreferences: communicationMethods,
                     counts: [0, 0, 0, 0],
                 };

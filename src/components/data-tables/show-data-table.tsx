@@ -94,6 +94,7 @@ const ShowDataTable = ({
                                                 ];
                                             return {
                                                 name: rowData?.name ?? "",
+                                                id: rowData?.id ?? "",
                                                 email: question,
                                                 communicationPreferences:
                                                     rowData?.communicationPreferences ??

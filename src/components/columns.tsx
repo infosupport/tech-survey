@@ -17,6 +17,7 @@ export type SurveyResult = {
 
 export type AggregatedSurveyResult = {
     name: string;
+    id: string;
     email: string;
     communicationPreferences: string[];
     0: number;
@@ -45,9 +46,9 @@ export const aggregateColumns: ColumnDef<AggregatedSurveyResult>[] = [
         accessorKey: "name",
         header: "Name",
         cell: ({ row }) => {
-            const name = row.original.name.replace(" ", "+");
+            const userId = row.original.id;
             return (
-                <Link href={`/find-the-expert/profile-page?name=${name}`}>
+                <Link href={`/find-the-expert/profile-page?userId=${userId}`}>
                     {row.original.name}
                     <ExternalLinkIcon className="ml-1 inline-block text-blue-600" />
                 </Link>
