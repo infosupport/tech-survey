@@ -6,7 +6,9 @@ import { prismaClient } from "~/server/db";
 import { DataTable } from "~/components/data-tables/data-table";
 import type { ColumnDef } from "@tanstack/react-table";
 import communicationMethodToIcon from "~/components/ui/communication-method-to-icon";
-import ProfileRadarChart from "~/components/profile-radar-chart";
+import ProfileRadarChart, {
+    type ProfileRadarChartRoleData,
+} from "~/components/profile-radar-chart";
 import type { ProfilePageUserData } from "~/server/db/prisma-client/user";
 
 export const metadata: Metadata = {
@@ -44,6 +46,19 @@ const optionWeights: Record<number, number> = {
     3: 0,
 };
 
+const buildRoleData = (
+    roleName: string,
+    surveyName: string,
+    weight: number,
+): ProfileRadarChartRoleData => {
+    const result = {
+        role: roleName,
+    } as ProfileRadarChartRoleData;
+    result[surveyName] = weight;
+
+    return result;
+};
+
 const ProfilePage = async ({ user }: { user?: ProfilePageUserData }) => {
     if (!user) {
         return (
@@ -51,27 +66,28 @@ const ProfilePage = async ({ user }: { user?: ProfilePageUserData }) => {
         );
     }
 
+    const surveyNames = new Set<string>();
     const radarGraphData = user.questionResults.reduce(
         (acc, questionResult) => {
+            const surveyName = questionResult.question.survey.surveyName;
+            surveyNames.add(surveyName);
             questionResult.question.roles.forEach((role) => {
                 const roleName = role.role;
                 const answer = questionResult.answer.option;
                 const weight = optionWeights[answer] ?? 0;
 
-                const existingRoleData = acc.find(
-                    (item) => item.role === roleName,
-                );
-
-                if (existingRoleData) {
-                    existingRoleData.sum += weight;
-                } else {
-                    acc.push({ role: roleName, sum: weight });
+                let roleData = acc.find((item) => item.role === roleName);
+                if (!roleData) {
+                    roleData = buildRoleData(roleName, surveyName, 0);
+                    acc.push(roleData);
                 }
+
+                roleData[surveyName] = (roleData[surveyName] || 0) + weight;
             });
 
             return acc;
         },
-        [] as { role: string; sum: number }[],
+        [] as ProfileRadarChartRoleData[],
     );
 
     const columns: ColumnDef<ProfilePageUserData["questionResults"][0]>[] = [
@@ -108,7 +124,10 @@ const ProfilePage = async ({ user }: { user?: ProfilePageUserData }) => {
                 </h3>
                 <div className="mb-4">
                     <div className="chart-container">
-                        <ProfileRadarChart data={radarGraphData} />
+                        <ProfileRadarChart
+                            roleData={radarGraphData}
+                            surveyNames={Array.from(surveyNames)}
+                        />
                     </div>
                 </div>
                 <h3 className="mb-2 text-center text-lg font-semibold">
