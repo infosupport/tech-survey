@@ -79,6 +79,16 @@ const ProfileSearchCombobox = forwardRef<
         }
     };
 
+    const handleOnClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+        e.preventDefault();
+        const target = e.target as HTMLDivElement;
+        const userId = target.getAttribute("data-user-id");
+        const user = users.find((user) => user.id === userId);
+        if (user) {
+            handleUserSelect(user);
+        }
+    };
+
     const handleUserSelect = (user: GetUsersData) => {
         setValue("name", user.name ?? "");
         setSearchTerm(user.id);
@@ -116,10 +126,12 @@ const ProfileSearchCombobox = forwardRef<
             <PopoverContent
                 className="w-full rounded-md border p-0 shadow-md"
                 onOpenAutoFocus={(e) => e.preventDefault()}
+                onMouseDown={(e) => handleOnClick(e)}
             >
                 {filteredUsers.length > 0 ? (
                     filteredUsers.map((user, index) => (
                         <div
+                            data-user-id={user.id}
                             key={user.id}
                             className={`p-2 hover:bg-accent ${highlightedIndex === index ? "bg-accent" : ""} relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-2 pr-8 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50`}
                             onClick={() => handleUserSelect(user)}

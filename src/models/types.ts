@@ -91,6 +91,7 @@ export type DataByRoleAndQuestion = Record<
 
 interface UserInformation {
     name: string;
+    id: string;
     communicationPreferences: string[];
     counts: number[];
 }
