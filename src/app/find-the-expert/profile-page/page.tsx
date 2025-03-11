@@ -127,7 +127,7 @@ const ProfilePage = async ({
                     acc.push(roleData);
                 }
 
-                roleData[surveyName] = (roleData[surveyName] || 0) + weight;
+                roleData[surveyName] = (roleData[surveyName] ?? 0) + weight;
             });
 
             return acc;

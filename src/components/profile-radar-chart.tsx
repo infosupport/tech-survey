@@ -71,7 +71,7 @@ function ProfileRadarChart({ roleData, surveyNames }: ProfileRadarChartProps) {
                         }
                     />
                 ))}
-                <Legend onClick={(e) => handleLegendClick(e.value)} />
+                <Legend onClick={(e) => handleLegendClick(String(e.value))} />
             </RadarChart>
         </ResponsiveContainer>
     );
