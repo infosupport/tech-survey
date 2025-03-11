@@ -85,19 +85,6 @@ const optionWeights: Record<number, number> = {
     3: 0,
 };
 
-const buildRoleData = (
-    roleName: string,
-    surveyName: string,
-    weight: number,
-): ProfileRadarChartRoleData => {
-    const result = {
-        role: roleName,
-    } as ProfileRadarChartRoleData;
-    result[surveyName] = weight;
-
-    return result;
-};
-
 const ProfilePage = async ({
     currentSurveyId,
     user,
@@ -123,7 +110,9 @@ const ProfilePage = async ({
 
                 let roleData = acc.find((item) => item.role === roleName);
                 if (!roleData) {
-                    roleData = buildRoleData(roleName, surveyName, 0);
+                    roleData = {
+                        role: roleName,
+                    } as ProfileRadarChartRoleData;
                     acc.push(roleData);
                 }
 
