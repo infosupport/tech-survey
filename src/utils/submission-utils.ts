@@ -9,7 +9,7 @@ export const useSubmitAnswers = (userAnswersForRole: QuestionResult[]) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [amountOfAnsweredQuestions, setAmountOfAnsweredQuestions] =
         useState<number>(userAnswersForRole.length);
-    const submitResponse = api.survey.setQuestionResult.useMutation();
+    const submitResponse = api.surveys.setQuestionResultForUser.useMutation();
 
     useEffect(() => {
         if (submitResponse.isError) {

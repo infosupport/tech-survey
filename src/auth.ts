@@ -1,10 +1,9 @@
-import type { Adapter } from "@auth/core/adapters";
 import MicrosoftEntraID from "@auth/core/providers/microsoft-entra-id";
-import { PrismaAdapter } from "@auth/prisma-adapter";
 import NextAuth, { type DefaultSession } from "next-auth";
 
-import { db } from "~/server/db";
-import { env } from "./env";
+import { env } from "~/env";
+import { prismaClient } from "~/server/db";
+import type { IPrismaAdapterService } from "~/server/db/prisma-client";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -51,7 +50,9 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
     session: {
         strategy: "jwt",
     },
-    adapter: PrismaAdapter(db) as Adapter,
+    adapter: (
+        prismaClient as unknown as IPrismaAdapterService
+    ).toPrismaAdapter(),
     // We trust Microsoft Entra ID to have securely verified the email address associated with the account
     // so we allow linking accounts with the same email address.
     // Automatic account linking on sign in is not secure between arbitrary providers, so if you are using arbitrary providers, this should be set to `false`.

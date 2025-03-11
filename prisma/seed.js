@@ -1,8 +1,8 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaDbClient } from "~/prisma";
 import fs from "fs";
 import csv from "csv-parser";
 
-const prisma = new PrismaClient();
+const prisma = new PrismaDbClient();
 
 /**
  * Parses a CSV file to extract roles, questions, and their mappings.
@@ -93,6 +93,7 @@ async function main() {
         where: { surveyName: "Info Support Tech Survey - 2024" },
         create: {
             surveyName: "Info Support Tech Survey - 2024",
+            surveyDate: new Date(2024, 0, 1),
         },
         update: {},
     });
