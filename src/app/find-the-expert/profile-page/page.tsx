@@ -9,9 +9,44 @@ import communicationMethodToIcon from "~/components/ui/communication-method-to-i
 import ProfileRadarChart from "~/components/profile-radar-chart";
 import type { ProfilePageUserData } from "~/server/db/prisma-client/user";
 
-export const metadata: Metadata = {
-    title: "Find the expert",
+const staticTitle = "Find the expert - Tech Survey";
+
+const buildStaticMetadata = (): Metadata => {
+    return {
+        title: staticTitle,
+    };
 };
+
+const buildTitle = (userName: string | null): string => {
+    if (userName === null) {
+        return staticTitle;
+    }
+
+    return `${userName} - ${staticTitle}`;
+};
+
+export async function generateMetadata({
+    searchParams,
+}: {
+    searchParams: Promise<{ userId?: string }>;
+}): Promise<Metadata> {
+    const userId = (await searchParams).userId;
+    if (!userId) {
+        return buildStaticMetadata();
+    }
+
+    const user = await prismaClient.users.getUserById(userId);
+    if (!user) {
+        return buildStaticMetadata();
+    }
+
+    return {
+        title: buildTitle(user.name),
+        openGraph: {
+            title: buildTitle(user.name),
+        },
+    };
+}
 
 const ContentSection = async ({ userId }: { userId?: string }) => {
     const users = await prismaClient.users.getUsers();
