@@ -154,11 +154,8 @@ const ProfilePage = async ({
                         )}
                     </div>
                 </h3>
-                {(user.communicationPreferences === null ||
-                    user.communicationPreferences!.methods.length === 0) && (
-                    <p className="text-center">
-                        No communication methods selected.
-                    </p>
+                {(user.communicationPreferences?.methods.length ?? 0) === 0 && (
+                    <p className="text-center">Do not contact</p>
                 )}
                 <h3 className="mb-2 mt-4 text-center text-lg font-semibold">
                     Aggregated data by role
