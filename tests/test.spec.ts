@@ -117,7 +117,7 @@ test.describe("Desktop tests using a single role", () => {
 
         await surveyPage.submitAnswers();
         const validationErrorElement =
-            await surveyPage.checkForValidationError("yourRole");
+            await surveyPage.checkForValidationError("general");
         await expect(validationErrorElement).toBeVisible();
 
         // fill in the first question
@@ -341,7 +341,7 @@ test.describe("Mobile tests using a single role", () => {
 
         await surveyPage.submitAnswers();
         const validationErrorElement =
-            await surveyPage.checkForValidationError("yourRole");
+            await surveyPage.checkForValidationError("general");
         await expect(validationErrorElement).toBeVisible();
 
         // fill in the first question
@@ -470,6 +470,9 @@ test.describe("Mobile tests using multiple roles", () => {
 
             if (role === MULTIPLE_ROLES[MULTIPLE_ROLES.length - 1]) {
                 await surveyPage.submitAnswers();
+                await surveyPage.page.waitForURL(
+                    `http://localhost:${surveyPage.port}/thank-you`,
+                );
             } else {
                 await surveyPage.goToNextQuestionsForDifferentRole();
             }
