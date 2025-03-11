@@ -18,6 +18,7 @@ const ContentSection = async ({ userId }: { userId?: string }) => {
     const selectedUser = userId
         ? await prismaClient.users.getProfilePageUserById(userId)
         : null;
+    const currentSurveyId = await prismaClient.surveys.getLatestSurveyId();
 
     return (
         <>
@@ -26,7 +27,10 @@ const ContentSection = async ({ userId }: { userId?: string }) => {
             </Suspense>
             <Suspense fallback={<ButtonSkeleton />}>
                 {selectedUser !== null ? (
-                    <ProfilePage user={selectedUser} />
+                    <ProfilePage
+                        currentSurveyId={currentSurveyId}
+                        user={selectedUser}
+                    />
                 ) : (
                     <h3 className="text-center text-lg font-semibold">
                         Type a name to start searching
@@ -44,7 +48,13 @@ const optionWeights: Record<number, number> = {
     3: 0,
 };
 
-const ProfilePage = async ({ user }: { user?: ProfilePageUserData }) => {
+const ProfilePage = async ({
+    currentSurveyId,
+    user,
+}: {
+    currentSurveyId: string | null;
+    user?: ProfilePageUserData;
+}) => {
     if (!user) {
         return (
             <h3 className="text-center text-lg font-semibold">No user found</h3>
@@ -114,7 +124,12 @@ const ProfilePage = async ({ user }: { user?: ProfilePageUserData }) => {
                 <h3 className="mb-2 text-center text-lg font-semibold">
                     Technology survey results
                 </h3>
-                <DataTable columns={columns} data={user.questionResults} />
+                <DataTable
+                    columns={columns}
+                    data={user.questionResults.filter(
+                        (qr) => qr.question.survey.id === currentSurveyId,
+                    )}
+                />
             </div>
         </div>
     );
