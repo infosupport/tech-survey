@@ -8,7 +8,7 @@ import {
     RadarChart,
     ResponsiveContainer,
 } from "recharts";
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo, useRef } from "react";
 
 export type ProfileRadarChartRoleData = { role: string } & {
     [surveyName in string]: number;
@@ -20,6 +20,24 @@ type ProfileRadarChartProps = {
 };
 
 function ProfileRadarChart({ roleData, surveyNames }: ProfileRadarChartProps) {
+    const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+
+    const scrollToCenter = useCallback(() => {
+        if (scrollContainerRef.current) {
+            scrollContainerRef.current.scrollLeft =
+                (scrollContainerRef.current.scrollWidth -
+                    scrollContainerRef.current.clientWidth) /
+                2;
+        }
+    }, []);
+
+    useEffect(() => {
+        scrollToCenter();
+
+        window.addEventListener("resize", scrollToCenter);
+        return () => window.removeEventListener("resize", scrollToCenter);
+    }, [scrollToCenter]);
+
     const [activeSurveys, setActiveSurveys] = React.useState(
         surveyNames.map((_, index) => index),
     );
@@ -50,34 +68,42 @@ function ProfileRadarChart({ roleData, surveyNames }: ProfileRadarChartProps) {
     }
 
     return (
-        <ResponsiveContainer width="100%" height={400}>
-            <RadarChart
-                data={roleData}
-                margin={{
-                    top: 20,
-                    right: 20,
-                    left: 20,
-                    bottom: 20,
-                }}
-            >
-                <PolarGrid />
-                <PolarAngleAxis dataKey="role" />
-                {surveyNames.map((surveyName, index) => (
-                    <Radar
-                        key={index}
-                        name={surveyName}
-                        dataKey={surveyName}
-                        stroke={colors[index % colors.length]}
-                        fill={colors[index % colors.length]}
-                        fillOpacity={0.25}
-                        display={
-                            activeSurveys.includes(index) ? "block" : "none"
-                        }
-                    />
-                ))}
-                <Legend onClick={(e) => handleLegendClick(String(e.value))} />
-            </RadarChart>
-        </ResponsiveContainer>
+        <div ref={scrollContainerRef} className="mb-4 w-full overflow-x-scroll">
+            <div className="min-w-[975px]">
+                <ResponsiveContainer height={500} width="100%">
+                    <RadarChart
+                        data={roleData}
+                        margin={{
+                            top: 20,
+                            right: 20,
+                            left: 20,
+                            bottom: 20,
+                        }}
+                    >
+                        <PolarGrid />
+                        <PolarAngleAxis dataKey="role" />
+                        {surveyNames.map((surveyName, index) => (
+                            <Radar
+                                key={index}
+                                name={surveyName}
+                                dataKey={surveyName}
+                                stroke={colors[index % colors.length]}
+                                fill={colors[index % colors.length]}
+                                fillOpacity={0.25}
+                                display={
+                                    activeSurveys.includes(index)
+                                        ? "block"
+                                        : "none"
+                                }
+                            />
+                        ))}
+                        <Legend
+                            onClick={(e) => handleLegendClick(String(e.value))}
+                        />
+                    </RadarChart>
+                </ResponsiveContainer>
+            </div>
+        </div>
     );
 }
 

@@ -137,40 +137,34 @@ const ProfilePage = async ({
     ];
 
     return (
-        <div>
-            <div key={user.id}>
-                <h2 className="mb-2 text-center text-2xl font-bold">
-                    Profile page for {user.name}
-                </h2>
-                <h3 className="text-center text-lg font-semibold">
-                    Preferred communication methods
-                    <div className="flex justify-center gap-2">
-                        {user.communicationPreferences?.methods.map(
-                            (method) => (
-                                <div key={method}>
-                                    {communicationMethodToIcon[method]}
-                                </div>
-                            ),
-                        )}
-                    </div>
-                </h3>
-                {(user.communicationPreferences?.methods.length ?? 0) === 0 && (
-                    <p className="text-center">Do not contact</p>
-                )}
-                <h3 className="mb-2 mt-4 text-center text-lg font-semibold">
-                    Aggregated data by role
-                </h3>
-                <div className="mb-4">
-                    <div className="chart-container">
-                        <ProfileRadarChart
-                            roleData={radarGraphData}
-                            surveyNames={Array.from(surveyNames)}
-                        />
-                    </div>
+        <div key={user.id} className="w-full flex-col">
+            <h2 className="mb-2 text-center text-2xl font-bold">
+                Profile page for {user.name}
+            </h2>
+            <h3 className="text-center text-lg font-semibold">
+                Preferred communication methods
+                <div className="flex justify-center gap-2">
+                    {user.communicationPreferences?.methods.map((method) => (
+                        <div key={method}>
+                            {communicationMethodToIcon[method]}
+                        </div>
+                    ))}
                 </div>
-                <h3 className="mb-2 text-center text-lg font-semibold">
-                    Technology survey results
-                </h3>
+            </h3>
+            {(user.communicationPreferences?.methods.length ?? 0) === 0 && (
+                <p className="text-center">Do not contact</p>
+            )}
+            <h3 className="mb-2 mt-4 text-center text-lg font-semibold">
+                Aggregated data by role
+            </h3>
+            <ProfileRadarChart
+                roleData={radarGraphData}
+                surveyNames={Array.from(surveyNames)}
+            />
+            <h3 className="mb-2 text-center text-lg font-semibold">
+                Technology survey results
+            </h3>
+            <div className="grid place-content-center">
                 <DataTable
                     columns={columns}
                     data={user.questionResults.filter(
