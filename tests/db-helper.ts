@@ -43,7 +43,7 @@ export class DbHelper {
             cwd: this.cwd,
             encoding: "utf-8",
         });
-        const client = new PrismaDbClient({
+        return new PrismaDbClient({
             datasources: {
                 db: {
                     url: this.container!.getConnectionUri(),
@@ -56,7 +56,6 @@ export class DbHelper {
                 },
             ],
         });
-        return client;
     }
 
     async createSurvey(surveyName: string): Promise<string> {
@@ -139,7 +138,7 @@ export class DbHelper {
         const role = await this.getClient().role.create({
             data: {
                 role: roleName,
-                default: roleName === "General" ? true : false,
+                default: roleName === "General",
             },
         });
         return role.id;
@@ -172,54 +171,5 @@ export class DbHelper {
         await this.getClient().question.deleteMany();
         await this.getClient().survey.deleteMany();
         await this.getClient().role.deleteMany();
-        await this.getClient().user.deleteMany();
-    }
-
-    async getSurveys() {
-        return this.getClient().survey.findMany();
-    }
-
-    async getRoles() {
-        return this.getClient().role.findMany();
-    }
-
-    async getQuestions() {
-        return this.getClient().question.findMany();
-    }
-
-    async getAnswerOptions() {
-        return this.getClient().answerOption.findMany();
-    }
-
-    async getUsers() {
-        return this.getClient().user.findMany();
-    }
-
-    async getQuestionResult() {
-        return this.getClient().questionResult.findMany();
-    }
-
-    async getQuestionsCount() {
-        return this.getClient().question.count();
-    }
-
-    async getNumberOfQuestionsForSurvey(surveyId: string) {
-        return this.getClient().question.count({
-            where: {
-                surveyId: surveyId,
-            },
-        });
-    }
-
-    async getRolesAssignedToQuestion(questionId: string) {
-        const question = await this.getClient().question.findUnique({
-            where: {
-                id: questionId,
-            },
-            include: {
-                roles: true,
-            },
-        });
-        return question?.roles ?? [];
     }
 }
