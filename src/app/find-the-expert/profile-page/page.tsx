@@ -11,15 +11,51 @@ import ProfileRadarChart, {
 } from "~/components/profile-radar-chart";
 import type { ProfilePageUserData } from "~/server/db/prisma-client/user";
 
-export const metadata: Metadata = {
-    title: "Find the expert",
+const staticTitle = "Find the expert - Tech Survey";
+
+const buildStaticMetadata = (): Metadata => {
+    return {
+        title: staticTitle,
+    };
 };
+
+const buildTitle = (userName: string | null): string => {
+    if (userName === null) {
+        return staticTitle;
+    }
+
+    return `${userName} - ${staticTitle}`;
+};
+
+export async function generateMetadata({
+    searchParams,
+}: {
+    searchParams: Promise<{ userId?: string }>;
+}): Promise<Metadata> {
+    const userId = (await searchParams).userId;
+    if (!userId) {
+        return buildStaticMetadata();
+    }
+
+    const user = await prismaClient.users.getUserById(userId);
+    if (!user) {
+        return buildStaticMetadata();
+    }
+
+    return {
+        title: buildTitle(user.name),
+        openGraph: {
+            title: buildTitle(user.name),
+        },
+    };
+}
 
 const ContentSection = async ({ userId }: { userId?: string }) => {
     const users = await prismaClient.users.getUsers();
     const selectedUser = userId
         ? await prismaClient.users.getProfilePageUserById(userId)
         : null;
+    const currentSurveyId = await prismaClient.surveys.getLatestSurveyId();
 
     return (
         <>
@@ -28,7 +64,10 @@ const ContentSection = async ({ userId }: { userId?: string }) => {
             </Suspense>
             <Suspense fallback={<ButtonSkeleton />}>
                 {selectedUser !== null ? (
-                    <ProfilePage user={selectedUser} />
+                    <ProfilePage
+                        currentSurveyId={currentSurveyId}
+                        user={selectedUser}
+                    />
                 ) : (
                     <h3 className="text-center text-lg font-semibold">
                         Type a name to start searching
@@ -59,7 +98,13 @@ const buildRoleData = (
     return result;
 };
 
-const ProfilePage = async ({ user }: { user?: ProfilePageUserData }) => {
+const ProfilePage = async ({
+    currentSurveyId,
+    user,
+}: {
+    currentSurveyId: string | null;
+    user?: ProfilePageUserData;
+}) => {
     if (!user) {
         return (
             <h3 className="text-center text-lg font-semibold">No user found</h3>
@@ -133,7 +178,12 @@ const ProfilePage = async ({ user }: { user?: ProfilePageUserData }) => {
                 <h3 className="mb-2 text-center text-lg font-semibold">
                     Technology survey results
                 </h3>
-                <DataTable columns={columns} data={user.questionResults} />
+                <DataTable
+                    columns={columns}
+                    data={user.questionResults.filter(
+                        (qr) => qr.question.survey.id === currentSurveyId,
+                    )}
+                />
             </div>
         </div>
     );

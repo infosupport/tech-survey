@@ -278,7 +278,7 @@ const profilePageUserSelect = {
     id: true,
     questionResults: {
         orderBy: [
-            { question: { survey: { id: "desc" } } },
+            { question: { survey: { surveyDate: "desc" } } },
             { answer: { option: "asc" } },
         ],
         select: {
