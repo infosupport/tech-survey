@@ -6,10 +6,33 @@ import {
 } from "~/server/api/trpc";
 import { checkUserAuthorization } from "~/server/api/routers/shared";
 
+const newSurveyObject = z.object({
+    surveyDate: z.string().transform((val) => new Date(val)),
+    surveyName: z.string(),
+    questions: z.array(
+        z.object({
+            questionText: z.string(),
+            roles: z.array(
+                z.object({
+                    id: z.string(),
+                    role: z.string(),
+                    default: z.boolean(),
+                }),
+            ),
+        }),
+    ),
+});
+
 export const surveysRouter = createTRPCRouter({
     getLatestSurveyId: publicProcedure.query(async ({ ctx }) => {
         return await ctx.prismaClient.surveys.getLatestSurveyId();
     }),
+
+    uploadNewSurvey: protectedProcedure
+        .input(newSurveyObject)
+        .mutation(async ({ ctx, input }) => {
+            return await ctx.prismaClient.surveys.uploadNewSurvey(input);
+        }),
 
     getUserAnswersWithRoles: protectedProcedure
         .input(z.object({ userId: z.string() }))
