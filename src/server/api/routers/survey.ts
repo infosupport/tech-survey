@@ -5,23 +5,7 @@ import {
     publicProcedure,
 } from "~/server/api/trpc";
 import { checkUserAuthorization } from "~/server/api/routers/shared";
-
-const newSurveyObject = z.object({
-    surveyDate: z.string().transform((val) => new Date(val)),
-    surveyName: z.string(),
-    questions: z.array(
-        z.object({
-            questionText: z.string(),
-            roles: z.array(
-                z.object({
-                    id: z.string(),
-                    role: z.string(),
-                    default: z.boolean(),
-                }),
-            ),
-        }),
-    ),
-});
+import { newSurveyObject } from "~/app/survey/upload/page";
 
 export const surveysRouter = createTRPCRouter({
     getLatestSurveyId: publicProcedure.query(async ({ ctx }) => {

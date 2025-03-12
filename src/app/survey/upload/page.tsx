@@ -9,7 +9,7 @@ import { Loader2 } from "lucide-react";
 import { useEffect } from "react";
 import { toast } from "~/components/ui/use-toast";
 
-const newSurveyObject = z.object({
+export const newSurveyObject = z.object({
     surveyDate: z.string().transform((val) => new Date(val)),
     surveyName: z.string(),
     questions: z.array(
