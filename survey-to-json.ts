@@ -31,8 +31,4 @@ async function questionsToJSON() {
     fs.writeFileSync("survey.json", json);
 }
 
-async function main() {
-    await questionsToJSON();
-}
-
-void main();
+void questionsToJSON();

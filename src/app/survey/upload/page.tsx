@@ -107,7 +107,6 @@ function SurveyUpload() {
             <input
                 id="survey_upload"
                 type="file"
-                multiple
                 hidden
                 accept=".json"
                 onChange={(e) => {
