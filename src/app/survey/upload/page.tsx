@@ -27,6 +27,7 @@ const newSurveyObject = z.object({
 });
 
 function SurveyUpload() {
+    // TODO: #158 - Hide this behind admin rights
     // A component to upload a json file and then using the content, call the uploadNewSurvey mutation
     const { mutate, isPending, isSuccess, isError, error } =
         api.surveys.uploadNewSurvey.useMutation();
