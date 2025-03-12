@@ -1,9 +1,12 @@
 import { expect, test, type Page } from "@playwright/test";
-import { type SurveyPage } from "~/tests/survey-page";
-import { DbHelper } from "~/tests/db-helper";
+import { SurveyPage } from "~/tests/survey-page";
 import { type ChildProcess } from "child_process";
 
 import { slugify } from "~/utils/slugify";
+import treeKill from "tree-kill";
+
+import { promisify } from "node:util";
+import { DbHelper } from "~/tests/helpers/db";
 import {
     ANSWER_OPTIONS_COUNT,
     COMMUNICATION_PREFERENCES,
@@ -11,12 +14,10 @@ import {
     QUESTIONS_WITH_MULTIPLE_ROLES,
     QUESTIONS_WITH_SINGLE_ROLE,
     SINGLE_ROLE,
-    TestSetup,
-    USER_NAME,
-} from "~/tests/test-setup";
-import treeKill from "tree-kill";
-
-import { promisify } from "node:util";
+    SurveyDbHelper,
+} from "~/tests/helpers/db/survey";
+import { TestSetup } from "~/tests/helpers/test-setup";
+import { USER_NAME } from "~/tests/helpers/db/user";
 
 const treeKillAsPromised = promisify(treeKill);
 const killAllProcesses = async (process: ChildProcess) => {
@@ -28,20 +29,19 @@ const killAllProcesses = async (process: ChildProcess) => {
 let nextProcess: ChildProcess;
 let surveyPage: SurveyPage;
 let dbHelper: DbHelper;
-let testSetup: TestSetup;
+let surveyDbHelper: SurveyDbHelper;
 let page: Page;
-test.beforeAll(async ({ browser }) => {
-    page = await browser.newPage();
-    dbHelper = await DbHelper.create();
-    testSetup = new TestSetup(dbHelper.getContainer());
-    const { port, process } = await testSetup.setupNextProcess();
-    nextProcess = process;
-    surveyPage = await testSetup.setupSurveyPage(page, port);
-    await testSetup.setupUserAndSession(page, dbHelper);
 
-    // Navigate to the landing page and check to see if we are logged in correctly
-    const headingElement = await surveyPage.navigateToLandingPage();
-    await expect(headingElement).toBeVisible();
+test.beforeAll(async ({ browser }) => {
+    const setup = await TestSetup.setup(browser, true);
+    page = setup.page;
+    dbHelper = setup.dbHelper;
+    nextProcess = setup.nextProcess;
+
+    surveyDbHelper = new SurveyDbHelper(dbHelper.getClient());
+    surveyPage = new SurveyPage(page, setup.port);
+
+    await surveyPage.navigateToLandingPage();
 });
 
 test.afterAll(async () => {
@@ -53,16 +53,11 @@ test.afterAll(async () => {
 test.describe("Desktop tests using a single role", () => {
     // Set up the landing page before each test
     test.beforeEach(async () => {
-        try {
-            // Fill the database with what we need for the tests with a single role.
-            await testSetup.createSingleRoleSurvey(dbHelper);
+        // Fill the database with what we need for the tests with a single role.
+        await surveyDbHelper.createSingleRoleSurvey();
 
-            // Navigate to the landing page and check to see if we are logged in correctly
-            const headingElement = await surveyPage.navigateToLandingPage();
-            await expect(headingElement).toBeVisible();
-        } catch (error) {
-            throw error;
-        }
+        // Navigate to the landing page and check to see if we are logged in correctly
+        await surveyPage.navigateToLandingPage();
     });
 
     test.afterEach(async () => {
@@ -183,8 +178,7 @@ test.describe("Desktop tests using a single role", () => {
         await surveyPage.checkDoNotContactIsPresentInFindTheExpertPage();
 
         // Change the communication preferences
-        const headingElement = await surveyPage.navigateToLandingPage();
-        await expect(headingElement).toBeVisible();
+        await surveyPage.navigateToLandingPage();
         await surveyPage.selectCommunicationPreferences(
             COMMUNICATION_PREFERENCES,
         );
@@ -200,13 +194,8 @@ test.describe("Desktop tests using a single role", () => {
 test.describe("Desktop tests using a multiple roles", () => {
     // Set up the landing page before each test
     test.beforeEach(async () => {
-        try {
-            await testSetup.createMultipleRoleSurvey(dbHelper);
-            const headingElement = await surveyPage.navigateToLandingPage();
-            await expect(headingElement).toBeVisible();
-        } catch (error) {
-            throw error;
-        }
+        await surveyDbHelper.createMultipleRoleSurvey();
+        await surveyPage.navigateToLandingPage();
     });
 
     // Clean up the landing page after each test
@@ -283,16 +272,11 @@ test.describe("Desktop tests using a multiple roles", () => {
 test.describe("Mobile tests using a single role", () => {
     // Set up the landing page before each test
     test.beforeEach(async () => {
-        try {
-            // Fill the database with what we need for the tests with a single role.
-            await testSetup.createSingleRoleSurvey(dbHelper);
+        // Fill the database with what we need for the tests with a single role.
+        await surveyDbHelper.createSingleRoleSurvey();
 
-            // Navigate to the landing page and check to see if we are logged in correctly
-            const headingElement = await surveyPage.navigateToLandingPage();
-            await expect(headingElement).toBeVisible();
-        } catch (error) {
-            throw error;
-        }
+        // Navigate to the landing page and check to see if we are logged in correctly
+        await surveyPage.navigateToLandingPage();
     });
 
     test.afterEach(async () => {
@@ -378,8 +362,7 @@ test.describe("Mobile tests using a single role", () => {
         await surveyPage.checkDoNotContactIsPresentInFindTheExpertPage();
 
         // Change the communication preferences
-        const headingElement = await surveyPage.navigateToLandingPage();
-        await expect(headingElement).toBeVisible();
+        await surveyPage.navigateToLandingPage();
         await surveyPage.selectCommunicationPreferences(
             COMMUNICATION_PREFERENCES,
         );
@@ -413,16 +396,11 @@ test.describe("Mobile tests using a single role", () => {
 test.describe("Mobile tests using multiple roles", () => {
     // Set up the landing page before each test
     test.beforeEach(async () => {
-        try {
-            // Fill the database with what we need for the tests with a single role.
-            await testSetup.createMultipleRoleSurvey(dbHelper);
+        // Fill the database with what we need for the tests with a single role.
+        await surveyDbHelper.createMultipleRoleSurvey();
 
-            // Navigate to the landing page and check to see if we are logged in correctly
-            const headingElement = await surveyPage.navigateToLandingPage();
-            await expect(headingElement).toBeVisible();
-        } catch (error) {
-            throw error;
-        }
+        // Navigate to the landing page and check to see if we are logged in correctly
+        await surveyPage.navigateToLandingPage();
     });
 
     test.afterEach(async () => {
