@@ -7,18 +7,30 @@ if (typeof window !== "undefined") {
     throw new Error("❌ PrismaClient should not be used in the browser.");
 }
 
-const createPrismaClient = () =>
-    new PrismaClient(
-        new PrismaDbClient({
-            log: ["error"],
-        }),
+const createPrismaClient = (prismaDbClient?: PrismaDbClient) => {
+    return new PrismaClient(
+        prismaDbClient ??
+            new PrismaDbClient({
+                log: ["error"],
+            }),
     );
-
-const globalForPrisma = globalThis as unknown as {
-    prisma: ReturnType<typeof createPrismaClient> | undefined;
 };
 
-export const prismaClient: PrismaClient =
-    globalForPrisma.prisma ?? createPrismaClient();
+const createPrismaDbClient = () => {
+    return new PrismaDbClient({
+        log: ["error"],
+    });
+};
 
-if (env.NODE_ENV !== "production") globalForPrisma.prisma = prismaClient;
+declare const globalThis: {
+    prismaDbClient: ReturnType<typeof createPrismaDbClient>;
+} & typeof global;
+
+export const prismaClient: PrismaClient = createPrismaClient(
+    globalThis.prismaDbClient,
+);
+
+if (env.NODE_ENV !== "production") {
+    globalThis.prismaDbClient =
+        globalThis.prismaDbClient ?? createPrismaDbClient();
+}
