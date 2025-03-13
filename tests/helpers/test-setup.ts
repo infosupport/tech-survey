@@ -43,8 +43,8 @@ export class TestSetup {
             nextProcess,
             cleanup: async () => {
                 await page.close();
-                await dbHelper.getContainer().stop();
                 await killAllProcesses(nextProcess);
+                await dbHelper.stop();
             },
         };
     }
@@ -57,7 +57,7 @@ export class TestSetup {
             (res, rej) => {
                 const nextProcess = spawn(
                     "npm",
-                    ["run", "dev", "--", "--port", "0"],
+                    ["run", "start", "--", "--port", "0"],
                     {
                         cwd: this.cwd,
                         shell: true,

@@ -14,9 +14,9 @@
         "dev": "next dev --turbo",
         "lint": "next lint",
         "lint:fix": "npm run lint -- --fix",
-        "start": "node ./node_modules/next/dist/bin/next start",
+        "start": "next start",
         "typecheck": "tsc --noEmit",
-        "test": "playwright test"
+        "test": "npm run build && playwright test"
     },
     "prisma": {
         "seed": "node prisma/seed.js"
