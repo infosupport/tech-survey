@@ -3,9 +3,6 @@ import { SurveyPage } from "~/tests/survey-page";
 import { type ChildProcess } from "child_process";
 
 import { slugify } from "~/utils/slugify";
-import treeKill from "tree-kill";
-
-import { promisify } from "node:util";
 import { DbHelper } from "~/tests/helpers/db";
 import {
     ANSWER_OPTIONS_COUNT,
@@ -19,24 +16,19 @@ import {
 import { TestSetup } from "~/tests/helpers/test-setup";
 import { USER_NAME } from "~/tests/helpers/db/user";
 
-const treeKillAsPromised = promisify(treeKill);
-const killAllProcesses = async (process: ChildProcess) => {
-    if (process?.pid) {
-        await treeKillAsPromised(process.pid);
-    }
-};
-
 let nextProcess: ChildProcess;
 let surveyPage: SurveyPage;
 let dbHelper: DbHelper;
 let surveyDbHelper: SurveyDbHelper;
 let page: Page;
+let cleanup: () => Promise<void>;
 
 test.beforeAll(async ({ browser }) => {
     const setup = await TestSetup.setup(browser, true);
     page = setup.page;
     dbHelper = setup.dbHelper;
     nextProcess = setup.nextProcess;
+    cleanup = setup.cleanup;
 
     surveyDbHelper = new SurveyDbHelper(dbHelper.getClient());
     surveyPage = new SurveyPage(page, setup.port);
@@ -45,9 +37,7 @@ test.beforeAll(async ({ browser }) => {
 });
 
 test.afterAll(async () => {
-    await dbHelper.getContainer().stop();
-    await page.close();
-    await killAllProcesses(nextProcess);
+    await cleanup();
 });
 
 test.describe("Desktop tests using a single role", () => {

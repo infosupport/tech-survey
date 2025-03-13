@@ -2,8 +2,17 @@ import { type ChildProcess, spawn } from "child_process";
 import type { Browser, Page } from "@playwright/test";
 import { type StartedPostgreSqlContainer } from "@testcontainers/postgresql";
 import { encode, type DefaultJWT } from "next-auth/jwt";
+import treeKill from "tree-kill";
+import { promisify } from "node:util";
 import { USER_EMAIL, USER_NAME, UserDbHelper } from "~/tests/helpers/db/user";
 import { DbHelper } from "~/tests/helpers/db";
+
+const treeKillAsPromised = promisify(treeKill);
+const killAllProcesses = async (process: ChildProcess) => {
+    if (process?.pid) {
+        await treeKillAsPromised(process.pid);
+    }
+};
 
 export class TestSetup {
     private readonly cwd = new URL("..", import.meta.url);
@@ -26,7 +35,18 @@ export class TestSetup {
             );
         }
 
-        return { page, dbHelper, testSetup, port, nextProcess };
+        return {
+            page,
+            dbHelper,
+            testSetup,
+            port,
+            nextProcess,
+            cleanup: async () => {
+                await page.close();
+                await dbHelper.getContainer().stop();
+                await killAllProcesses(nextProcess);
+            },
+        };
     }
 
     async #setupNextProcess(): Promise<{
