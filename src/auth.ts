@@ -65,4 +65,10 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
             allowDangerousEmailAccountLinking: true,
         }),
     ],
+    /**
+     * We trust our deployment provider to set the HOST header safely.
+     * If you don't trust your deployment provider to set the HOST header safely, you should set this to `false`.
+     * @see https://authjs.dev/reference/core#trusthost
+     */
+    trustHost: true,
 });
