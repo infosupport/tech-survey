@@ -12,7 +12,7 @@
         "db:deploy": "prisma migrate deploy",
         "db:seed": "node prisma/seed.js",
         "dev": "next dev --turbo",
-        "lint": "next lint",
+        "lint": "next lint --max-warnings 0",
         "lint:fix": "npm run lint -- --fix",
         "start": "next start",
         "typecheck": "tsc --noEmit",
