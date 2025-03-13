@@ -13,10 +13,11 @@ export class SurveyPage {
 
     async navigateToLandingPage() {
         await this.page.goto(`http://localhost:${this.port}`);
-        await this.page.waitForURL(`http://localhost:${this.port}`);
-        return this.page.getByRole("heading", {
-            name: "Select Roles",
-        });
+        await expect(
+            this.page.getByRole("heading", {
+                name: "Select Roles",
+            }),
+        ).toBeVisible();
     }
 
     async checkUrl(path: string) {
