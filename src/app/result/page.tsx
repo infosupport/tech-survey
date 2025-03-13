@@ -18,9 +18,9 @@ export const metadata: Metadata = {
     title: "Results",
 };
 
-const Results = async (context: {
+export default async function Results(context: {
     searchParams: Promise<{ role: string; unit: string }>;
-}) => {
+}) {
     return (
         <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
             <h1 className="text-center text-5xl font-extrabold tracking-tight">
@@ -41,9 +41,9 @@ const Results = async (context: {
             </Suspense>
         </div>
     );
-};
+}
 
-export async function AnonymousRoleSearch() {
+async function AnonymousRoleSearch() {
     const availableRoles = sortRoles(await prismaClient.roles.getAll());
     const availableUnits = await prismaClient.businessUnits.getAll();
 
@@ -113,5 +113,3 @@ const ShowResultsWrapper = async ({
 
     return <ShowResults data={transformedData} />;
 };
-
-export default Results;
