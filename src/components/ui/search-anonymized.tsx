@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { BusinessUnit } from "~/prisma";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import type { Role } from "~/models/types";
@@ -32,8 +32,6 @@ export default function SearchAnonymized({
     const searchParams = useSearchParams();
     const path = usePathname();
     const route = useRouter();
-    let previousRole = "";
-    let previousUnit = "";
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -43,37 +41,26 @@ export default function SearchAnonymized({
         },
     });
 
-    function onSubmit(values: z.infer<typeof formSchema>) {
-        const role2 =
-            values.role != undefined
-                ? values.role.length != 0 && values.role != "No role"
+    const { role, unit } = form.watch();
+
+    const onSubmit = useCallback(
+        (values: z.infer<typeof formSchema>) => {
+            const roleParam =
+                values.role && values.role !== "No role"
                     ? `role=${values.role}`
-                    : ""
-                : "";
-        const unit2 =
-            values.unit != undefined
-                ? values.unit.length != 0 && values.unit != "No unit"
-                    ? `&unit=${values.unit}`
-                    : ""
-                : "";
-        route.push(`${path}?${role2}${unit2}`);
-    }
+                    : "";
+            const unitParam =
+                values.unit && values.unit !== "No unit"
+                    ? `unit=${values.unit}`
+                    : "";
+            route.push(`${path}?${roleParam}${unitParam}`);
+        },
+        [route, path],
+    );
 
     useEffect(() => {
-        const intervalId = setInterval(() => {
-            const currentRole = form.getValues().role;
-            const currentUnit = form.getValues().unit;
-            if (previousRole != currentRole || previousUnit != currentUnit) {
-                previousRole = currentRole;
-                previousUnit = currentUnit;
-                onSubmit({ role: currentRole, unit: currentUnit });
-            }
-        }, 1000);
-
-        return () => {
-            clearInterval(intervalId);
-        };
-    }, []);
+        onSubmit({ role, unit });
+    }, [onSubmit, role, unit]);
 
     return (
         <div>

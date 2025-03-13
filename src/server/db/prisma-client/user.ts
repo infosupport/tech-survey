@@ -17,17 +17,17 @@ export class UserPrismaClient {
     }
 
     async getUserById(userId: string) {
-        return await this.#db.user.findUnique({ where: { id: userId } });
+        return this.#db.user.findUnique({ where: { id: userId } });
     }
 
     async getUsers(): Promise<GetUsersData[]> {
-        return await this.#db.user.findMany({
+        return this.#db.user.findMany({
             select: getUsersSelect,
         });
     }
 
     async getUserInfo(userId: string) {
-        return await this.#db.user.findUnique({
+        return this.#db.user.findUnique({
             where: {
                 id: userId,
             },
@@ -189,7 +189,7 @@ export class UserPrismaClient {
     }
 
     async getRolesForUser(userId: string) {
-        return await this.#db.user.findUnique({
+        return this.#db.user.findUnique({
             where: {
                 id: userId,
             },
@@ -264,7 +264,7 @@ export class UserPrismaClient {
     async getProfilePageUserById(
         userId: string,
     ): Promise<ProfilePageUserData | null> {
-        return await this.#db.user.findUnique({
+        return this.#db.user.findUnique({
             where: {
                 id: userId,
             },
@@ -276,6 +276,11 @@ export class UserPrismaClient {
 const profilePageUserSelect = {
     name: true,
     id: true,
+    roles: {
+        select: {
+            role: true,
+        },
+    },
     questionResults: {
         orderBy: [
             { question: { survey: { surveyDate: "desc" } } },

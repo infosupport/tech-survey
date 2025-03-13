@@ -11,6 +11,6 @@ export class RolePrismaClient {
     }
 
     async getAll() {
-        return await this.#db.role.findMany();
+        return this.#db.role.findMany();
     }
 }
