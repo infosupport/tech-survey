@@ -8,6 +8,7 @@ import "./src/env";
 const cspHeader = `
     default-src 'self';
     script-src 'self' 'unsafe-eval' 'unsafe-inline';
+    connect-src 'self' data:;
     style-src 'self' 'unsafe-inline';
     img-src 'self' blob: data:;
     font-src 'self';
@@ -19,6 +20,9 @@ const cspHeader = `
     upgrade-insecure-requests;`;
 
 const config: NextConfig = {
+    eslint: {
+        dirs: ["src", "tests"],
+    },
     async headers() {
         return [
             {
