@@ -5,11 +5,18 @@ import {
     publicProcedure,
 } from "~/server/api/trpc";
 import { checkUserAuthorization } from "~/server/api/routers/shared";
+import { newSurveyObject } from "~/app/survey/upload/page";
 
 export const surveysRouter = createTRPCRouter({
     getLatestSurveyId: publicProcedure.query(async ({ ctx }) => {
         return await ctx.prismaClient.surveys.getLatestSurveyId();
     }),
+
+    uploadNewSurvey: protectedProcedure
+        .input(newSurveyObject)
+        .mutation(async ({ ctx, input }) => {
+            return await ctx.prismaClient.surveys.uploadNewSurvey(input);
+        }),
 
     getUserAnswersWithRoles: protectedProcedure
         .input(z.object({ userId: z.string() }))
