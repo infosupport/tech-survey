@@ -2,7 +2,8 @@
  * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially useful
  * for Docker builds.
  */
-await import("./src/env.js");
+import type { NextConfig } from "next";
+import "./src/env";
 
 const cspHeader = `
     default-src 'self';
@@ -17,13 +18,8 @@ const cspHeader = `
     block-all-mixed-content;
     upgrade-insecure-requests;`;
 
-/** @type {import("next").NextConfig} */
-const config = {
-    typescript: {
-        ignoreBuildErrors: true,
-    },
+const config: NextConfig = {
     eslint: {
-        ignoreDuringBuilds: true,
         dirs: ["src", "tests"],
     },
     async headers() {

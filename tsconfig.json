@@ -50,5 +50,5 @@
         "**/*.js",
         ".next/types/**/*.ts"
     ],
-    "exclude": ["node_modules", "playwright-report"]
+    "exclude": ["node_modules", "playwright-report", ".next"]
 }
