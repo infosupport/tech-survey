@@ -94,7 +94,7 @@ export class SurveyPrismaClient {
     }
 
     async getUserAnswersWithRoles(userId: string) {
-        return await this.#db.questionResult.findMany({
+        return this.#db.questionResult.findMany({
             where: {
                 userId: userId,
             },

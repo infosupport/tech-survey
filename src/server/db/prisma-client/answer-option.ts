@@ -11,6 +11,6 @@ export class AnswerOptionPrismaClient {
     }
 
     async getAll() {
-        return await this.#db.answerOption.findMany();
+        return this.#db.answerOption.findMany();
     }
 }

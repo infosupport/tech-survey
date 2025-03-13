@@ -97,6 +97,7 @@ const ProfilePage = async ({
             <h3 className="text-center text-lg font-semibold">No user found</h3>
         );
     }
+    const userRoles = user.roles;
 
     const surveyNames = new Set<string>();
     const radarGraphData = user.questionResults.reduce(
@@ -105,6 +106,9 @@ const ProfilePage = async ({
             surveyNames.add(surveyName);
             questionResult.question.roles.forEach((role) => {
                 const roleName = role.role;
+                if (!userRoles.some((userRole) => userRole.role === roleName)) {
+                    return;
+                }
                 const answer = questionResult.answer.option;
                 const weight = optionWeights[answer] ?? 0;
 
