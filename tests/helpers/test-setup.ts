@@ -43,8 +43,8 @@ export class TestSetup {
             nextProcess,
             cleanup: async () => {
                 await page.close();
-                await dbHelper.stop();
                 await killAllProcesses(nextProcess);
+                await dbHelper.stop();
             },
         };
     }

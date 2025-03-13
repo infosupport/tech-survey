@@ -53,7 +53,6 @@ let
                       # Create the initial AVD that's needed by the emulator
                       #scripts.<name-placeholder>.exec = "";
                       scripts.logindb.exec = "psql \"tech-survey\" -U ${builtins.getEnv "DB_USER"}";
-                      scripts.run-tests.exec = "npm run test > >(${pkgs.gnugrep}/bin/grep -v \"terminating connection due to administrator command\")";
 
                       # https://devenv.sh/processes/
                       # These processes will all run whenever we run `devenv run`
