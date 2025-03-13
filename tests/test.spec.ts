@@ -1,9 +1,8 @@
 import { expect, test, type Page } from "@playwright/test";
 import { SurveyPage } from "~/tests/survey-page";
-import { type ChildProcess } from "child_process";
 
 import { slugify } from "~/utils/slugify";
-import { DbHelper } from "~/tests/helpers/db";
+import type { DbHelper } from "~/tests/helpers/db";
 import {
     ANSWER_OPTIONS_COUNT,
     COMMUNICATION_PREFERENCES,
@@ -16,7 +15,6 @@ import {
 import { TestSetup } from "~/tests/helpers/test-setup";
 import { USER_NAME } from "~/tests/helpers/db/user";
 
-let nextProcess: ChildProcess;
 let surveyPage: SurveyPage;
 let dbHelper: DbHelper;
 let surveyDbHelper: SurveyDbHelper;
@@ -27,7 +25,6 @@ test.beforeAll(async ({ browser }) => {
     const setup = await TestSetup.setup(browser, true);
     page = setup.page;
     dbHelper = setup.dbHelper;
-    nextProcess = setup.nextProcess;
     cleanup = setup.cleanup;
 
     surveyDbHelper = new SurveyDbHelper(dbHelper.getClient());

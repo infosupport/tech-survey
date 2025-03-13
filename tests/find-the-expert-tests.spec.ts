@@ -1,13 +1,11 @@
 import { expect, test, type Page } from "@playwright/test";
-import { type ChildProcess } from "child_process";
 
 import { TestSetup } from "~/tests/helpers/test-setup";
 import { FindTheExpertPage } from "~/tests/find-the-expert-page";
-import { DbHelper } from "~/tests/helpers/db";
+import type { DbHelper } from "~/tests/helpers/db";
 import { USER_EMAIL, USER_NAME, UserDbHelper } from "~/tests/helpers/db/user";
 import { SurveyDbHelper } from "~/tests/helpers/db/survey";
 
-let nextProcess: ChildProcess;
 let findTheExpertPage: FindTheExpertPage;
 let dbHelper: DbHelper;
 let userDbHelper: UserDbHelper;
@@ -19,7 +17,6 @@ test.beforeAll(async ({ browser }) => {
     const setup = await TestSetup.setup(browser, true);
     page = setup.page;
     dbHelper = setup.dbHelper;
-    nextProcess = setup.nextProcess;
     cleanup = setup.cleanup;
 
     userDbHelper = new UserDbHelper(dbHelper.getClient());

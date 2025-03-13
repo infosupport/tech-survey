@@ -19,13 +19,6 @@ const cspHeader = `
 
 /** @type {import("next").NextConfig} */
 const config = {
-    typescript: {
-        ignoreBuildErrors: true,
-    },
-    eslint: {
-        ignoreDuringBuilds: true,
-        dirs: ["src", "tests"],
-    },
     async headers() {
         return [
             {
