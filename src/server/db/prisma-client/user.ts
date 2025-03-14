@@ -56,7 +56,7 @@ export class UserPrismaClient {
         // retrieve all default roles
         const defaultRole = await this.#db.role.findFirst({
             where: {
-                default: true,
+                isDefault: true,
             },
         });
 
@@ -284,12 +284,12 @@ const profilePageUserSelect = {
     questionResults: {
         orderBy: [
             { question: { survey: { surveyDate: "desc" } } },
-            { answer: { option: "asc" } },
+            { answer: { optionValue: "asc" } },
         ],
         select: {
             answer: {
                 select: {
-                    option: true,
+                    optionValue: true,
                 },
             },
             question: {

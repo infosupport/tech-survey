@@ -145,7 +145,11 @@ export function SurveyQuestions({
                                                     textAlign: "center",
                                                 }}
                                             >
-                                                {idToTextMap[option.option]}
+                                                {
+                                                    idToTextMap[
+                                                        option.optionValue
+                                                    ]
+                                                }
                                             </span>
                                             <InfoCircledIcon className="ml-2 h-4 w-4" />
                                         </div>
@@ -156,7 +160,7 @@ export function SurveyQuestions({
                                                 <p className="text-sm font-normal">
                                                     {
                                                         idToMoreInfo[
-                                                            option.option
+                                                            option.optionValue
                                                         ]
                                                     }
                                                 </p>

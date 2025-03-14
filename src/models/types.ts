@@ -8,7 +8,7 @@ export interface Survey {
 export interface Role {
     id: string;
     role: string;
-    default: boolean;
+    isDefault: boolean;
 }
 
 export interface Question {
@@ -22,7 +22,7 @@ export interface Question {
 
 export interface AnswerOption {
     id: string;
-    option: number;
+    optionValue: number;
 }
 
 export interface QuestionResult {

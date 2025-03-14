@@ -106,7 +106,7 @@ export function MobileSurveyQuestionnaire({
                                                                 {
                                                                     idToTextMap[
                                                                         option
-                                                                            .option
+                                                                            .optionValue
                                                                     ]
                                                                 }
                                                             </span>
@@ -129,7 +129,7 @@ export function MobileSurveyQuestionnaire({
                                                                                 {
                                                                                     idToMoreInfo[
                                                                                         option
-                                                                                            .option
+                                                                                            .optionValue
                                                                                     ]
                                                                                 }
                                                                             </p>

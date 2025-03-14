@@ -114,7 +114,7 @@ async function main() {
             const newRole = await prisma.role.create({
                 data: {
                     role: role,
-                    default: role === "General",
+                    isDefault: role === "General",
                 },
             });
             roleObjects.push(newRole);
@@ -142,7 +142,7 @@ async function main() {
         for (const option of options) {
             await prisma.answerOption.create({
                 data: {
-                    option: option,
+                    optionValue: option,
                 },
             });
         }

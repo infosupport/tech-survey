@@ -35,7 +35,7 @@ const PDFDocument = ({
             (option) => option.id === answerId,
         );
         return answerOption
-            ? idToTextMap[answerOption.option] ?? ""
+            ? idToTextMap[answerOption.optionValue] ?? ""
             : "Option not found";
     }
 

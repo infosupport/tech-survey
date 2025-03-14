@@ -49,7 +49,7 @@ async function AnonymousRoleSearch() {
 
     const def: Role = {
         id: "",
-        default: true,
+        isDefault: true,
         role: "No role",
     };
     availableRoles.unshift(def);
@@ -93,7 +93,7 @@ const ShowResultsWrapper = async ({
 
                     const answerString =
                         answerOptions.find(({ id }) => id === answerId)
-                            ?.option ?? "";
+                            ?.optionValue ?? "";
                     transformedData[roleName][questionText][answerString] =
                         (transformedData[roleName][questionText][
                             answerString
@@ -105,7 +105,8 @@ const ShowResultsWrapper = async ({
             transformedData[unitId][questionText] ??= {};
 
             const answerString =
-                answerOptions.find(({ id }) => id === answerId)?.option ?? "";
+                answerOptions.find(({ id }) => id === answerId)?.optionValue ??
+                "";
             transformedData[unitId][questionText][answerString] =
                 (transformedData[unitId][questionText][answerString] ?? 0) + 1;
         }

@@ -82,7 +82,7 @@ let
                       services.postgres = {
                         enable = true;
                         listen_addresses = "127.0.0.1";
-                        initialScript = "CREATE DATABASE \"tech-survey\"; CREATE ROLE ${builtins.getEnv "DB_USER"} LOGIN PASSWORD '${builtins.getEnv "DB_PASSWORD"}' SUPERUSER; GRANT ALL PRIVILEGES ON DATABASE \"tech-survey\" TO ${builtins.getEnv "DB_USER"};";
+                        initialScript = "CREATE DATABASE tech_survey; CREATE ROLE ${builtins.getEnv "DB_USER"} LOGIN PASSWORD '${builtins.getEnv "DB_PASSWORD"}' SUPERUSER; GRANT ALL PRIVILEGES ON DATABASE tech_survey TO ${builtins.getEnv "DB_USER"};";
                       };
 
                       # See full reference at https://devenv.sh/reference/options/
