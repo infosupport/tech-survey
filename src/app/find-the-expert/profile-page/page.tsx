@@ -109,7 +109,7 @@ const ProfilePage = async ({
                 if (!userRoles.some((userRole) => userRole.role === roleName)) {
                     return;
                 }
-                const answer = questionResult.answer.option;
+                const answer = questionResult.answer.optionValue;
                 const weight = optionWeights[answer] ?? 0;
 
                 let roleData = acc.find((item) => item.role === roleName);
