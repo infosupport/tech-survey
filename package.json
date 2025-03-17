@@ -10,7 +10,7 @@
         "db:format": "prisma format",
         "db:generate": "prisma generate",
         "db:deploy": "prisma migrate deploy",
-        "db:seed": "node prisma/seed.js",
+        "db:seed": "tsx ./prisma/seed-database-dummy-data.ts",
         "dev": "next dev --turbo",
         "lint": "next lint --max-warnings 0",
         "lint:fix": "npm run lint -- --fix",
