@@ -46,13 +46,19 @@ npm run db:generate
 npm run db:push
 ```
 
-7. **(Optional)**: You can seed the database with some initial data by running the following command. For this you need a file called `survey.csv` in the folder `./import`. Ask a co-worker for this file.
+7. **(Optional)**: You can seed the database with some initial data by running the following command.
 
 ```bash
 npm run db:seed
 ```
 
-Note that if you run this command again, your database will be populated with duplicate data.
+Note that this will delete all survey data (but not accounts) from your database.
+If you have a csv file with survey data, you can import it by running the following command:
+
+```bash
+tsx .\prisma\seed.js
+```
+For this, put the csv-file in `./import/survey.csv`
 
 8. Now you should be ready to go! 🎉 You can check your local database by opening the studio of Prisma. If you followed step 7, you should see that the database has been populated with questions, roles, etc.
 
