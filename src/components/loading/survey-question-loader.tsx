@@ -16,7 +16,7 @@ export default function SurveyQuestionLoader() {
     const roles = Array.from({ length: 6 }, (_, index) => ({
         id: index.toString(),
         role: `Role ${index}`,
-        default: index === 0,
+        isDefault: index === 0,
     }));
 
     return (

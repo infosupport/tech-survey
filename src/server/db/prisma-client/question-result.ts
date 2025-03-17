@@ -110,7 +110,7 @@ export class QuestionResultPrismaClient {
                 answer: {
                     select: {
                         id: true,
-                        option: true,
+                        optionValue: true,
                     },
                 },
             },

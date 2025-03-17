@@ -79,7 +79,7 @@ export class SurveyDbHelper {
         // check if answer option already exists
         const answerOptionExists = await this.#db.answerOption.findFirst({
             where: {
-                option: option,
+                optionValue: option,
             },
         });
 
@@ -90,7 +90,7 @@ export class SurveyDbHelper {
         return (
             await this.#db.answerOption.create({
                 data: {
-                    option: option,
+                    optionValue: option,
                 },
             })
         ).id;
@@ -108,7 +108,7 @@ export class SurveyDbHelper {
         const role = await this.#db.role.create({
             data: {
                 role: roleName,
-                default: roleName === "General",
+                isDefault: roleName === "General",
             },
         });
         return role.id;
