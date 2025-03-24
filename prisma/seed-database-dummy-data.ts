@@ -193,7 +193,7 @@ async function main() {
     });
 
     const addedAnswerOptions = await prisma.answerOption.createManyAndReturn({
-        data: answerOptions.map((option) => ({ option })),
+        data: answerOptions.map((option) => ({ optionValue: option })),
         select: {
             id: true,
         },
@@ -219,7 +219,7 @@ async function main() {
 
     const addedQuestions: {
         id: string;
-        roles: { id: string; role: string; default: boolean }[];
+        roles: { id: string; role: string; isDefault: boolean }[];
     }[] = [];
     for (const question of questionsToAdd) {
         const addedQuestion = await prisma.question.create({
