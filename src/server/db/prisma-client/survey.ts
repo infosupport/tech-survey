@@ -1,4 +1,11 @@
-import type { PrismaClient, PrismaDbClient } from "~/prisma";
+import {
+    type Prisma,
+    type PrismaClient,
+    type PrismaDbClient,
+    type Question,
+} from "~/prisma";
+import { TRPCClientError } from "@trpc/client";
+import type { QuestionResult } from "@prisma/client";
 
 export class SurveyPrismaClient {
     #prismaClient: PrismaClient;
@@ -155,4 +162,94 @@ export class SurveyPrismaClient {
 
         return result;
     }
+
+    async uploadNewSurvey(surveyData: {
+        surveyDate: Date;
+        surveyName: string;
+        questions: {
+            questionText: string;
+            roles: {
+                id: string;
+                role: string;
+                default: boolean;
+            }[];
+        }[];
+    }) {
+        try {
+            const questions = surveyData.questions;
+            const currentSurveyId = await this.getLatestSurveyId();
+
+            let currentSurveyQuestions: QuestionWithResult[] = [];
+
+            if (currentSurveyId) {
+                // 1. Find existing questions for the current survey
+                currentSurveyQuestions = await this.#db.question.findMany({
+                    where: {
+                        surveyId: currentSurveyId,
+                    },
+                    include: {
+                        QuestionResult: true,
+                    },
+                });
+            }
+            // 2. Create a new survey
+            const questionsCreate = questions.map((question) => ({
+                questionText: question.questionText,
+                roles: {
+                    // Link the question to the existing roles
+                    connect: question.roles.map((role) => ({
+                        id: role.id,
+                    })),
+                },
+            }));
+            const newSurvey = await this.#db.survey.create({
+                data: {
+                    surveyDate: surveyData.surveyDate,
+                    surveyName: surveyData.surveyName,
+                    questions: {
+                        create: questionsCreate,
+                    },
+                },
+                include: {
+                    questions: true,
+                },
+            });
+            const insertedQuestions = newSurvey.questions;
+
+            // 3. Copy existing question results to the new survey
+            let newQuestionResults: Prisma.QuestionResultCreateManyInput[] = [];
+            for (const question of insertedQuestions) {
+                const existingQuestion = currentSurveyQuestions.find(
+                    (q) => q.questionText === question.questionText,
+                );
+                if (existingQuestion) {
+                    const questionResultsToAdd =
+                        existingQuestion.QuestionResult.map((qr) => ({
+                            userId: qr.userId,
+                            answerId: qr.answerId,
+                            questionId: question.id,
+                        }));
+                    newQuestionResults = [
+                        ...newQuestionResults,
+                        ...questionResultsToAdd,
+                    ];
+                }
+            }
+
+            // 4. Insert new question results
+            await this.#db.questionResult.createMany({
+                data: newQuestionResults,
+            });
+        } catch (error) {
+            if (error instanceof Error) {
+                throw new TRPCClientError(
+                    `Error uploading survey: ${error.message}`,
+                );
+            }
+        }
+    }
 }
+
+type QuestionWithResult = Question & {
+    QuestionResult: QuestionResult[];
+};
