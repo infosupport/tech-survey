@@ -7,7 +7,7 @@ import { auth } from "~/auth";
 import { prismaClient } from "~/server/db";
 
 export const metadata: Metadata = {
-    title: "Thank You",
+    title: "Admin Dashboard",
 };
 
 const AdministratorDashboard = async ({
