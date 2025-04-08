@@ -6,18 +6,14 @@ import { Inter } from "next/font/google";
 
 import { TRPCReactProvider } from "~/trpc/react";
 import { cn } from "~/lib/utils";
-import { Suspense } from "react";
 import { ModeToggle } from "~/components/mode-toggle";
-import { Login } from "~/components/login";
-import { type Session } from "next-auth";
-import { getServerAuthSession } from "~/server/auth";
-import ButtonSkeleton from "~/components/loading/button-loader";
-import { Button } from "~/components/ui/button";
-import { ArrowLeftDarkModeFriendly } from "~/components/svg";
 import Link from "next/link";
-import { headers } from "next/headers";
 import GithubLink from "~/components/github-link";
-import { db } from "~/server/db";
+import { HomeLink } from "~/components/home-link";
+import { SignOutButton } from "~/components/sign-out-button";
+import { auth } from "~/auth";
+import { SessionProvider } from "next-auth/react";
+import { Button } from "~/components/ui/button";
 
 const inter = Inter({
     subsets: ["latin"],
@@ -33,25 +29,15 @@ export const metadata = {
     icons: [{ rel: "icon", url: "/favicon.png" }],
 };
 
-function getNextUrl() {
-    const headersList = headers();
-    const nextUrl = headersList.get("next-url");
-    return nextUrl;
-}
-
 export default async function RootLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
-    const session = await getServerAuthSession();
-    const user = await db.user.findFirst({
-        where: {
-            id: session?.user.id,
-            isAdministrator: true,
-        },
-    });
-    const userIsAdministrator = user !== null;
+    const session = await auth();
+    const adminGroup = process.env["AUTH_MICROSOFT_ENTRA_ID_ADMIN_GROUP"];
+    const userIsAdmin =
+        !!adminGroup && session?.user.groups?.includes(adminGroup);
 
     return (
         <html lang="en" suppressHydrationWarning={true}>
@@ -62,65 +48,53 @@ export default async function RootLayout({
                 )}
                 suppressHydrationWarning={true}
             >
-                <ThemeProvider
-                    attribute="class"
-                    defaultTheme="system"
-                    enableSystem
-                    disableTransitionOnChange
-                >
-                    <TRPCReactProvider>
-                        <main className="min-h-screen items-center justify-center">
-                            <div className="mx-auto flex flex-wrap items-center justify-between p-4">
-                                {/* only show this back to home button if the getNextUrl is not '/' */}
-                                {getNextUrl() !== "/" && (
-                                    <Link href="/" passHref>
-                                        <Button variant="outline">
-                                            <ArrowLeftDarkModeFriendly />
-                                            Home
-                                        </Button>
-                                    </Link>
-                                )}
-
-                                <div className="flex-grow"></div>
-                                {session && (
-                                    <Suspense fallback={<ButtonSkeleton />}>
-                                        <LoginWrapper session={session} />
-                                    </Suspense>
-                                )}
-                                {userIsAdministrator && (
-                                    <Link href="/administrator-dashboard">
-                                        <Button variant="outline">
-                                            Administrator dashboard
-                                        </Button>
-                                    </Link>
-                                )}
-                                <ModeToggle />
-                                <GithubLink />
-                            </div>
-                            {children}
-                            <div className="text-center">
-                                <p className="text-md mb-8">
-                                    Your privacy is important to us. We invite
-                                    you to read our{" "}
-                                    <Link
-                                        className="underline"
-                                        href={"/privacy"}
-                                    >
-                                        Privacy Statement
-                                    </Link>{" "}
-                                    to understand how we protect and handle your
-                                    personal information.
-                                </p>
-                            </div>
-                        </main>
-                    </TRPCReactProvider>
-                    <Toaster />
-                </ThemeProvider>
+                <SessionProvider session={session}>
+                    <ThemeProvider
+                        attribute="class"
+                        defaultTheme="system"
+                        enableSystem
+                        disableTransitionOnChange
+                    >
+                        <TRPCReactProvider>
+                            <main className="min-h-screen items-center justify-center">
+                                <div className="mx-auto flex flex-wrap items-center justify-between p-4">
+                                    <HomeLink />
+                                    <div className="flex-grow"></div>
+                                    <SignOutButton />
+                                    <ModeToggle />
+                                    <GithubLink />
+                                    {userIsAdmin && (
+                                        <Link
+                                            href="/administrator-dashboard"
+                                            className="ml-2 mr-2"
+                                        >
+                                            <Button variant="outline">
+                                                Administrator dashboard
+                                            </Button>
+                                        </Link>
+                                    )}
+                                </div>
+                                {children}
+                                <div className="text-center">
+                                    <p className="text-md mb-8">
+                                        Your privacy is important to us. We
+                                        invite you to read our{" "}
+                                        <Link
+                                            className="underline"
+                                            href={"/privacy"}
+                                        >
+                                            Privacy Statement
+                                        </Link>{" "}
+                                        to understand how we protect and handle
+                                        your personal information.
+                                    </p>
+                                </div>
+                            </main>
+                        </TRPCReactProvider>
+                        <Toaster />
+                    </ThemeProvider>
+                </SessionProvider>
             </body>
         </html>
     );
 }
-
-const LoginWrapper: React.FC<{ session: Session }> = async ({ session }) => {
-    return <Login session={session} text="Go to survey" />;
-};

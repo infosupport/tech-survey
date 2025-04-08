@@ -1,7 +1,7 @@
 import { Loader2 } from "lucide-react";
+import { ArrowRightDarkModeFriendly } from "~/components/svg";
 
 import { Button, type ButtonProps } from "~/components/ui/button";
-import { ArrowRightDarkModeFriendly } from "../svg";
 
 interface SpinnerButtonProps extends ButtonProps {
     state: boolean;

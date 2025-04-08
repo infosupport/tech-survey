@@ -1,42 +1,29 @@
-import { db } from "~/server/db";
 import React from "react";
-import { getServerAuthSession } from "~/server/auth";
 
 import { type Metadata } from "next";
-import { redirect } from "next/navigation";
 import UserDataTable from "~/components/user-data-table";
 import SearchInput from "~/components/search-user-input";
+import { auth } from "~/auth";
+import { prismaClient } from "~/server/db";
 
 export const metadata: Metadata = {
     title: "Thank You",
 };
 
-const AdministratorDashboard = async (context: {
-    searchParams: { name: string };
+const AdministratorDashboard = async ({
+    searchParams,
+}: {
+    searchParams: Promise<{ name: string }>;
 }) => {
-    const session = await getServerAuthSession();
-    const user = await db.user.findFirst({
-        where: {
-            id: session?.user.id,
-            isAdministrator: true,
-        },
-    });
-    const userIsAdministrator = user !== null;
+    const session = await auth();
+    const userId = session?.user.id;
+    const name = (await searchParams).name;
 
-    if (!userIsAdministrator) {
-        redirect("/");
+    if (!userId) {
+        return null;
     }
 
-    const allUsers = await db.user.findMany({
-        select: {
-            id: true,
-            name: true,
-            isAdministrator: true,
-        },
-        orderBy: {
-            name: "asc",
-        },
-    });
+    const allUsers = await prismaClient.users.getUsers();
 
     return (
         <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
@@ -45,10 +32,7 @@ const AdministratorDashboard = async (context: {
             </h1>
             <SearchInput />
             <div className="w-full max-w-2xl">
-                <UserDataTableWrapper
-                    name={context.searchParams.name}
-                    allUsers={allUsers}
-                />
+                <UserDataTableWrapper name={name} allUsers={allUsers} />
             </div>
         </div>
     );
@@ -59,7 +43,7 @@ const UserDataTableWrapper = async ({
     allUsers,
 }: {
     name: string;
-    allUsers: { id: string; name: string | null; isAdministrator: boolean }[];
+    allUsers: { id: string; name: string | null }[];
 }) => {
     if (name) {
         allUsers = allUsers.filter((user) => {

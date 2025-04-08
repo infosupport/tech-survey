@@ -7,11 +7,9 @@ export const env = createEnv({
      * isn't built with invalid env vars.
      */
     server: {
-        AZURE_AD_CLIENT_ID: z.string(),
-        AZURE_AD_CLIENT_SECRET: z.string(),
-        AZURE_AD_TENANT_ID: z.string(),
-        NEXTAUTH_SECRET: z.string(),
-        NEXTAUTH_URL: z.string(),
+        AUTH_MICROSOFT_ENTRA_ID_ISSUER: z.string(),
+        AUTH_MICROSOFT_ENTRA_ID_ADMIN_GROUP: z.string(),
+
         FRESH_RUN: z.string(),
 
         NODE_ENV: z
@@ -33,19 +31,18 @@ export const env = createEnv({
      * middlewares) or client-side so we need to destruct manually.
      */
     runtimeEnv: {
-        AZURE_AD_CLIENT_ID: process.env.AZURE_AD_CLIENT_ID,
-        AZURE_AD_CLIENT_SECRET: process.env.AZURE_AD_CLIENT_SECRET,
-        AZURE_AD_TENANT_ID: process.env.AZURE_AD_TENANT_ID,
-        NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
-        NEXTAUTH_URL: process.env.NEXTAUTH_URL,
-        FRESH_RUN: process.env.FRESH_RUN,
+        AUTH_MICROSOFT_ENTRA_ID_ISSUER:
+            process.env["AUTH_MICROSOFT_ENTRA_ID_ISSUER"],
+        AUTH_MICROSOFT_ENTRA_ID_ADMIN_GROUP:
+            process.env["AUTH_MICROSOFT_ENTRA_ID_ADMIN_GROUP"],
+        FRESH_RUN: process.env["FRESH_RUN"],
         NODE_ENV: process.env.NODE_ENV,
     },
     /**
      * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
      * useful for Docker builds.
      */
-    skipValidation: !!process.env.SKIP_ENV_VALIDATION,
+    skipValidation: !!process.env["SKIP_ENV_VALIDATION"],
     /**
      * Makes it so that empty strings are treated as undefined. `SOME_VAR: z.string()` and
      * `SOME_VAR=''` will throw an error.

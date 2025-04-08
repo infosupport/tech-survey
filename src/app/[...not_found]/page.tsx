@@ -1,4 +1,4 @@
-export function renderNotFoundPage() {
+export default function renderNotFoundPage() {
     return (
         <>
             <style>{`
@@ -40,5 +40,3 @@ export function renderNotFoundPage() {
         </>
     );
 }
-
-export default renderNotFoundPage;

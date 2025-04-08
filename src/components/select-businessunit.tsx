@@ -1,19 +1,18 @@
-import type { BusinessUnit } from "@prisma/client";
-import type { Session } from "next-auth";
+import type { BusinessUnit } from "~/prisma";
 import { useState } from "react";
 import { api } from "~/trpc/react";
 
 export default function SelectBusinessUnit({
     businessUnits,
     userSelectedBusinessUnit,
-    session,
+    userId,
 }: {
-    session: Session;
+    userId: string;
     businessUnits: BusinessUnit[];
     userSelectedBusinessUnit: BusinessUnit | undefined;
 }) {
     const { mutate: setBusinessUnit } =
-        api.survey.setBusinessUnit.useMutation();
+        api.users.setBusinessUnitForUser.useMutation();
     const [selectedUnit, setSelectedUnit] = useState<string | undefined>(
         userSelectedBusinessUnit?.id,
     );
@@ -36,15 +35,13 @@ export default function SelectBusinessUnit({
                     <li
                         key={unit.id}
                         className={`rounded-lg border p-4`}
-                        onClick={() => handleChange(session.user.id, unit.id)}
+                        onClick={() => handleChange(userId, unit.id)}
                     >
                         <input
                             type="checkbox"
                             className={`"cursor-pointer"} mr-2 accent-custom-primary`}
                             checked={unit.id === selectedUnit}
-                            onChange={() =>
-                                handleChange(session.user.id, unit.id)
-                            }
+                            onChange={() => handleChange(userId, unit.id)}
                         />
 
                         <label

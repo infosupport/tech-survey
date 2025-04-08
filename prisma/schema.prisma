@@ -1,127 +1,151 @@
 generator client {
-  provider      = "prisma-client-js"
-  binaryTargets = ["native", "debian-openssl-1.1.x", "debian-openssl-3.0.x"]
+    provider      = "prisma-client-js"
+    binaryTargets = ["native", "debian-openssl-1.1.x", "debian-openssl-3.0.x"]
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
 }
 
 enum CommunicationMethod {
-  SLACK
-  EMAIL
-  WHATSAPP
-  SIGNAL
-  PHONE
-  TEAMS
+    SLACK
+    EMAIL
+    WHATSAPP
+    SIGNAL
+    PHONE
+    TEAMS
 }
 
 model BusinessUnit {
-  id    String @id @default(cuid())
-  unit  String @unique
-  users User[]
+    id    String @id @default(cuid())
+    unit  String @unique
+    users User[] @relation("business_unit_user")
+
+    @@map("business_units")
 }
 
 model Survey {
-  id         String     @id @default(cuid())
-  surveyName String     @unique
-  questions  Question[]
+    id         String     @id @default(cuid())
+    surveyName String     @unique @map("survey_name")
+    questions  Question[]
+    surveyDate DateTime   @map("survey_date") @db.Date
+
+    @@map("surveys")
 }
 
 model Role {
-  id        String     @id @default(cuid())
-  role      String
-  questions Question[] @relation("QuestionToRole")
-  users     User[]     @relation("UserRole")
-  default   Boolean    @default(false)
+    id        String     @id @default(cuid())
+    role      String
+    questions Question[] @relation("question_to_role")
+    users     User[]     @relation("user_role")
+    isDefault Boolean    @default(false) @map("is_default")
+
+    @@map("roles")
 }
 
 model Question {
-  id             String           @id @default(cuid())
-  surveyId       String
-  questionText   String
-  survey         Survey           @relation(fields: [surveyId], references: [id], onDelete: Cascade)
-  QuestionResult QuestionResult[]
-  roles          Role[]           @relation("QuestionToRole")
+    id              String           @id @default(cuid())
+    surveyId        String           @map("survey_id")
+    questionText    String           @map("question_text")
+    survey          Survey           @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+    questionResults QuestionResult[] @relation("question_result_question")
+    roles           Role[]           @relation("question_to_role")
+
+    @@map("questions")
 }
 
 model AnswerOption {
-  id             String           @id @default(cuid())
-  option         Int
-  QuestionResult QuestionResult[]
+    id              String           @id @default(cuid())
+    optionValue     Int              @map("option_value")
+    questionResults QuestionResult[] @relation("question_result_answer_option")
+
+    @@map("answer_options")
 }
 
 model QuestionResult {
-  id         String       @id @default(cuid())
-  userId     String
-  questionId String
-  answerId   String
-  answer     AnswerOption @relation(fields: [answerId], references: [id], onDelete: Cascade)
-  question   Question     @relation(fields: [questionId], references: [id], onDelete: Cascade)
-  user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+    id         String @id @default(cuid())
+    userId     String @map("user_id")
+    questionId String @map("question_id")
+    answerId   String @map("answer_id")
+
+    answer   AnswerOption @relation(fields: [answerId], references: [id], onDelete: Cascade, name: "question_result_answer_option")
+    question Question     @relation(fields: [questionId], references: [id], onDelete: Cascade, name: "question_result_question")
+    user     User         @relation(fields: [userId], references: [id], onDelete: Cascade, name: "question_result_user")
+
+    @@unique([userId, questionId])
+    @@map("question_results")
 }
 
 model CommunicationPreference {
-  id      String                @id @default(cuid())
-  userId  String                @unique
-  methods CommunicationMethod[] @default([])
-  user    User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
+    id      String                @id @default(cuid())
+    userId  String                @unique @map("user_id")
+    methods CommunicationMethod[] @default([])
+    user    User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-model User {
-  id                       String                   @id @default(cuid())
-  name                     String?
-  email                    String?                  @unique
-  emailVerified            DateTime?
-  image                    String?
-  roles                    Role[]                   @relation("UserRole")
-  accounts                 Account[]
-  questionResults          QuestionResult[]
-  communicationPreferences CommunicationPreference?
-  sessions                 Session[]
-  businessUnitId           String?
-  businessUnit             BusinessUnit?            @relation(fields: [businessUnitId], references: [id])
-  isAdministrator          Boolean                  @default(false)  
+    @@map("communication_preferences")
 }
 
 model Account {
-  id                String  @id @default(cuid())
-  userId            String
-  type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String?
-  access_token      String?
-  expires_at        Int?
-  ext_expires_in    Int?
-  token_type        String?
-  scope             String?
-  id_token          String?
-  session_state     String?
-  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+    id                String  @id @default(cuid())
+    userId            String  @map("user_id")
+    type              String
+    provider          String
+    providerAccountId String  @map("provider_account_id")
+    refresh_token     String? @db.Text
+    access_token      String? @db.Text
+    expires_at        Int?
+    ext_expires_in    Int?
+    token_type        String?
+    scope             String?
+    id_token          String? @db.Text
+    session_state     String?
+    user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([provider, providerAccountId])
+    @@unique([provider, providerAccountId])
+    @@map("accounts")
 }
 
 model Session {
-  id           String   @id @default(cuid())
-  sessionToken String   @unique
-  userId       String
-  expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    id           String   @id @default(cuid())
+    sessionToken String   @unique @map("session_token")
+    userId       String   @map("user_id")
+    expires      DateTime
+    user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@map("sessions")
+}
+
+model User {
+    id                       String                   @id @default(cuid())
+    name                     String?
+    email                    String?                  @unique
+    emailVerified            DateTime?                @map("email_verified")
+    image                    String?
+    accounts                 Account[]
+    sessions                 Session[]
+    roles                    Role[]                   @relation("user_role")
+    questionResults          QuestionResult[]         @relation("question_result_user")
+    communicationPreferences CommunicationPreference?
+    businessUnitId           String?                  @map("business_unit_id")
+    businessUnit             BusinessUnit?            @relation(fields: [businessUnitId], references: [id], name: "business_unit_user")
+
+    @@map("users")
 }
 
 model VerificationToken {
-  identifier String
-  token      String   @unique
-  expires    DateTime
+    identifier String
+    token      String
+    expires    DateTime
 
-  @@unique([identifier, token])
+    @@unique([identifier, token])
+    @@map("verification_tokens")
 }
 
-model UsageMetrics {
-  id        String   @id @default(cuid())
-  action    String
-  createdAt DateTime @default(now())
+model UsageMetric {
+    id        String   @id @default(cuid())
+    action    String
+    createdAt DateTime @default(now()) @map("created_at")
+
+    @@map("usage_metrics")
 }

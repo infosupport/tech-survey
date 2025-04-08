@@ -2,17 +2,17 @@
 
 import React from "react";
 import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
-import { idToTextMap } from "~/utils/optionMapping";
+import { idToTextMap } from "~/utils/option-mapping";
 import { type AnswerOption, type PdfTransformedData } from "~/models/types";
 
 import dynamic from "next/dynamic";
 import { Button } from "~/components/ui/button";
 import Link from "next/link";
-import { ArrowLeftDarkModeFriendly, Download } from "./svg";
-import { type Session } from "next-auth";
+import type { Session } from "next-auth";
+import { ArrowLeftDarkModeFriendly, Download } from "~/components/svg";
 
 const PDFDownloadLink = dynamic(
-    () => import("@react-pdf/renderer").then((mod) => mod.PDFDownloadLink),
+    () => import("~/components/pdf-download-link").then((mod) => mod.default),
     {
         ssr: false,
         loading: () => <p>Loading...</p>,
@@ -35,7 +35,7 @@ const PDFDocument = ({
             (option) => option.id === answerId,
         );
         return answerOption
-            ? idToTextMap[answerOption.option] ?? ""
+            ? idToTextMap[answerOption.optionValue] ?? ""
             : "Option not found";
     }
 

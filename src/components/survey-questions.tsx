@@ -19,8 +19,7 @@ import {
     FormMessage,
 } from "~/components/ui/form";
 
-import { type Session } from "next-auth";
-import { idToMoreInfo, idToTextMap } from "~/utils/optionMapping";
+import { idToMoreInfo, idToTextMap } from "~/utils/option-mapping";
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 
 import {
@@ -33,23 +32,20 @@ import {
 } from "~/components/ui/table";
 import { InfoCircledIcon } from "@radix-ui/react-icons";
 import { type useForm } from "react-hook-form";
-import { findAnswerId } from "~/utils/survey-utils";
 import { useEffect, useRef } from "react";
 
 export function SurveyQuestions({
-    session,
-    filteredQuestions,
+    userId,
+    questions,
     answerOptions,
     form,
     saveAnswer,
-    currentAnswers,
 }: {
-    session: Session;
-    filteredQuestions: Question[];
+    userId: string;
+    questions: Question[];
     answerOptions: AnswerOption[];
     form: ReturnType<typeof useForm>;
     saveAnswer: (answer: SurveyResponse) => void;
-    currentAnswers: SurveyResponse[];
 }) {
     const tableRef = useRef<HTMLTableElement>(null);
     const currentRowIndex = useRef<number>(1);
@@ -58,7 +54,7 @@ export function SurveyQuestions({
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
             if (event.key === "ArrowDown") {
-                if (currentRowIndex.current < filteredQuestions.length) {
+                if (currentRowIndex.current < questions.length) {
                     currentRowIndex.current++;
                     focusCell();
                 }
@@ -90,7 +86,7 @@ export function SurveyQuestions({
     }, [
         currentRowIndex,
         currentCellIndex,
-        filteredQuestions.length,
+        questions.length,
         answerOptions.length,
     ]);
 
@@ -149,7 +145,11 @@ export function SurveyQuestions({
                                                     textAlign: "center",
                                                 }}
                                             >
-                                                {idToTextMap[option.option]}
+                                                {
+                                                    idToTextMap[
+                                                        option.optionValue
+                                                    ]
+                                                }
                                             </span>
                                             <InfoCircledIcon className="ml-2 h-4 w-4" />
                                         </div>
@@ -160,7 +160,7 @@ export function SurveyQuestions({
                                                 <p className="text-sm font-normal">
                                                     {
                                                         idToMoreInfo[
-                                                            option.option
+                                                            option.optionValue
                                                         ]
                                                     }
                                                 </p>
@@ -173,7 +173,7 @@ export function SurveyQuestions({
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {filteredQuestions?.map((question, questionIndex) => (
+                    {questions?.map((question, questionIndex) => (
                         <FormField
                             control={form.control}
                             name={question.id}
@@ -203,11 +203,7 @@ export function SurveyQuestions({
                                         >
                                             <label
                                                 className={`${
-                                                    field.value === option.id ||
-                                                    findAnswerId(
-                                                        currentAnswers,
-                                                        question.id,
-                                                    ) === option.id
+                                                    field.value === option.id
                                                         ? "rounded-lg border-2 border-custom-selected "
                                                         : ""
                                                 }flex h-[40px] cursor-pointer items-center justify-center`}
@@ -222,9 +218,7 @@ export function SurveyQuestions({
                                                                     value,
                                                                 );
                                                                 saveAnswer({
-                                                                    userId: session
-                                                                        .user
-                                                                        .id,
+                                                                    userId: userId,
                                                                     questionId:
                                                                         question.id,
                                                                     answerId:
@@ -254,12 +248,7 @@ export function SurveyQuestions({
                                                                     }
                                                                     checked={
                                                                         field.value ===
-                                                                            option.id ||
-                                                                        findAnswerId(
-                                                                            currentAnswers,
-                                                                            question.id,
-                                                                        ) ===
-                                                                            option.id
+                                                                        option.id
                                                                     }
                                                                 />
                                                             </FormControl>

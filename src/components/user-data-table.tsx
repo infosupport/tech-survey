@@ -1,5 +1,5 @@
 ﻿"use client";
-import { DataTable } from "~/components/data-table";
+import { DataTable } from "~/components/data-tables/data-table";
 import React, { useEffect, useState } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import type { Prisma } from "@prisma/client";
@@ -17,44 +17,8 @@ type UserData = Prisma.UserGetPayload<{
     select: {
         id: true;
         name: true;
-        isAdministrator: true;
     };
 }>;
-
-const AdministratorCheckboxCell = ({
-    row,
-    onSetIsAdministrator,
-}: {
-    row: { original: UserData };
-    onSetIsAdministrator: (userId: string, isAdministrator: boolean) => void;
-}) => {
-    const { mutate: setAdministrator } =
-        api.survey.setIsAdministrator.useMutation({
-            onError: (error) => {
-                toast({
-                    title: "Something went wrong!",
-                    description: error.message,
-                    variant: "destructive",
-                });
-            },
-        });
-    const [checked, setChecked] = useState(row.original.isAdministrator);
-
-    const handleChange = (id: string, isAdministrator: boolean) => {
-        setAdministrator({ userId: id, isAdministrator });
-        setChecked(isAdministrator);
-        onSetIsAdministrator(id, isAdministrator);
-    };
-
-    return (
-        <input
-            type="checkbox"
-            className={`"cursor-pointer"} mr-2 accent-custom-primary`}
-            checked={checked}
-            onChange={() => handleChange(row.original.id, !checked)}
-        />
-    );
-};
 
 const DeleteCell = ({
     row,
@@ -64,7 +28,7 @@ const DeleteCell = ({
     onDelete: (id: string) => void;
 }) => {
     const [open, setOpen] = useState(false);
-    const { mutate: deleteUser } = api.survey.deleteUser.useMutation({
+    const { mutate: deleteUser } = api.users.deleteUser.useMutation({
         onError: (error) => {
             toast({
                 title: "Something went wrong!",
@@ -136,14 +100,6 @@ function UserDataTable({ data }: { data: UserData[] }) {
         setUserData((prev) => prev.filter((user) => user.id !== id));
     };
 
-    const onSetIsAdministrator = (userId: string, isAdministrator: boolean) => {
-        setUserData((prev) =>
-            prev.map((user) =>
-                user.id === userId ? { ...user, isAdministrator } : user,
-            ),
-        );
-    };
-
     useEffect(() => {
         setUserData(data);
     }, [data]);
@@ -152,16 +108,6 @@ function UserDataTable({ data }: { data: UserData[] }) {
         {
             accessorKey: "name",
             header: "Name",
-        },
-        {
-            accessorKey: "isAdministrator",
-            header: "Is administrator",
-            cell: ({ row }) => (
-                <AdministratorCheckboxCell
-                    row={row}
-                    onSetIsAdministrator={onSetIsAdministrator}
-                />
-            ),
         },
         {
             accessorKey: "answer",

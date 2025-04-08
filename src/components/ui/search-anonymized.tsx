@@ -1,21 +1,21 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import type { BusinessUnit } from "@prisma/client";
+import type { BusinessUnit } from "~/prisma";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import type { Section } from "~/models/types";
-import { Form, FormControl, FormField, FormItem } from "./form";
-import { Label } from "./label";
+import type { Role } from "~/models/types";
+import { Form, FormControl, FormField, FormItem } from "~/components/ui/form";
+import { Label } from "~/components/ui/label";
 import {
     Select,
     SelectContent,
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from "./select";
+} from "~/components/ui/select";
 
 const formSchema = z.object({
     role: z.string(),
@@ -26,14 +26,12 @@ export default function SearchAnonymized({
     roles,
     businessUnits,
 }: {
-    roles: Section[];
+    roles: Role[];
     businessUnits: BusinessUnit[];
 }) {
     const searchParams = useSearchParams();
     const path = usePathname();
     const route = useRouter();
-    let previousRole = "";
-    let previousUnit = "";
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -43,37 +41,26 @@ export default function SearchAnonymized({
         },
     });
 
-    function onSubmit(values: z.infer<typeof formSchema>) {
-        const role2 =
-            values.role != undefined
-                ? values.role.length != 0 && values.role != "No role"
+    const { role, unit } = form.watch();
+
+    const onSubmit = useCallback(
+        (values: z.infer<typeof formSchema>) => {
+            const roleParam =
+                values.role && values.role !== "No role"
                     ? `role=${values.role}`
-                    : ""
-                : "";
-        const unit2 =
-            values.unit != undefined
-                ? values.unit.length != 0 && values.unit != "No unit"
-                    ? `&unit=${values.unit}`
-                    : ""
-                : "";
-        route.push(`${path}?${role2}${unit2}`);
-    }
+                    : "";
+            const unitParam =
+                values.unit && values.unit !== "No unit"
+                    ? `unit=${values.unit}`
+                    : "";
+            route.push(`${path}?${roleParam}${unitParam}`);
+        },
+        [route, path],
+    );
 
     useEffect(() => {
-        const intervalId = setInterval(() => {
-            const currentRole = form.getValues().role;
-            const currentUnit = form.getValues().unit;
-            if (previousRole != currentRole || previousUnit != currentUnit) {
-                previousRole = currentRole;
-                previousUnit = currentUnit;
-                onSubmit({ role: currentRole, unit: currentUnit });
-            }
-        }, 1000);
-
-        return () => {
-            clearInterval(intervalId);
-        };
-    }, []);
+        onSubmit({ role, unit });
+    }, [onSubmit, role, unit]);
 
     return (
         <div>
@@ -139,10 +126,10 @@ export default function SearchAnonymized({
                                                 {roles.map((r) => {
                                                     return (
                                                         <SelectItem
-                                                            value={r.label}
+                                                            value={r.role}
                                                             key={r.id}
                                                         >
-                                                            {r.label}
+                                                            {r.role}
                                                         </SelectItem>
                                                     );
                                                 })}

@@ -10,9 +10,9 @@
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
+import { auth } from "~/auth";
 
-import { getServerAuthSession } from "~/server/auth";
-import { db } from "~/server/db";
+import { prismaClient } from "~/server/db";
 
 /**
  * 1. CONTEXT
@@ -27,10 +27,10 @@ import { db } from "~/server/db";
  * @see https://trpc.io/docs/server/context
  */
 export const createTRPCContext = async (opts: { headers: Headers }) => {
-    const session = await getServerAuthSession();
+    const session = await auth();
 
     return {
-        db,
+        prismaClient,
         session,
         ...opts,
     };
@@ -104,13 +104,10 @@ export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
 
 export const adminProtectedProcedure = protectedProcedure.use(
     async ({ ctx, next }) => {
-        const user = await db.user.findFirst({
-            where: {
-                id: ctx.session?.user.id,
-                isAdministrator: true,
-            },
-        });
-        const userIsAdministrator = user !== null;
+        const adminGroup = process.env["AUTH_MICROSOFT_ENTRA_ID_ADMIN_GROUP"];
+        const userGroups = ctx.session.user.groups ?? [];
+        const userIsAdministrator =
+            !!adminGroup && userGroups.includes(adminGroup);
 
         if (!userIsAdministrator) {
             throw new TRPCError({ code: "UNAUTHORIZED" });

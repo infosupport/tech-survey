@@ -1,6 +1,7 @@
-import { surveyRouter } from "~/server/api/routers/survey";
+import { surveysRouter } from "~/server/api/routers/survey";
+import { usersRouter } from "~/server/api/routers/user";
 import { createTRPCRouter } from "~/server/api/trpc";
-import { usageMetricLogger } from "../log";
+import { usageMetricLogger } from "~/server/log";
 
 /**
  * This is the primary router for your server.
@@ -8,7 +9,8 @@ import { usageMetricLogger } from "../log";
  * All routers added in /api/routers should be manually added here.
  */
 export const appRouter = createTRPCRouter({
-    survey: surveyRouter,
+    users: usersRouter,
+    surveys: surveysRouter,
     usageMetricLogger: usageMetricLogger,
 });
 
