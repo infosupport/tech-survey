@@ -32,7 +32,7 @@ const SearchInput = () => {
         const params = new URLSearchParams();
         if (name) params.set("name", name);
 
-        router.push(`${path}?${params.toString()}`);
+        router.replace(`${path}?${params.toString()}`);
     }, 250);
 
     useEffect(() => {
@@ -42,7 +42,7 @@ const SearchInput = () => {
         const params = new URLSearchParams();
         if (data.name) params.set("name", data.name);
 
-        router.push(`${path}?${params.toString()}`);
+        router.replace(`${path}?${params.toString()}`);
     };
 
     return (

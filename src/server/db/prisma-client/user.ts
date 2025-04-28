@@ -211,7 +211,6 @@ export class UserPrismaClient {
                 throw new TRPCClientError("User not found");
             }
 
-            // delete the user
             await this.#db.user.delete({
                 where: {
                     id: userId,
