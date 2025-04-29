@@ -11,6 +11,6 @@ export class BusinessUnitPrismaClient {
     }
 
     async getAll() {
-        return await this.#db.businessUnit.findMany();
+        return this.#db.businessUnit.findMany();
     }
 }

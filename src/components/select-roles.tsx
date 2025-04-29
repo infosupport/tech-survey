@@ -76,27 +76,32 @@ function SelectRoles({
                     <li
                         key={role.id}
                         className={`rounded-lg border p-4 ${
-                            role.default
+                            role.isDefault
                                 ? ""
                                 : "cursor-pointer hover:bg-gray-400 hover:bg-opacity-25 dark:hover:bg-gray-800"
                         }`}
-                        onClick={() => handleRoleToggle(role.id, role.default)}
+                        onClick={() =>
+                            handleRoleToggle(role.id, role.isDefault)
+                        }
                     >
                         <input
                             type="checkbox"
-                            className={`mr-2 ${role.default ? "" : "cursor-pointer"} accent-custom-primary`}
+                            className={`mr-2 ${role.isDefault ? "" : "cursor-pointer"} accent-custom-primary`}
                             checked={
-                                role.default || selectedRoles.includes(role.id)
+                                role.isDefault ||
+                                selectedRoles.includes(role.id)
                             }
                             onChange={() =>
-                                handleRoleToggle(role.id, role.default)
+                                handleRoleToggle(role.id, role.isDefault)
                             }
-                            disabled={role.default}
+                            disabled={role.isDefault}
                         />
 
                         <label
-                            className={role.default ? "" : "cursor-pointer"}
-                            style={{ color: role.default ? "#999" : "inherit" }}
+                            className={role.isDefault ? "" : "cursor-pointer"}
+                            style={{
+                                color: role.isDefault ? "#999" : "inherit",
+                            }}
                         >
                             {role.role}
                         </label>

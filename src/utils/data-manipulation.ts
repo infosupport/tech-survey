@@ -53,7 +53,7 @@ const aggregateDataByRole = (
             const userId = entry.userId;
 
             const answerValue = parseInt(
-                entry.answer.option.toString() ?? "0",
+                entry.answer.optionValue.toString() ?? "0",
                 10,
             );
 
@@ -141,7 +141,7 @@ const pushUserData = (
     dataByRoleAndQuestion[roleName]![questionText]!.push({
         name: entry.user.name ?? "Unknown User",
         communicationPreferences: communicationMethod,
-        answer: entry.answer.option.toString() ?? "Unknown Answer",
+        answer: entry.answer.optionValue.toString() ?? "Unknown Answer",
         roles: entry.user.roles.map((role) => role.role) ?? [],
     });
 };
@@ -203,7 +203,7 @@ type GetAnswersByRoleQuestionResultWithRelations =
             answer: {
                 select: {
                     id: true;
-                    option: true;
+                    optionValue: true;
                 };
             };
         };

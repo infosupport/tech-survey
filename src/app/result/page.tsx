@@ -18,9 +18,9 @@ export const metadata: Metadata = {
     title: "Results",
 };
 
-const Results = async (context: {
+export default async function Results(context: {
     searchParams: Promise<{ role: string; unit: string }>;
-}) => {
+}) {
     return (
         <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
             <h1 className="text-center text-5xl font-extrabold tracking-tight">
@@ -41,15 +41,15 @@ const Results = async (context: {
             </Suspense>
         </div>
     );
-};
+}
 
-export async function AnonymousRoleSearch() {
+async function AnonymousRoleSearch() {
     const availableRoles = sortRoles(await prismaClient.roles.getAll());
     const availableUnits = await prismaClient.businessUnits.getAll();
 
     const def: Role = {
         id: "",
-        default: true,
+        isDefault: true,
         role: "No role",
     };
     availableRoles.unshift(def);
@@ -93,7 +93,7 @@ const ShowResultsWrapper = async ({
 
                     const answerString =
                         answerOptions.find(({ id }) => id === answerId)
-                            ?.option ?? "";
+                            ?.optionValue ?? "";
                     transformedData[roleName][questionText][answerString] =
                         (transformedData[roleName][questionText][
                             answerString
@@ -105,7 +105,8 @@ const ShowResultsWrapper = async ({
             transformedData[unitId][questionText] ??= {};
 
             const answerString =
-                answerOptions.find(({ id }) => id === answerId)?.option ?? "";
+                answerOptions.find(({ id }) => id === answerId)?.optionValue ??
+                "";
             transformedData[unitId][questionText][answerString] =
                 (transformedData[unitId][questionText][answerString] ?? 0) + 1;
         }
@@ -113,5 +114,3 @@ const ShowResultsWrapper = async ({
 
     return <ShowResults data={transformedData} />;
 };
-
-export default Results;

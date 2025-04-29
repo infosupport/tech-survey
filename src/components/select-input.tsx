@@ -46,13 +46,8 @@ function SelectUserSurveyPreferences({
         logUsageMetric({ logMessage: "find-the-expert-page-accessed" });
     };
 
-    const [communicationMethodIsLoading, setCommunicationMethodIsLoading] = [
-        false,
-        // TODO #181: This breaks the tests, it causes a reload of the whole page, meaning the role is deselected.
-        () => {
-            return;
-        },
-    ];
+    const [communicationMethodIsLoading, setCommunicationMethodIsLoading] =
+        useState(false);
     const [roleIsLoading, setRoleIsLoading] = useState(false);
 
     // Redirect to /survey/general after the default role mutation succeeds

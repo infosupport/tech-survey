@@ -58,7 +58,7 @@ export class QuestionResultPrismaClient {
             };
         }
 
-        return await this.#db.questionResult.findMany({
+        return this.#db.questionResult.findMany({
             where: whereConditions,
             include: {
                 question: {
@@ -87,7 +87,7 @@ export class QuestionResultPrismaClient {
             businessUnit,
         );
 
-        return await this.#db.questionResult.findMany({
+        return this.#db.questionResult.findMany({
             where,
             include: {
                 question: {
@@ -110,7 +110,7 @@ export class QuestionResultPrismaClient {
                 answer: {
                     select: {
                         id: true,
-                        option: true,
+                        optionValue: true,
                     },
                 },
             },
@@ -123,7 +123,7 @@ export class QuestionResultPrismaClient {
             return [];
         }
 
-        return await this.#db.questionResult.findMany({
+        return this.#db.questionResult.findMany({
             where: {
                 userId: userId,
                 question: {

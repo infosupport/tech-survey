@@ -17,17 +17,17 @@ export class UserPrismaClient {
     }
 
     async getUserById(userId: string) {
-        return await this.#db.user.findUnique({ where: { id: userId } });
+        return this.#db.user.findUnique({ where: { id: userId } });
     }
 
     async getUsers(): Promise<GetUsersData[]> {
-        return await this.#db.user.findMany({
+        return this.#db.user.findMany({
             select: getUsersSelect,
         });
     }
 
     async getUserInfo(userId: string) {
-        return await this.#db.user.findUnique({
+        return this.#db.user.findUnique({
             where: {
                 id: userId,
             },
@@ -56,7 +56,7 @@ export class UserPrismaClient {
         // retrieve all default roles
         const defaultRole = await this.#db.role.findFirst({
             where: {
-                default: true,
+                isDefault: true,
             },
         });
 
@@ -189,7 +189,7 @@ export class UserPrismaClient {
     }
 
     async getRolesForUser(userId: string) {
-        return await this.#db.user.findUnique({
+        return this.#db.user.findUnique({
             where: {
                 id: userId,
             },
@@ -197,6 +197,54 @@ export class UserPrismaClient {
                 roles: true,
             },
         });
+    }
+
+    async deleteUser(userId: string) {
+        try {
+            const existingUser = await this.#db.user.findUnique({
+                where: {
+                    id: userId,
+                },
+            });
+
+            if (!existingUser) {
+                throw new TRPCClientError("User not found");
+            }
+
+            await this.#db.user.delete({
+                where: {
+                    id: userId,
+                },
+            });
+
+            await this.#db.account.deleteMany({
+                where: {
+                    userId: userId,
+                },
+            });
+        } catch (error: unknown) {
+            if (error instanceof TRPCClientError) {
+                throw error;
+            } else if (
+                typeof error === "object" &&
+                error !== null &&
+                "message" in error &&
+                typeof error.message === "string"
+            ) {
+                if (error.message.includes("ETIMEDOUT")) {
+                    throw new TRPCClientError(
+                        "Timeout error occurred while accessing the database",
+                    );
+                } else if (error.message.includes("ER_DUP_ENTRY")) {
+                    throw new TRPCClientError("Duplicate entry error occurred");
+                } else if (error.message.includes("ER_NO_REFERENCED_ROW")) {
+                    throw new TRPCClientError(
+                        "Referenced row not found error occurred",
+                    );
+                }
+            }
+            throw new TRPCClientError("An unexpected error occurred");
+        }
     }
 
     async setRolesForUser(userId: string, roleIds: string[]) {
@@ -264,7 +312,7 @@ export class UserPrismaClient {
     async getProfilePageUserById(
         userId: string,
     ): Promise<ProfilePageUserData | null> {
-        return await this.#db.user.findUnique({
+        return this.#db.user.findUnique({
             where: {
                 id: userId,
             },
@@ -276,15 +324,20 @@ export class UserPrismaClient {
 const profilePageUserSelect = {
     name: true,
     id: true,
+    roles: {
+        select: {
+            role: true,
+        },
+    },
     questionResults: {
         orderBy: [
             { question: { survey: { surveyDate: "desc" } } },
-            { answer: { option: "asc" } },
+            { answer: { optionValue: "asc" } },
         ],
         select: {
             answer: {
                 select: {
-                    option: true,
+                    optionValue: true,
                 },
             },
             question: {

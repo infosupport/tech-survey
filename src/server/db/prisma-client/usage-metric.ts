@@ -11,7 +11,7 @@ export class UsageMetricPrismaClient {
     }
 
     async createUsageMetric(logMessage: string) {
-        await this.#db.usageMetrics.create({
+        await this.#db.usageMetric.create({
             data: {
                 action: logMessage,
             },

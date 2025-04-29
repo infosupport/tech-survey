@@ -101,3 +101,23 @@ export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
         },
     });
 });
+
+export const adminProtectedProcedure = protectedProcedure.use(
+    async ({ ctx, next }) => {
+        const adminGroup = process.env["AUTH_MICROSOFT_ENTRA_ID_ADMIN_GROUP"];
+        const userGroups = ctx.session.user.groups ?? [];
+        const userIsAdministrator =
+            !!adminGroup && userGroups.includes(adminGroup);
+
+        if (!userIsAdministrator) {
+            throw new TRPCError({ code: "UNAUTHORIZED" });
+        }
+
+        return next({
+            ctx: {
+                // infers the `session` as non-nullable
+                session: { ...ctx.session, user: ctx.session.user },
+            },
+        });
+    },
+);

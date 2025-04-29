@@ -49,7 +49,7 @@ export class SurveyPrismaClient {
                         },
                     },
                     include: {
-                        QuestionResult: {
+                        questionResults: {
                             where: {
                                 userId: userId,
                             },
@@ -101,7 +101,7 @@ export class SurveyPrismaClient {
     }
 
     async getUserAnswersWithRoles(userId: string) {
-        return await this.#db.questionResult.findMany({
+        return this.#db.questionResult.findMany({
             where: {
                 userId: userId,
             },
@@ -130,7 +130,7 @@ export class SurveyPrismaClient {
                         surveyId: surveyId,
                     },
                     include: {
-                        QuestionResult: {
+                        questionResults: {
                             where: {
                                 userId: userId,
                             },
@@ -151,7 +151,7 @@ export class SurveyPrismaClient {
         for (const role of userRolesWithQuestions) {
             const totalQuestions = role.questions.length;
             const answeredQuestions = role.questions.filter(
-                (question) => question.QuestionResult.length > 0,
+                (question) => question.questionResults.length > 0,
             ).length;
 
             result[role.id] = {
