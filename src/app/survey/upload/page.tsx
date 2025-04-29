@@ -14,7 +14,6 @@ function SurveyUpload() {
         api.surveys.uploadNewSurvey.useMutation();
     const uploadFile = async (file: File) => {
         const fileContent = await file.text();
-        console.log(JSON.parse(fileContent));
         // validate the file content
         const surveyData = newSurveyObject.parse(JSON.parse(fileContent));
 
