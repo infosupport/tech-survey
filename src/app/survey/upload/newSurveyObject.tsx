@@ -8,6 +8,7 @@ export const newSurveyObject = z.object({
             questionText: z.string(),
             roles: z.array(
                 z.object({
+                    id: z.string(),
                     role: z.string(),
                     isDefault: z.boolean(),
                 }),
