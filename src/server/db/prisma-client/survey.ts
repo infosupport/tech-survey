@@ -169,7 +169,6 @@ export class SurveyPrismaClient {
         questions: {
             questionText: string;
             roles: {
-                id: string;
                 role: string;
                 isDefault: boolean;
             }[];
@@ -177,6 +176,7 @@ export class SurveyPrismaClient {
     }) {
         try {
             const questions = surveyData.questions;
+            const allRoles = await this.#db.role.findMany();
             const currentSurveyId = await this.getLatestSurveyId();
 
             let currentSurveyQuestions: QuestionWithResult[] = [];
@@ -196,9 +196,15 @@ export class SurveyPrismaClient {
             const questionsCreate = questions.map((question) => ({
                 questionText: question.questionText,
                 roles: {
-                    // Link the question to the existing roles
-                    connect: question.roles.map((role) => ({
-                        id: role.id,
+                    // Link the question to the existing roles, otherwise create new roles
+                    connectOrCreate: question.roles.map((role) => ({
+                        where: {
+                            id: allRoles.find((r) => r.role === role.role)?.id,
+                        },
+                        create: {
+                            role: role.role,
+                            isDefault: role.isDefault,
+                        },
                     })),
                 },
             }));

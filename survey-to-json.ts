@@ -20,7 +20,12 @@ async function questionsToJSON() {
             questions: {
                 select: {
                     questionText: true,
-                    roles: true,
+                    roles: {
+                        select: {
+                            role: true,
+                            isDefault: true,
+                        },
+                    },
                 },
             },
         },
