@@ -28,7 +28,7 @@ const protectedRoutes = [
     "/result",
 ];
 
-const adminRoutes = ["/administrator-dashboard"];
+const adminRoutes = ["/administrator-dashboard", "/survey/upload"];
 
 type TokenWithGroups = {
     groups: string[];

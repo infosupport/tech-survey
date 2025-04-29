@@ -188,7 +188,7 @@ export class SurveyPrismaClient {
                         surveyId: currentSurveyId,
                     },
                     include: {
-                        QuestionResult: true,
+                        questionResults: true,
                     },
                 });
             }
@@ -224,7 +224,7 @@ export class SurveyPrismaClient {
                 );
                 if (existingQuestion) {
                     const questionResultsToAdd =
-                        existingQuestion.QuestionResult.map((qr) => ({
+                        existingQuestion.questionResults.map((qr) => ({
                             userId: qr.userId,
                             answerId: qr.answerId,
                             questionId: question.id,
@@ -251,5 +251,5 @@ export class SurveyPrismaClient {
 }
 
 type QuestionWithResult = Question & {
-    QuestionResult: QuestionResult[];
+    questionResults: QuestionResult[];
 };
