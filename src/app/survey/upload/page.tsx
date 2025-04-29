@@ -1,6 +1,5 @@
 "use client";
 import { api } from "~/trpc/react";
-import { z } from "zod";
 import { buttonVariants } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
 
@@ -8,31 +7,14 @@ import { UploadIcon } from "@radix-ui/react-icons";
 import { Loader2 } from "lucide-react";
 import { useEffect } from "react";
 import { toast } from "~/components/ui/use-toast";
-
-export const newSurveyObject = z.object({
-    surveyDate: z.string().transform((val) => new Date(val)),
-    surveyName: z.string(),
-    questions: z.array(
-        z.object({
-            questionText: z.string(),
-            roles: z.array(
-                z.object({
-                    id: z.string(),
-                    role: z.string(),
-                    default: z.boolean(),
-                }),
-            ),
-        }),
-    ),
-});
+import { newSurveyObject } from "~/app/survey/upload/newSurveyObject";
 
 function SurveyUpload() {
-    // TODO: #158 - Hide this behind admin rights
-    // A component to upload a json file and then using the content, call the uploadNewSurvey mutation
     const { mutate, isPending, isSuccess, isError, error } =
         api.surveys.uploadNewSurvey.useMutation();
     const uploadFile = async (file: File) => {
         const fileContent = await file.text();
+        console.log(JSON.parse(fileContent));
         // validate the file content
         const surveyData = newSurveyObject.parse(JSON.parse(fileContent));
 
