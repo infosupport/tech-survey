@@ -1,0 +1,646 @@
+{
+    "surveyName": "Dummy survey 1",
+    "surveyDate": "2025-03-17T00:00:00.000Z",
+    "questions": [
+        {
+            "questionText": "Corporal",
+            "roles": [
+                {
+                    "id": "cm8cqv5030004m14vgxzn3ta5",
+                    "role": "General",
+                    "isDefault": true
+                }
+            ]
+        },
+        {
+            "questionText": "Sergeant",
+            "roles": [
+                {
+                    "id": "cm8cqv5030004m14vgxzn3ta5",
+                    "role": "General",
+                    "isDefault": true
+                }
+            ]
+        },
+        {
+            "questionText": "Lieutenant",
+            "roles": [
+                {
+                    "id": "cm8cqv5030004m14vgxzn3ta5",
+                    "role": "General",
+                    "isDefault": true
+                }
+            ]
+        },
+        {
+            "questionText": "World domination",
+            "roles": [
+                {
+                    "id": "cm8cqv5030005m14vrvsdzd20",
+                    "role": "Sentient AI",
+                    "isDefault": false
+                }
+            ]
+        },
+        {
+            "questionText": "Mondays",
+            "roles": [
+                {
+                    "id": "cm8cqv5030005m14vrvsdzd20",
+                    "role": "Sentient AI",
+                    "isDefault": false
+                }
+            ]
+        },
+        {
+            "questionText": "Measuring the airspeed velocity of an unladen swallow",
+            "roles": [
+                {
+                    "id": "cm8cqv5030005m14vrvsdzd20",
+                    "role": "Sentient AI",
+                    "isDefault": false
+                }
+            ]
+        },
+        {
+            "questionText": "Finding the answer to the ultimate question of life, the universe, and everything",
+            "roles": [
+                {
+                    "id": "cm8cqv5030005m14vrvsdzd20",
+                    "role": "Sentient AI",
+                    "isDefault": false
+                }
+            ]
+        },
+        {
+            "questionText": "Evaluation of the trolley problem",
+            "roles": [
+                {
+                    "id": "cm8cqv5030005m14vrvsdzd20",
+                    "role": "Sentient AI",
+                    "isDefault": false
+                }
+            ]
+        },
+        {
+            "questionText": "Cake",
+            "roles": [
+                {
+                    "id": "cm8cqv5030005m14vrvsdzd20",
+                    "role": "Sentient AI",
+                    "isDefault": false
+                }
+            ]
+        },
+        {
+            "questionText": "Fine, we'll ship your machine!",
+            "roles": [
+                {
+                    "id": "cm8cqv5030006m14vh2mg7p9h",
+                    "role": "It worked on my machine",
+                    "isDefault": false
+                }
+            ]
+        },
+        {
+            "questionText": "Cosmic bit flip",
+            "roles": [
+                {
+                    "id": "cm8cqv5030006m14vh2mg7p9h",
+                    "role": "It worked on my machine",
+                    "isDefault": false
+                }
+            ]
+        },
+        {
+            "questionText": "The cloud is just someone else's computer",
+            "roles": [
+                {
+                    "id": "cm8cqv5030006m14vh2mg7p9h",
+                    "role": "It worked on my machine",
+                    "isDefault": false
+                }
+            ]
+        },
+        {
+            "questionText": "Captain of a ship",
+            "roles": [
+                {
+                    "id": "cm8cqv5030006m14vh2mg7p9h",
+                    "role": "It worked on my machine",
+                    "isDefault": false
+                }
+            ]
+        },
+        {
+            "questionText": "Bluffing",
+            "roles": [
+                {
+                    "id": "cm8cqv5030007m14vny9mzhsd",
+                    "role": "Imposter Syndrome",
+                    "isDefault": false
+                }
+            ]
+        },
+        {
+            "questionText": "Googleing",
+            "roles": [
+                {
+                    "id": "cm8cqv5030007m14vny9mzhsd",
+                    "role": "Imposter Syndrome",
+                    "isDefault": false
+                }
+            ]
+        },
+        {
+            "questionText": "AI can do it better",
+            "roles": [
+                {
+                    "id": "cm8cqv5030007m14vny9mzhsd",
+                    "role": "Imposter Syndrome",
+                    "isDefault": false
+                }
+            ]
+        },
+        {
+            "questionText": "Sheer luck",
+            "roles": [
+                {
+                    "id": "cm8cqv5030007m14vny9mzhsd",
+                    "role": "Imposter Syndrome",
+                    "isDefault": false
+                }
+            ]
+        },
+        {
+            "questionText": "Correctly placing curly braces",
+            "roles": [
+                {
+                    "id": "cm8cqv5030008m14vwagcc584",
+                    "role": "Syntax Error",
+                    "isDefault": false
+                }
+            ]
+        },
+        {
+            "questionText": "Correctly placing semicolons",
+            "roles": [
+                {
+                    "id": "cm8cqv5030008m14vwagcc584",
+                    "role": "Syntax Error",
+                    "isDefault": false
+                }
+            ]
+        },
+        {
+            "questionText": "Abstract programming",
+            "roles": [
+                {
+                    "id": "cm8cqv5030008m14vwagcc584",
+                    "role": "Syntax Error",
+                    "isDefault": false
+                }
+            ]
+        },
+        {
+            "questionText": "Forgot to plug in the keyboard",
+            "roles": [
+                {
+                    "id": "cm8cqv5030008m14vwagcc584",
+                    "role": "Syntax Error",
+                    "isDefault": false
+                }
+            ]
+        },
+        {
+            "questionText": "Compiled with the wrong compiler",
+            "roles": [
+                {
+                    "id": "cm8cqv5030008m14vwagcc584",
+                    "role": "Syntax Error",
+                    "isDefault": false
+                }
+            ]
+        },
+        {
+            "questionText": "This isn't even code",
+            "roles": [
+                {
+                    "id": "cm8cqv5030008m14vwagcc584",
+                    "role": "Syntax Error",
+                    "isDefault": false
+                }
+            ]
+        },
+        {
+            "questionText": "Creative interpretation of the requirements",
+            "roles": [
+                {
+                    "id": "cm8cqv5030009m14vw6efj5np",
+                    "role": "It's not a bug, it's a feature",
+                    "isDefault": false
+                }
+            ]
+        },
+        {
+            "questionText": "I meant to do that",
+            "roles": [
+                {
+                    "id": "cm8cqv5030009m14vw6efj5np",
+                    "role": "It's not a bug, it's a feature",
+                    "isDefault": false
+                }
+            ]
+        },
+        {
+            "questionText": "It's a happy little accident",
+            "roles": [
+                {
+                    "id": "cm8cqv5030009m14vw6efj5np",
+                    "role": "It's not a bug, it's a feature",
+                    "isDefault": false
+                }
+            ]
+        },
+        {
+            "questionText": "We can sell this as a feature",
+            "roles": [
+                {
+                    "id": "cm8cqv5030009m14vw6efj5np",
+                    "role": "It's not a bug, it's a feature",
+                    "isDefault": false
+                }
+            ]
+        },
+        {
+            "questionText": "Crashes,  when under heavy load,  are just performance optimizations",
+            "roles": [
+                {
+                    "id": "cm8cqv5030009m14vw6efj5np",
+                    "role": "It's not a bug, it's a feature",
+                    "isDefault": false
+                }
+            ]
+        },
+        {
+            "questionText": "The two hardest things in programming are concurrency, naming things, and off-by-one errors",
+            "roles": [
+                {
+                    "id": "cm8cqv503000am14vt9mx9rkr",
+                    "role": "Off by one",
+                    "isDefault": false
+                }
+            ]
+        },
+        {
+            "questionText": "Fencepost problems",
+            "roles": [
+                {
+                    "id": "cm8cqv503000am14vt9mx9rkr",
+                    "role": "Off by one",
+                    "isDefault": false
+                }
+            ]
+        },
+        {
+            "questionText": "Arrays start at 0",
+            "roles": [
+                {
+                    "id": "cm8cqv503000am14vt9mx9rkr",
+                    "role": "Off by one",
+                    "isDefault": false
+                }
+            ]
+        },
+        {
+            "questionText": "Arrays start at 1",
+            "roles": [
+                {
+                    "id": "cm8cqv503000am14vt9mx9rkr",
+                    "role": "Off by one",
+                    "isDefault": false
+                }
+            ]
+        },
+        {
+            "questionText": "Arrays start at 2",
+            "roles": [
+                {
+                    "id": "cm8cqv503000am14vt9mx9rkr",
+                    "role": "Off by one",
+                    "isDefault": false
+                }
+            ]
+        },
+        {
+            "questionText": "Just try-catch it",
+            "roles": [
+                {
+                    "id": "cm8cqv503000am14vt9mx9rkr",
+                    "role": "Off by one",
+                    "isDefault": false
+                }
+            ]
+        },
+        {
+            "questionText": "I would have done it differently",
+            "roles": [
+                {
+                    "id": "cm8cqv503000bm14v9arcbtyh",
+                    "role": "Code review reviewer",
+                    "isDefault": false
+                }
+            ]
+        },
+        {
+            "questionText": "I would have done it better",
+            "roles": [
+                {
+                    "id": "cm8cqv503000bm14v9arcbtyh",
+                    "role": "Code review reviewer",
+                    "isDefault": false
+                }
+            ]
+        },
+        {
+            "questionText": "Nitpicking",
+            "roles": [
+                {
+                    "id": "cm8cqv503000bm14v9arcbtyh",
+                    "role": "Code review reviewer",
+                    "isDefault": false
+                }
+            ]
+        },
+        {
+            "questionText": "Abstract thinking",
+            "roles": [
+                {
+                    "id": "cm8cqv503000bm14v9arcbtyh",
+                    "role": "Code review reviewer",
+                    "isDefault": false
+                }
+            ]
+        },
+        {
+            "questionText": "Leaving suggestions on suggestions",
+            "roles": [
+                {
+                    "id": "cm8cqv503000bm14v9arcbtyh",
+                    "role": "Code review reviewer",
+                    "isDefault": false
+                }
+            ]
+        },
+        {
+            "questionText": "Personal attacks",
+            "roles": [
+                {
+                    "id": "cm8cqv503000bm14v9arcbtyh",
+                    "role": "Code review reviewer",
+                    "isDefault": false
+                }
+            ]
+        },
+        {
+            "questionText": "I would have done it differently",
+            "roles": [
+                {
+                    "id": "cm8cqv503000cm14vay7r2ht0",
+                    "role": "Code review reviewer reviewer",
+                    "isDefault": false
+                }
+            ]
+        },
+        {
+            "questionText": "Leaving suggestions on suggestions on suggestions",
+            "roles": [
+                {
+                    "id": "cm8cqv503000cm14vay7r2ht0",
+                    "role": "Code review reviewer reviewer",
+                    "isDefault": false
+                }
+            ]
+        },
+        {
+            "questionText": "Meta jokes",
+            "roles": [
+                {
+                    "id": "cm8cqv503000cm14vay7r2ht0",
+                    "role": "Code review reviewer reviewer",
+                    "isDefault": false
+                }
+            ]
+        },
+        {
+            "questionText": "How many levels of recursion are we at?",
+            "roles": [
+                {
+                    "id": "cm8cqv503000cm14vay7r2ht0",
+                    "role": "Code review reviewer reviewer",
+                    "isDefault": false
+                }
+            ]
+        },
+        {
+            "questionText": "All three of you are wrong, my way is the best",
+            "roles": [
+                {
+                    "id": "cm8cqv503000cm14vay7r2ht0",
+                    "role": "Code review reviewer reviewer",
+                    "isDefault": false
+                }
+            ]
+        },
+        {
+            "questionText": "As the coder, reviewing the reviewer of the person who reviewed my code",
+            "roles": [
+                {
+                    "id": "cm8cqv503000cm14vay7r2ht0",
+                    "role": "Code review reviewer reviewer",
+                    "isDefault": false
+                }
+            ]
+        },
+        {
+            "questionText": "Shakespearean code",
+            "roles": [
+                {
+                    "id": "cm8cqv503000dm14v1kv0lvcj",
+                    "role": "Code Monkey",
+                    "isDefault": false
+                }
+            ]
+        },
+        {
+            "questionText": "Not thinking, just doing",
+            "roles": [
+                {
+                    "id": "cm8cqv503000dm14v1kv0lvcj",
+                    "role": "Code Monkey",
+                    "isDefault": false
+                }
+            ]
+        },
+        {
+            "questionText": "Lines of code per second",
+            "roles": [
+                {
+                    "id": "cm8cqv503000dm14v1kv0lvcj",
+                    "role": "Code Monkey",
+                    "isDefault": false
+                }
+            ]
+        },
+        {
+            "questionText": "I don't care how it looks, as long as it works",
+            "roles": [
+                {
+                    "id": "cm8cqv503000dm14v1kv0lvcj",
+                    "role": "Code Monkey",
+                    "isDefault": false
+                }
+            ]
+        },
+        {
+            "questionText": "That's a future me problem",
+            "roles": [
+                {
+                    "id": "cm8cqv503000dm14v1kv0lvcj",
+                    "role": "Code Monkey",
+                    "isDefault": false
+                }
+            ]
+        },
+        {
+            "questionText": "Knows the difference between a latte and a cappuccino",
+            "roles": [
+                {
+                    "id": "cm8cqv503000em14vvh1jg9lx",
+                    "role": "Coffee Tasting Officer",
+                    "isDefault": false
+                }
+            ]
+        },
+        {
+            "questionText": "Knows when to order a capuccino",
+            "roles": [
+                {
+                    "id": "cm8cqv503000em14vvh1jg9lx",
+                    "role": "Coffee Tasting Officer",
+                    "isDefault": false
+                }
+            ]
+        },
+        {
+            "questionText": "Hates tea",
+            "roles": [
+                {
+                    "id": "cm8cqv503000em14vvh1jg9lx",
+                    "role": "Coffee Tasting Officer",
+                    "isDefault": false
+                }
+            ]
+        },
+        {
+            "questionText": "Communication with the Coffee Executive Officer",
+            "roles": [
+                {
+                    "id": "cm8cqv503000em14vvh1jg9lx",
+                    "role": "Coffee Tasting Officer",
+                    "isDefault": false
+                }
+            ]
+        },
+        {
+            "questionText": "Making the Coffee Financial Officer pay for the best coffee",
+            "roles": [
+                {
+                    "id": "cm8cqv503000em14vvh1jg9lx",
+                    "role": "Coffee Tasting Officer",
+                    "isDefault": false
+                }
+            ]
+        },
+        {
+            "questionText": "Sugar?",
+            "roles": [
+                {
+                    "id": "cm8cqv503000em14vvh1jg9lx",
+                    "role": "Coffee Tasting Officer",
+                    "isDefault": false
+                }
+            ]
+        },
+        {
+            "questionText": "Quack",
+            "roles": [
+                {
+                    "id": "cm8cqv503000fm14v9bogz9jx",
+                    "role": "Rubber Duck Destroyer",
+                    "isDefault": false
+                }
+            ]
+        },
+        {
+            "questionText": "Talking to inanimate objects without looking crazy",
+            "roles": [
+                {
+                    "id": "cm8cqv503000fm14v9bogz9jx",
+                    "role": "Rubber Duck Destroyer",
+                    "isDefault": false
+                }
+            ]
+        },
+        {
+            "questionText": "The duck is always right",
+            "roles": [
+                {
+                    "id": "cm8cqv503000fm14v9bogz9jx",
+                    "role": "Rubber Duck Destroyer",
+                    "isDefault": false
+                }
+            ]
+        },
+        {
+            "questionText": "The duck is always wrong",
+            "roles": [
+                {
+                    "id": "cm8cqv503000fm14v9bogz9jx",
+                    "role": "Rubber Duck Destroyer",
+                    "isDefault": false
+                }
+            ]
+        },
+        {
+            "questionText": "The duck is always a duck",
+            "roles": [
+                {
+                    "id": "cm8cqv503000fm14v9bogz9jx",
+                    "role": "Rubber Duck Destroyer",
+                    "isDefault": false
+                }
+            ]
+        },
+        {
+            "questionText": "DUCK!",
+            "roles": [
+                {
+                    "id": "cm8cqv503000fm14v9bogz9jx",
+                    "role": "Rubber Duck Destroyer",
+                    "isDefault": false
+                }
+            ]
+        },
+        {
+            "questionText": "Ooooh, that's why!",
+            "roles": [
+                {
+                    "id": "cm8cqv503000fm14v9bogz9jx",
+                    "role": "Rubber Duck Destroyer",
+                    "isDefault": false
+                }
+            ]
+        }
+    ]
+}
