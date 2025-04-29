@@ -14,7 +14,7 @@
         "dev": "next dev --turbo",
         "lint": "next lint --max-warnings 0",
         "lint:fix": "npm run lint -- --fix",
-        "start": "next start",
+        "start": "node ./node_modules/next/dist/bin/next start",
         "typecheck": "tsc --noEmit",
         "test": "npm run build && playwright test"
     },
