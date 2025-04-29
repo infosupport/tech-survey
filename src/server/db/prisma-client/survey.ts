@@ -171,7 +171,7 @@ export class SurveyPrismaClient {
             roles: {
                 id: string;
                 role: string;
-                default: boolean;
+                isDefault: boolean;
             }[];
         }[];
     }) {
