@@ -1,5 +1,9 @@
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import {
+    adminProtectedProcedure,
+    createTRPCRouter,
+    protectedProcedure,
+} from "~/server/api/trpc";
 import { CommunicationMethod } from "~/prisma";
 import { checkUserAuthorization } from "~/server/api/routers/shared";
 
@@ -7,6 +11,16 @@ export const usersRouter = createTRPCRouter({
     getUsers: protectedProcedure.query(async ({ ctx }) => {
         return await ctx.prismaClient.users.getUsers();
     }),
+    deleteUser: adminProtectedProcedure
+        .input(
+            z.object({
+                userId: z.string(),
+            }),
+        )
+        .mutation(async ({ ctx, input }) => {
+            await ctx.prismaClient.users.deleteUser(input.userId);
+        }),
+
     getUserInfo: protectedProcedure
         .input(z.object({ userId: z.string() }))
         .query(async ({ ctx, input }) => {

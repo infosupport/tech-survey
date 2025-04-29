@@ -13,6 +13,7 @@ import { HomeLink } from "~/components/home-link";
 import { SignOutButton } from "~/components/sign-out-button";
 import { auth } from "~/auth";
 import { SessionProvider } from "next-auth/react";
+import { Button } from "~/components/ui/button";
 
 const inter = Inter({
     subsets: ["latin"],
@@ -34,6 +35,9 @@ export default async function RootLayout({
     children: React.ReactNode;
 }) {
     const session = await auth();
+    const adminGroup = process.env["AUTH_MICROSOFT_ENTRA_ID_ADMIN_GROUP"];
+    const userIsAdmin =
+        !!adminGroup && session?.user.groups?.includes(adminGroup);
 
     return (
         <html lang="en" suppressHydrationWarning={true}>
@@ -59,6 +63,16 @@ export default async function RootLayout({
                                     <SignOutButton />
                                     <ModeToggle />
                                     <GithubLink />
+                                    {userIsAdmin && (
+                                        <Link
+                                            href="/administrator-dashboard"
+                                            className="ml-2 mr-2"
+                                        >
+                                            <Button variant="outline">
+                                                Administrator dashboard
+                                            </Button>
+                                        </Link>
+                                    )}
                                 </div>
                                 {children}
                                 <div className="text-center">

@@ -8,6 +8,7 @@ export const env = createEnv({
      */
     server: {
         AUTH_MICROSOFT_ENTRA_ID_ISSUER: z.string(),
+        AUTH_MICROSOFT_ENTRA_ID_ADMIN_GROUP: z.string(),
 
         FRESH_RUN: z.string(),
 
@@ -32,6 +33,8 @@ export const env = createEnv({
     runtimeEnv: {
         AUTH_MICROSOFT_ENTRA_ID_ISSUER:
             process.env["AUTH_MICROSOFT_ENTRA_ID_ISSUER"],
+        AUTH_MICROSOFT_ENTRA_ID_ADMIN_GROUP:
+            process.env["AUTH_MICROSOFT_ENTRA_ID_ADMIN_GROUP"],
         FRESH_RUN: process.env["FRESH_RUN"],
         NODE_ENV: process.env.NODE_ENV,
     },

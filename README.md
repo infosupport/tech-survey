@@ -32,6 +32,7 @@ openssl rand -base64 32
     1. AUTH_MICROSOFT_ENTRA_ID_SECRET: A secret credential created in an app registration.
     2. AUTH_MICROSOFT_ENTRA_ID_ID: The client ID of the app registration.
     3. AUTH_MICROSOFT_ENTRA_ID_ISSUER: The tenant ID of the Azure AD.
+    4. AUTH_MICROSOFT_ENTRA_ID_ADMIN_GROUP: The group ID of the Azure AD group that has admin rights in the app registration.
 
 7. Install NPM dependencies using the following command:
 
