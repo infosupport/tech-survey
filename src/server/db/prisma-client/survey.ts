@@ -169,7 +169,6 @@ export class SurveyPrismaClient {
         questions: {
             questionText: string;
             roles: {
-                id: string;
                 role: string;
                 isDefault: boolean;
             }[];
@@ -177,7 +176,30 @@ export class SurveyPrismaClient {
     }) {
         try {
             const questions = surveyData.questions;
+            const roles = Array.from(
+                new Set(
+                    questions.flatMap((question) =>
+                        question.roles.flatMap((role) => role.role),
+                    ),
+                ),
+            );
+            let allRoles = await this.#db.role.findMany();
             const currentSurveyId = await this.getLatestSurveyId();
+
+            // create all roles that don't exist yet
+            const rolesToCreate = roles.filter((role) => {
+                return !allRoles.some((r) => r.role === role);
+            });
+            if (rolesToCreate.length > 0) {
+                await this.#db.role.createMany({
+                    data: rolesToCreate.map((role) => ({
+                        role: role,
+                        isDefault: role === "General",
+                    })),
+                });
+            }
+
+            allRoles = await this.#db.role.findMany();
 
             let currentSurveyQuestions: QuestionWithResult[] = [];
 
@@ -196,9 +218,8 @@ export class SurveyPrismaClient {
             const questionsCreate = questions.map((question) => ({
                 questionText: question.questionText,
                 roles: {
-                    // Link the question to the existing roles
                     connect: question.roles.map((role) => ({
-                        id: role.id,
+                        id: allRoles.find((r) => r.role === role.role)?.id,
                     })),
                 },
             }));

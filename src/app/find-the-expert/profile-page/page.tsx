@@ -135,7 +135,7 @@ const ProfilePage = async ({
             header: "Name",
         },
         {
-            accessorKey: "answer.option",
+            accessorKey: "answer.optionValue",
             header: "Answer",
         },
     ];

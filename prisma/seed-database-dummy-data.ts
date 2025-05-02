@@ -36,7 +36,7 @@ const roles = [
     {
         role: "General",
         questions: ["Corporal", "Sergeant", "Lieutenant"],
-        default: true,
+        isDefault: true,
     },
     {
         role: "Sentient AI",
@@ -48,7 +48,7 @@ const roles = [
             "Evaluation of the trolley problem",
             "Cake",
         ],
-        default: false,
+        isDefault: false,
     },
     {
         role: "It worked on my machine",
@@ -58,7 +58,7 @@ const roles = [
             "The cloud is just someone else's computer",
             "Captain of a ship",
         ],
-        default: false,
+        isDefault: false,
     },
     {
         role: "Imposter Syndrome",
@@ -68,7 +68,7 @@ const roles = [
             "AI can do it better",
             "Sheer luck",
         ],
-        default: false,
+        isDefault: false,
     },
     {
         role: "Syntax Error",
@@ -80,7 +80,7 @@ const roles = [
             "Compiled with the wrong compiler",
             "This isn't even code",
         ],
-        default: false,
+        isDefault: false,
     },
     {
         role: "It's not a bug, it's a feature",
@@ -91,7 +91,7 @@ const roles = [
             "We can sell this as a feature",
             "Crashes,  when under heavy load,  are just performance optimizations",
         ],
-        default: false,
+        isDefault: false,
     },
     {
         role: "Off by one",
@@ -103,7 +103,7 @@ const roles = [
             "Arrays start at 2",
             "Just try-catch it",
         ],
-        default: false,
+        isDefault: false,
     },
     {
         role: "Code review reviewer",
@@ -115,7 +115,7 @@ const roles = [
             "Leaving suggestions on suggestions",
             "Personal attacks",
         ],
-        default: false,
+        isDefault: false,
     },
     {
         role: "Code review reviewer reviewer",
@@ -127,7 +127,7 @@ const roles = [
             "All three of you are wrong, my way is the best",
             "As the coder, reviewing the reviewer of the person who reviewed my code",
         ],
-        default: false,
+        isDefault: false,
     },
     {
         role: "Code Monkey",
@@ -138,7 +138,7 @@ const roles = [
             "I don't care how it looks, as long as it works",
             "That's a future me problem",
         ],
-        default: false,
+        isDefault: false,
     },
     {
         role: "Coffee Tasting Officer",
@@ -150,7 +150,7 @@ const roles = [
             "Making the Coffee Financial Officer pay for the best coffee",
             "Sugar?",
         ],
-        default: false,
+        isDefault: false,
     },
     {
         role: "Rubber Duck Destroyer",
@@ -163,7 +163,7 @@ const roles = [
             "DUCK!",
             "Ooooh, that's why!",
         ],
-        default: false,
+        isDefault: false,
     },
 ];
 
@@ -202,7 +202,7 @@ async function main() {
     const addedRoles = await prisma.role.createManyAndReturn({
         data: roles.map((role) => ({
             role: role.role,
-            default: role.default,
+            isDefault: role.isDefault,
         })),
         select: {
             id: true,
