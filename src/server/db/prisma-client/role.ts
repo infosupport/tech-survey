@@ -1,5 +1,4 @@
 import type { PrismaClient, PrismaDbClient } from "~/prisma";
-import { SurveyPrismaClient } from "~/server/db/prisma-client/survey";
 
 export class RolePrismaClient {
     #prismaClient: PrismaClient;
