@@ -16,7 +16,7 @@ export class RolePrismaClient {
     async getCurrent() {
         const surveyId = await this.#prismaClient.surveys.getLatestSurveyId();
         if (!surveyId) {
-            throw new Error("No survey found");
+            return [];
         }
         return this.#db.role.findMany({
             where: {
