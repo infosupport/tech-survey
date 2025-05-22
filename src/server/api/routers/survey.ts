@@ -1,5 +1,6 @@
 import { z } from "zod";
 import {
+    adminProtectedProcedure,
     createTRPCRouter,
     protectedProcedure,
     publicProcedure,
@@ -12,7 +13,7 @@ export const surveysRouter = createTRPCRouter({
         return await ctx.prismaClient.surveys.getLatestSurveyId();
     }),
 
-    uploadNewSurvey: protectedProcedure
+    uploadNewSurvey: adminProtectedProcedure
         .input(newSurveyObject)
         .mutation(async ({ ctx, input }) => {
             return await ctx.prismaClient.surveys.uploadNewSurvey(input);
