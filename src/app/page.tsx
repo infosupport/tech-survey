@@ -10,7 +10,7 @@ import { auth } from "~/auth";
 const Home: React.FC = async () => {
     const session = await auth();
     const [roles, businessUnits] = await Promise.all([
-        prismaClient.roles.getAll(),
+        prismaClient.roles.getCurrent(),
         prismaClient.businessUnits.getAll(),
     ]);
 
@@ -24,7 +24,10 @@ const Home: React.FC = async () => {
                     </span>
                     <span className="block sm:inline">
                         {" "}
-                        Tech Survey of 2024
+                        Tech Survey of{" "}
+                        <span className="bg-gradient-to-r from-pink-800 to-yellow-600 bg-clip-text text-transparent dark:from-pink-500 dark:to-yellow-400">
+                            2025
+                        </span>
                     </span>
                 </h1>
 

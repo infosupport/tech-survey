@@ -1,7 +1,6 @@
 import type { PrismaClient, PrismaDbClient } from "~/prisma";
 
 export class RolePrismaClient {
-    // @ts-expect-error - Might be used in the future
     #prismaClient: PrismaClient;
     #db: PrismaDbClient;
 
@@ -12,5 +11,21 @@ export class RolePrismaClient {
 
     async getAll() {
         return this.#db.role.findMany();
+    }
+
+    async getCurrent() {
+        const surveyId = await this.#prismaClient.surveys.getLatestSurveyId();
+        if (!surveyId) {
+            return [];
+        }
+        return this.#db.role.findMany({
+            where: {
+                questions: {
+                    some: {
+                        surveyId: surveyId,
+                    },
+                },
+            },
+        });
     }
 }
