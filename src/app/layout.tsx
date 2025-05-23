@@ -22,10 +22,10 @@ const inter = Inter({
 
 export const metadata = {
     title: {
-        template: "%s | Info Support Tech Survey - 2024",
-        default: "Info Support Tech Survey - 2024",
+        template: "%s | Info Support Tech Survey - 2025",
+        default: "Info Support Tech Survey - 2025",
     },
-    description: "Info Support Tech Survey - 2024",
+    description: "Info Support Tech Survey - 2025",
     icons: [{ rel: "icon", url: "/favicon.png" }],
 };
 
