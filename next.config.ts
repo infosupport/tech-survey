@@ -23,9 +23,6 @@ const config: NextConfig = {
     eslint: {
         dirs: ["src", "tests"],
     },
-    logging: {
-        incomingRequests: true,
-    },
     async headers() {
         return [
             {
