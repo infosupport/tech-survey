@@ -37,7 +37,7 @@ jobs:
         # `.next`: explicitly also zip this hidden directory.
         # `-r`: recursive
         # `-y`: preserve symlinks
-        run: zip -y release.zip ./* .next -r
+        run: zip -y release.zip ./* .next ./node_modules/.prisma ./node_modules/.bin -r
       - name: "📤 Upload artifact"
         uses: actions/upload-artifact@v4
         with:
