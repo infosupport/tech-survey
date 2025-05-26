@@ -143,7 +143,7 @@ export function SurveyQuestionnaire({
             return {
                 id: role.id,
                 // See https://learn.microsoft.com/en-us/answers/questions/1160320/azure-is-decoding-characters-in-the-url-before-rea
-                href: `/survey/${encodeURIComponent(doubleEncodeUrlPath ? encodeURIComponent(role.role) : role.role)}`,
+                href: `/survey/${encodeURIComponent(doubleEncodeUrlPath ? role.role.replaceAll("/", encodeURIComponent("/")) : role.role)}`,
                 label: role.role,
                 isCurrent: role.id === currentRoleId,
                 isCompleted: totalQuestions === answeredQuestions,
