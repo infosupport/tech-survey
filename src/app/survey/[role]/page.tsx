@@ -23,7 +23,7 @@ const SuspenseSurveyData = async ({
             <SurveyPage
                 userId={session.user.id}
                 currentRole={role}
-                doubleEncodeUrlPath={env.DOUBLE_ENCODE_PATH}
+                doubleEncodeSlashesInPath={env.DOUBLE_ENCODE_SLASHES_IN_PATH}
             />
         </Suspense>
     );

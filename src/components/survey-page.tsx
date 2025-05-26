@@ -7,11 +7,11 @@ import { Loader2 } from "lucide-react";
 function SurveyPage({
     userId,
     currentRole,
-    doubleEncodeUrlPath,
+    doubleEncodeSlashesInPath,
 }: {
     userId: string;
     currentRole: string;
-    doubleEncodeUrlPath: boolean;
+    doubleEncodeSlashesInPath: boolean;
 }) {
     const { data: surveyData } = api.surveys.getCurrentSurveyPageData.useQuery(
         { userId: userId, role: currentRole },
@@ -39,7 +39,7 @@ function SurveyPage({
                 userRoles={surveyData?.roles ?? []}
                 userAnswersForRole={surveyData.userAnswersForRole}
                 currentRole={currentRole}
-                doubleEncodeUrlPath={doubleEncodeUrlPath}
+                doubleEncodeSlashesInPath={doubleEncodeSlashesInPath}
             />
         </div>
     );

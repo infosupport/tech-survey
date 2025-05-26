@@ -32,7 +32,7 @@ export function SurveyQuestionnaire({
     userRoles,
     userAnswersForRole,
     currentRole,
-    doubleEncodeUrlPath,
+    doubleEncodeSlashesInPath,
 }: {
     surveyId: string;
     userId: string;
@@ -41,7 +41,7 @@ export function SurveyQuestionnaire({
     userRoles: Role[];
     userAnswersForRole: QuestionResult[];
     currentRole: string;
-    doubleEncodeUrlPath: boolean;
+    doubleEncodeSlashesInPath: boolean;
 }) {
     const router = useRouter();
 
@@ -143,7 +143,7 @@ export function SurveyQuestionnaire({
             return {
                 id: role.id,
                 // See https://learn.microsoft.com/en-us/answers/questions/1160320/azure-is-decoding-characters-in-the-url-before-rea
-                href: `/survey/${encodeURIComponent(doubleEncodeUrlPath ? role.role.replaceAll("/", encodeURIComponent("/")) : role.role)}`,
+                href: `/survey/${encodeURIComponent(doubleEncodeSlashesInPath ? role.role.replaceAll("/", encodeURIComponent("/")) : role.role)}`,
                 label: role.role,
                 isCurrent: role.id === currentRoleId,
                 isCompleted: totalQuestions === answeredQuestions,

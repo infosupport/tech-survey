@@ -12,7 +12,7 @@ export const env = createEnv({
 
         FRESH_RUN: z.string(),
 
-        DOUBLE_ENCODE_PATH: z
+        DOUBLE_ENCODE_SLASHES_IN_PATH: z
             .string()
             .default("false")
             .transform((val) => val === "true"),
@@ -42,7 +42,8 @@ export const env = createEnv({
             process.env["AUTH_MICROSOFT_ENTRA_ID_ADMIN_GROUP"],
         FRESH_RUN: process.env["FRESH_RUN"],
         NODE_ENV: process.env.NODE_ENV,
-        DOUBLE_ENCODE_PATH: process.env["DOUBLE_ENCODE_PATH"],
+        DOUBLE_ENCODE_SLASHES_IN_PATH:
+            process.env["DOUBLE_ENCODE_SLASHES_IN_PATH"],
     },
     /**
      * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
