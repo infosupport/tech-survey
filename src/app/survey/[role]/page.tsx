@@ -4,6 +4,7 @@ import SurveyQuestionLoader from "~/components/loading/survey-question-loader";
 import { type Metadata } from "next";
 import SurveyPage from "~/components/survey-page";
 import { auth } from "~/auth";
+import { env } from "~/env";
 
 export const metadata: Metadata = {
     title: "Survey",
@@ -19,7 +20,11 @@ const SuspenseSurveyData = async ({
 
     return (
         <Suspense fallback={<SurveyQuestionLoader />}>
-            <SurveyPage userId={session.user.id} currentRole={role} />
+            <SurveyPage
+                userId={session.user.id}
+                currentRole={role}
+                doubleEncodeUrlPath={env.DOUBLE_ENCODE_PATH}
+            />
         </Suspense>
     );
 };

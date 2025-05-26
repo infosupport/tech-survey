@@ -7,9 +7,11 @@ import { Loader2 } from "lucide-react";
 function SurveyPage({
     userId,
     currentRole,
+    doubleEncodeUrlPath,
 }: {
     userId: string;
     currentRole: string;
+    doubleEncodeUrlPath: boolean;
 }) {
     const { data: surveyData } = api.surveys.getCurrentSurveyPageData.useQuery(
         { userId: userId, role: currentRole },
@@ -37,6 +39,7 @@ function SurveyPage({
                 userRoles={surveyData?.roles ?? []}
                 userAnswersForRole={surveyData.userAnswersForRole}
                 currentRole={currentRole}
+                doubleEncodeUrlPath={doubleEncodeUrlPath}
             />
         </div>
     );

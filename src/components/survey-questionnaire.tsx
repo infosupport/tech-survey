@@ -23,7 +23,6 @@ import { Form } from "~/components/ui/form";
 import renderNotFoundPage from "~/app/[...not_found]/page";
 import useOnlineStatus from "~/components/use-online-status";
 import { api } from "~/trpc/react";
-import { env } from "~/env";
 
 export function SurveyQuestionnaire({
     surveyId,
@@ -33,6 +32,7 @@ export function SurveyQuestionnaire({
     userRoles,
     userAnswersForRole,
     currentRole,
+    doubleEncodeUrlPath,
 }: {
     surveyId: string;
     userId: string;
@@ -41,6 +41,7 @@ export function SurveyQuestionnaire({
     userRoles: Role[];
     userAnswersForRole: QuestionResult[];
     currentRole: string;
+    doubleEncodeUrlPath: boolean;
 }) {
     const router = useRouter();
 
@@ -142,7 +143,7 @@ export function SurveyQuestionnaire({
             return {
                 id: role.id,
                 // See https://learn.microsoft.com/en-us/answers/questions/1160320/azure-is-decoding-characters-in-the-url-before-rea
-                href: `/survey/${encodeURIComponent(env.DOUBLE_ENCODE_SLASHES_IN_URL ? role.role.replaceAll("/", encodeURIComponent("/")) : "")}`,
+                href: `/survey/${encodeURIComponent(doubleEncodeUrlPath ? role.role.replaceAll("/", encodeURIComponent("/")) : role.role)}`,
                 label: role.role,
                 isCurrent: role.id === currentRoleId,
                 isCompleted: totalQuestions === answeredQuestions,
