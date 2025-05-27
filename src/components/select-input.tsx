@@ -26,7 +26,6 @@ function SelectUserSurveyPreferences({
         { userId: userId },
         { enabled: !!userId },
     );
-    const userSelectedBusinessUnit = user?.businessUnit ?? undefined;
     const communicationPreferences = user?.communicationPreferences;
     const [methods, setMethods] = useState<CommunicationMethod[]>(
         communicationPreferences?.methods ?? [],
@@ -85,8 +84,9 @@ function SelectUserSurveyPreferences({
             )}
 
             <SelectBusinessUnit
+                key={user?.businessUnit?.id}
                 businessUnits={businessUnits}
-                userSelectedBusinessUnit={userSelectedBusinessUnit}
+                userSelectedBusinessUnit={user?.businessUnit ?? undefined}
                 userId={userId}
             />
 

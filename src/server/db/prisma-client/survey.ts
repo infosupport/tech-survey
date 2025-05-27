@@ -69,6 +69,11 @@ export class SurveyPrismaClient {
                         id: userId,
                     },
                 },
+                questions: {
+                    some: {
+                        surveyId: surveyId,
+                    },
+                },
             },
         });
 
