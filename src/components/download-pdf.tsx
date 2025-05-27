@@ -87,7 +87,7 @@ const PDFDocument = ({
                     <View style={styles.centered}>
                         <Text style={styles.title}>
                             <Text style={styles.infoSupport}>Info Support</Text>{" "}
-                            Tech Survey 2024
+                            Tech Survey 2025
                         </Text>
                         <Text style={styles.subtitle}>
                             Results for:{" "}
