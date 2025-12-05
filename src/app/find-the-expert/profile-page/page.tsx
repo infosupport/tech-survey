@@ -99,6 +99,25 @@ const ProfilePage = async ({
     }
     const userRoles = user.roles;
 
+    const questionCounts: Map<string, Map<string, number>> = new Map<
+        string,
+        Map<string, number>
+    >();
+    user.questionResults.forEach((questionResult) => {
+        const surveyName = questionResult.question.survey.surveyName;
+        questionResult.question.roles.forEach((role) => {
+            const roleName = role.role;
+            if (!userRoles.some((userRole) => userRole.role === roleName))
+                return;
+            if (!questionCounts.has(roleName)) {
+                questionCounts.set(roleName, new Map<string, number>());
+            }
+
+            const roleCounts = questionCounts.get(roleName)!;
+            roleCounts.set(surveyName, (roleCounts.get(surveyName) ?? 0) + 1);
+        });
+    });
+
     const surveyNames = new Set<string>();
     const radarGraphData = user.questionResults.reduce(
         (acc, questionResult) => {
@@ -128,6 +147,18 @@ const ProfilePage = async ({
         },
         [] as ProfileRadarChartRoleData[],
     );
+
+    radarGraphData.forEach((roleData) => {
+        Object.keys(roleData).forEach((surveyName) => {
+            if (surveyName === "role") return;
+            const questionCount =
+                questionCounts.get(roleData.role)?.get(surveyName) ?? 0;
+            const maxScore = questionCount * 5; // Max score is number of questions * 5
+            roleData[surveyName] = Math.round(
+                ((roleData[surveyName] ?? 0) / maxScore) * 100,
+            );
+        });
+    });
 
     const columns: ColumnDef<ProfilePageUserData["questionResults"][0]>[] = [
         {
