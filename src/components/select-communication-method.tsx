@@ -8,7 +8,7 @@ import communicationMethodToIcon from "~/components/ui/communication-method-to-i
 export default function SelectCommunicationMethod({
     userId,
     methods,
-    setCommunicationMethodIsLoading,
+    setCommunicationMethodIsLoading, // eslint-disable-line @typescript-eslint/unbound-method
 }: {
     userId: string;
     methods: CommunicationMethod[];
@@ -18,6 +18,7 @@ export default function SelectCommunicationMethod({
         useState<CommunicationMethod[]>(methods);
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setSelectedMethods(methods);
     }, [methods]);
 

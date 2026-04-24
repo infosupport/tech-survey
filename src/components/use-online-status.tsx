@@ -21,6 +21,7 @@ function useOnlineStatus(): OnlineStatus {
             setPrevOnline(false);
         }
 
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setPrevOnline(window.navigator.onLine);
         window.addEventListener("online", handleOnline);
         window.addEventListener("offline", handleOffline);

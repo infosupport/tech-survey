@@ -41,6 +41,7 @@ export default function SearchAnonymized({
         },
     });
 
+    // eslint-disable-next-line react-hooks/incompatible-library
     const { role, unit } = form.watch();
 
     const onSubmit = useCallback(

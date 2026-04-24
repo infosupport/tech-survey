@@ -101,6 +101,7 @@ function UserDataTable({ data }: { data: UserData[] }) {
     };
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setUserData(data);
     }, [data]);
 

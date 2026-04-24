@@ -56,6 +56,7 @@ export function SurveyQuestions({
             if (event.key === "ArrowDown") {
                 if (currentRowIndex.current < questions.length) {
                     currentRowIndex.current++;
+                    // eslint-disable-next-line react-hooks/immutability
                     focusCell();
                 }
             } else if (event.key === "ArrowUp") {
@@ -74,6 +75,7 @@ export function SurveyQuestions({
                     focusCell();
                 }
             } else if (event.key === "Enter" || event.key === " ") {
+                // eslint-disable-next-line react-hooks/immutability
                 selectCell();
             }
         };

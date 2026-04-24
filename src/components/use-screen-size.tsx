@@ -25,6 +25,7 @@ const useScreenSize = () => {
         const storedWidth = localStorage.getItem("screenWidth");
         const storedHeight = localStorage.getItem("screenHeight");
 
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setScreenSize({
             width: storedWidth ? parseInt(storedWidth) : window.innerWidth,
             height: storedHeight ? parseInt(storedHeight) : window.innerHeight,

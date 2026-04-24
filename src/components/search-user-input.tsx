@@ -26,6 +26,7 @@ const SearchInput = () => {
         },
     });
 
+    // eslint-disable-next-line react-hooks/incompatible-library
     const { name } = form.watch();
 
     const debouncedUpdateURL = useDebouncedCallback((name: string) => {
