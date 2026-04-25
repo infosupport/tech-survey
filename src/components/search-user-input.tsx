@@ -1,6 +1,6 @@
 ﻿"use client";
 import { Input } from "~/components/ui/input";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";

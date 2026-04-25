@@ -1,6 +1,6 @@
 ﻿"use client";
 import { DataTable } from "~/components/data-tables/data-table";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import type { Prisma } from "@prisma/client";
 import { Cross1Icon, CheckIcon, TrashIcon } from "@radix-ui/react-icons";

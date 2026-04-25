@@ -1,6 +1,6 @@
 import { prismaClient } from "~/server/db";
 import PdfDownloadButton from "~/components/download-pdf";
-import React, { Suspense } from "react";
+import { Suspense } from "react";
 import { type QuestionResult, type Question } from "~/models/types";
 
 import { type Metadata } from "next";

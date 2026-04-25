@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import { useState } from "react";
 import {
     columns,
     aggregateColumns,
@@ -25,7 +25,7 @@ const ShowDataTable = ({
 }) => {
     const searchParams = useSearchParams();
     const currentRole = searchParams.get("role");
-    const [expandedRoles, setExpandedRoles] = React.useState<string[]>([
+    const [expandedRoles, setExpandedRoles] = useState<string[]>([
         Object.keys(aggregatedDataByRole)[0] ?? "",
     ]);
 
