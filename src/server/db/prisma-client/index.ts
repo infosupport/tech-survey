@@ -35,8 +35,7 @@ export class PrismaClient {
     /// outside of this class except in `auth.ts`.
     // @ts-expect-error - Used in src/auth.ts
     private toPrismaAdapter() {
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-        return PrismaAdapter(this.#db) as Adapter;
+        return PrismaAdapter(this.#db);
     }
 }
 
