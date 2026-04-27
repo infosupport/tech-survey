@@ -1,6 +1,6 @@
 ﻿"use client";
 import { Input } from "~/components/ui/input";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -26,6 +26,7 @@ const SearchInput = () => {
         },
     });
 
+    // eslint-disable-next-line react-hooks/incompatible-library
     const { name } = form.watch();
 
     const debouncedUpdateURL = useDebouncedCallback((name: string) => {

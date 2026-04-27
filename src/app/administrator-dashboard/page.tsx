@@ -1,5 +1,3 @@
-import React from "react";
-
 import { type Metadata } from "next";
 import UserDataTable from "~/components/user-data-table";
 import SearchInput from "~/components/search-user-input";

@@ -62,6 +62,7 @@ export function SurveyQuestionnaire({
 
     useEffect(() => {
         if (!isPending) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setPercentCompletedPerRole(data);
         }
     }, [data, isPending]);
@@ -73,6 +74,7 @@ export function SurveyQuestionnaire({
 
     useEffect(() => {
         if (currentRoleId) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setPercentCompletedPerRole((prevState) => {
                 if (!prevState) return prevState;
                 const updatedState = { ...prevState };

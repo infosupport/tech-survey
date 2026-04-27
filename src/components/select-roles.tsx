@@ -46,6 +46,7 @@ function SelectRoles({
 
     // Initialize selected roles from userSelectedRoles prop
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setSelectedRoles(userSelectedRoles?.map((role) => role.id));
     }, [userSelectedRoles]);
 

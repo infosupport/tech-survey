@@ -63,6 +63,7 @@ const ShowTechSearchWrapper = ({
         },
     });
 
+    // eslint-disable-next-line react-hooks/incompatible-library
     const { role, tech, unit } = form.watch();
     const debouncedTech = useDebounce(tech);
     const { mutate: logUsageMetric } =

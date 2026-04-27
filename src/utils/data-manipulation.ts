@@ -67,14 +67,12 @@ const aggregateDataByRole = (
                 communicationMethods = ["Do not contact"];
             }
 
-            if (!aggregatedDataByRole[roleName][userId]) {
-                aggregatedDataByRole[roleName][userId] = {
-                    name: name ?? "Unknown User",
-                    id: id,
-                    communicationPreferences: communicationMethods,
-                    counts: [0, 0, 0, 0],
-                };
-            }
+            aggregatedDataByRole[roleName][userId] ??= {
+                name: name ?? "Unknown User",
+                id: id,
+                communicationPreferences: communicationMethods,
+                counts: [0, 0, 0, 0],
+            };
             aggregatedDataByRole[roleName][userId].counts[answerValue]!++;
         }
     }
@@ -115,12 +113,8 @@ const initializeRoleAndQuestion = (
     roleName: string,
     questionText: string,
 ): void => {
-    if (!dataByRoleAndQuestion[roleName]) {
-        dataByRoleAndQuestion[roleName] = {};
-    }
-    if (!dataByRoleAndQuestion[roleName][questionText]) {
-        dataByRoleAndQuestion[roleName][questionText] = [];
-    }
+    dataByRoleAndQuestion[roleName] ??= {};
+    dataByRoleAndQuestion[roleName][questionText] ??= [];
 };
 
 // Helper function to push user data into the data structure

@@ -10,6 +10,7 @@ import {
 } from "recharts";
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
 
+// eslint-disable-next-line @typescript-eslint/consistent-indexed-object-style
 export type ProfileRadarChartRoleData = { role: string } & {
     [surveyName in string]: number;
 };

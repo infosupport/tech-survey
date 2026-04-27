@@ -20,9 +20,6 @@ const cspHeader = `
     upgrade-insecure-requests;`;
 
 const config: NextConfig = {
-    eslint: {
-        dirs: ["src", "tests"],
-    },
     async headers() {
         return [
             {

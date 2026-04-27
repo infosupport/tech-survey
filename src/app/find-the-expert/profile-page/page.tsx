@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import React, { Suspense } from "react";
+import { Suspense } from "react";
 import ButtonSkeleton from "~/components/loading/button-loader";
 import ProfilePageSearch from "~/components/ui/profile-page-search";
 import { prismaClient } from "~/server/db";
